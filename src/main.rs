@@ -1,5 +1,8 @@
 use ggez::{graphics, Context, ContextBuilder, GameResult};
 use ggez::event::{self, EventHandler};
+use ggez::nalgebra as na;
+
+type Point2 = na::Point2<f32>;
 
 pub struct Player
 {
@@ -86,13 +89,17 @@ impl MyGame {
 
 impl EventHandler for MyGame {
     fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
-        // Update code here...
+        print!("{}",&self.player_two.tower_hp);
 		Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-		graphics::clear(ctx, graphics::WHITE);
-        // Draw code here...
+        graphics::clear(ctx, [0.1, 0.2, 0.3, 1.0].into());
+        let color = [0.0, 0.3, 1.0, 1.0].into();
+        let rect = ggez::graphics::Rect::new(0.0,0.0,100.0,300.0);
+        let rectangle =
+            graphics::Mesh::new_rectangle(ctx, graphics::DrawMode::fill(), rect , color)?;
+        graphics::draw(ctx, &rectangle, (na::Point2::new(20.0, 380.0),));
 		graphics::present(ctx)
     }
 }
