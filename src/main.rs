@@ -68,6 +68,23 @@ impl MyGame {
         };
         Ok(game)
     }
+
+    pub fn draw_player_text(ctx: &mut Context, player: &Player, pos: Point2, font: graphics::Font) {
+        let drawparams = graphics::DrawParam::new()
+            .dest(pos)
+            .rotation(0.0 as f32)
+            .offset(Point2::new(0.0, 0.0));
+        let text = graphics::Text::new((
+            format!(
+                "Player{0}: {1} tower, {2} walls",
+                player.id, player.tower_hp, player.walls_hp
+            ),
+            font,
+            20.0,
+        ));
+
+        graphics::draw(ctx, &text, drawparams);
+    }
 }
 
 impl event::EventHandler for MyGame {
@@ -83,40 +100,8 @@ impl event::EventHandler for MyGame {
         let rectangle =
             graphics::Mesh::new_rectangle(ctx, graphics::DrawMode::fill(), rect, color)?;
         graphics::draw(ctx, &rectangle, (na::Point2::new(20.0, 380.0),));
-
-        {
-            let drawparams = graphics::DrawParam::new()
-                .dest(Point2::new(10.0, 10.0))
-                .rotation(0.0 as f32)
-                .offset(Point2::new(0.0, 0.0));
-            let text = graphics::Text::new((
-                format!(
-                    "Player{0}: {1} tower, {2} walls",
-                    self.player_one.id, self.player_one.tower_hp, self.player_one.walls_hp
-                ),
-                self.font,
-                20.0,
-            ));
-
-            graphics::draw(ctx, &text, drawparams)?;
-        }
-
-        {
-            let drawparams = graphics::DrawParam::new()
-                .dest(Point2::new(10.0, 200.0))
-                .rotation(0.0 as f32)
-                .offset(Point2::new(0.0, 0.0));
-            let text = graphics::Text::new((
-                format!(
-                    "Player{0}: {1} tower, {2} walls",
-                    self.player_two.id, self.player_two.tower_hp, self.player_two.walls_hp
-                ),
-                self.font,
-                20.0,
-            ));
-
-            graphics::draw(ctx, &text, drawparams)?;
-        }
+        MyGame::draw_player_text(ctx, &self.player_one, Point2::new(10.0, 10.0), self.font);
+        MyGame::draw_player_text(ctx, &self.player_one, Point2::new(10.0, 200.0), self.font);
         graphics::present(ctx)
     }
 }
@@ -129,8 +114,22 @@ fn main() -> GameResult {
     } else {
         path::PathBuf::from("./resources")
     };
+    let window_mode = ggez::conf::WindowMode {
+        width: 1280.0,
+        height: 720.0,
+        maximized: false,
+        fullscreen_type: ggez::conf::FullscreenType::Windowed,
+        borderless: false,
+        min_width: 0.0,
+        max_width: 0.0,
+        min_height: 0.0,
+        max_height: 0.0,
+        resizable: false,
+    };
     // Make a Context.
-    let cb = ContextBuilder::new("my_game", "Cool Game Author").add_resource_path(resource_dir);
+    let cb = ContextBuilder::new("my_game", "Cool Game Author")
+    .window_mode(window_mode)
+    .add_resource_path(resource_dir);
 
     let (ctx, event_loop) = &mut cb.build()?;
     let my_game = &mut MyGame::new(ctx)?;
