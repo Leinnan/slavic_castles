@@ -17,6 +17,13 @@ impl Player {
         }
     }
 
+    pub fn get_description(&self) -> String {
+        format!(
+            "Player{0}: {1} tower, {2} walls",
+            self.id, self.tower_hp, self.walls_hp
+        )
+    }
+
     pub fn make_tower_higher(&mut self, amount: i32) {
         self.tower_hp += amount;
     }
