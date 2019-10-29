@@ -1,8 +1,10 @@
 use std::env;
 use std::path;
 
+mod consts;
 mod my_game;
 mod player;
+mod resource;
 use crate::my_game::MyGame;
 
 fn main() -> ggez::GameResult {

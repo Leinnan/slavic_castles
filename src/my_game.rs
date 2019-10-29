@@ -1,37 +1,32 @@
 use crate::player::*;
-use ggez::input;
+use ggez::event;
+use ggez::event::{KeyCode, KeyMods};
 use ggez::nalgebra as na;
-use ggez::{event, graphics, Context, GameResult};
+use ggez::{graphics, Context, GameResult};
 
 type Point2 = na::Point2<f32>;
 const FONT_COLOR: (f32, f32, f32, f32) = (0.05, 0.05, 0.05, 1.0);
 
 pub struct MyGame {
-    player_one: Player,
-    player_two: Player,
+    players: Vec<Player>,
     font: graphics::Font,
-    active_player: i32,
+    active_player: usize,
     help_enabled: bool,
 }
 
 impl MyGame {
     pub fn get_active_player(&self) -> &Player {
-        if self.active_player == 1 {
-            return &self.player_one;
-        }
-
-        &self.player_two
+        &self.players[self.active_player]
     }
 
     pub fn new(ctx: &mut Context) -> GameResult<MyGame> {
-        let player_one = Player::new(1);
-        let player_two = Player::new(2);
+        let players = vec![Player::new(1), Player::new(2)];
+
         let font = graphics::Font::new(ctx, "/coolvetica.ttf")?;
         let game = MyGame {
-            player_one,
-            player_two,
+            players,
             font,
-            active_player: 1,
+            active_player: 0,
             help_enabled: true,
         };
         Ok(game)
@@ -43,7 +38,7 @@ impl MyGame {
             .color(FONT_COLOR.into())
             .rotation(0.0 as f32)
             .offset(Point2::new(0.0, 0.0));
-        let text = graphics::Text::new((player.get_description(), font, 26.0));
+        let text = graphics::Text::new((format!("{}", player), font, 26.0));
 
         graphics::draw(ctx, &text, drawparams);
     }
@@ -64,11 +59,13 @@ impl MyGame {
     }
 
     fn switch_player(&mut self) {
-        if self.active_player == 1 {
-            self.active_player = 2;
-        } else {
+        if self.active_player == 0 {
             self.active_player = 1;
+        } else {
+            self.active_player = 0;
         }
+
+        self.players[self.active_player].start_new_turn();
     }
 }
 
@@ -77,16 +74,11 @@ impl event::EventHandler for MyGame {
         Ok(())
     }
 
-    fn key_up_event(
-        &mut self,
-        _ctx: &mut Context,
-        keycode: ggez::event::KeyCode,
-        keymod: ggez::event::KeyMods,
-    ) {
-        if keycode == ggez::event::KeyCode::Space {
+    fn key_up_event(&mut self, _ctx: &mut Context, keycode: KeyCode, keymod: KeyMods) {
+        if keycode == KeyCode::Space {
             self.switch_player();
         }
-        if keycode == ggez::event::KeyCode::H {
+        if keycode == KeyCode::H {
             self.help_enabled = !self.help_enabled;
         }
     }
@@ -102,8 +94,8 @@ impl event::EventHandler for MyGame {
             Point2::new(10.0, 10.0),
             self.font,
         );
-        MyGame::draw_player_text(ctx, &self.player_one, Point2::new(10.0, 70.0), self.font);
-        MyGame::draw_player_text(ctx, &self.player_two, Point2::new(10.0, 100.0), self.font);
+        MyGame::draw_player_text(ctx, &self.players[0], Point2::new(10.0, 70.0), self.font);
+        MyGame::draw_player_text(ctx, &self.players[1], Point2::new(10.0, 100.0), self.font);
         graphics::present(ctx)
     }
 }
