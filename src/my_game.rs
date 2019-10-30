@@ -45,23 +45,20 @@ impl MyGame {
         if !card.can_aford(&self.players[&self.active_player].resources) {
             return;
         }
+        let mut player = 
+        self.players
+            .get_mut(&self.other_player())
+            .unwrap();
 
-        self.players
-            .get_mut(&self.active_player)
-            .unwrap()
-            .change_resource_amount(&card.cost_resource, -card.cost_amount);
-        self.players
-            .get_mut(&self.active_player)
-            .unwrap()
-            .make_tower_higher(card.tower_growth);
-        self.players
-            .get_mut(&self.active_player)
-            .unwrap()
-            .make_walls_higher(card.walls_growth);
+        player.change_resource_amount(&card.cost_resource, -card.cost_amount);
+        player.make_tower_higher(card.tower_growth);
+        player.make_walls_higher(card.walls_growth);
+        player.change_resource_production(&card.production_resource, card.production_change);
         self.players
             .get_mut(&self.other_player())
             .unwrap()
-            .give_damage(card.damage_for_enemy, false);
+            .give_damage(card.damage, false);
+
 
         println!("Card used: {}", &card.id);
         self.switch_player();
@@ -142,6 +139,10 @@ impl event::EventHandler for MyGame {
         }
         if keycode == KeyCode::Key3 {
             let card = self.players[&self.active_player].deck.cards[2];
+            self.try_use_card(&card);
+        }
+        if keycode == KeyCode::Key4 {
+            let card = self.players[&self.active_player].deck.cards[3];
             self.try_use_card(&card);
         }
     }

@@ -41,6 +41,13 @@ impl Player {
             .change_amount(amount);
     }
 
+    pub fn change_resource_production(&mut self, res_type: &ResourceType, amount: i32) {
+        self.resources
+            .get_mut(res_type)
+            .unwrap()
+            .change_production(amount);
+    }
+
     pub fn make_tower_higher(&mut self, amount: i32) {
         self.tower_hp += amount;
     }
