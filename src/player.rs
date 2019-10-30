@@ -3,10 +3,15 @@ use crate::resource::*;
 use std::collections::HashMap;
 use std::fmt;
 
+#[derive(PartialEq, Eq, Hash, Copy, Debug, Clone)]
+pub enum PlayerNumer {
+    First,
+    Second,
+}
+
 pub struct Player {
     pub human: bool,
     pub alive: bool,
-    pub id: i32,
     pub tower_hp: i32,
     pub walls_hp: i32,
     pub resources: HashMap<ResourceType, Resource>,
@@ -14,7 +19,7 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new(new_id: i32) -> Player {
+    pub fn new() -> Player {
         let mut resources = HashMap::new();
         resources.insert(ResourceType::Tools, Resource::new());
         resources.insert(ResourceType::Magic, Resource::new());
@@ -22,7 +27,6 @@ impl Player {
         Player {
             human: true,
             alive: true,
-            id: new_id,
             tower_hp: 20,
             walls_hp: 15,
             resources: resources,
@@ -85,8 +89,7 @@ impl fmt::Display for Player {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "Player{0}: Life: {1}+{2}, Tools: {3}, Magic: {4}, Soldiers: {5}",
-            self.id,
+            "Player: Life: {0}+{1}, Tools: {2}, Magic: {3}, Soldiers: {4}",
             self.tower_hp,
             self.walls_hp,
             self.resources[&ResourceType::Tools],

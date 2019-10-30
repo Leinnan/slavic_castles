@@ -4,54 +4,78 @@ use ggez::event;
 use ggez::event::{KeyCode, KeyMods};
 use ggez::nalgebra as na;
 use ggez::{graphics, Context, GameResult};
+use std::collections::HashMap;
 
 type Point2 = na::Point2<f32>;
 const FONT_COLOR: (f32, f32, f32, f32) = (0.05, 0.05, 0.05, 1.0);
 const ACTIVE_FONT_COLOR: (f32, f32, f32, f32) = (1.0, 0.4, 0.35, 1.0);
 
 pub struct MyGame {
-    players: Vec<Player>,
+    players: HashMap<PlayerNumer, Player>,
     font: graphics::Font,
-    active_player: usize,
+    active_player: PlayerNumer,
     help_enabled: bool,
 }
 
 impl MyGame {
     pub fn new(ctx: &mut Context) -> GameResult<MyGame> {
-        let players = vec![Player::new(1), Player::new(2)];
+        let mut players = HashMap::new();
+        players.insert(PlayerNumer::First, Player::new());
+        players.insert(PlayerNumer::Second, Player::new());
 
         let font = graphics::Font::new(ctx, "/coolvetica.ttf")?;
         let game = MyGame {
             players,
             font,
-            active_player: 0,
+            active_player: PlayerNumer::First,
             help_enabled: true,
         };
         Ok(game)
     }
 
-    pub fn active_player(&self) -> &Player {
-        &self.players[self.active_player]
-    }
-
-    pub fn other_player(&self) -> &Player {
-        &self.players[(self.active_player + 1) % 2]
+    pub fn other_player(&self) -> PlayerNumer {
+        if self.active_player == PlayerNumer::First {
+            PlayerNumer::Second
+        } else {
+            PlayerNumer::First
+        }
     }
 
     pub fn try_use_card(&mut self, card: &Card) {
-        if !card.can_aford(&self.players[self.active_player].resources) {
+        if !card.can_aford(&self.players[&self.active_player].resources) {
             return;
         }
 
-        self.players[self.active_player]
+        self.players
+            .get_mut(&self.active_player)
+            .unwrap()
             .change_resource_amount(&card.cost_resource, -card.cost_amount);
-        self.players[self.active_player].make_tower_higher(card.tower_growth);
-        self.players[self.active_player].make_walls_higher(card.walls_growth);
-        self.players[(self.active_player + 1) % 2].give_damage(card.damage_for_enemy, false);
+        self.players
+            .get_mut(&self.active_player)
+            .unwrap()
+            .make_tower_higher(card.tower_growth);
+        self.players
+            .get_mut(&self.active_player)
+            .unwrap()
+            .make_walls_higher(card.walls_growth);
+        self.players
+            .get_mut(&self.other_player())
+            .unwrap()
+            .give_damage(card.damage_for_enemy, false);
 
         println!("Card used: {}", &card.id);
         self.switch_player();
     }
+
+    fn switch_player(&mut self) {
+        self.active_player = self.other_player();
+        self.players
+            .get_mut(&self.active_player)
+            .unwrap()
+            .start_new_turn();
+    }
+
+    // DRAWING START
 
     fn draw_player_text(
         ctx: &mut Context,
@@ -94,16 +118,6 @@ impl MyGame {
 
         graphics::draw(ctx, &text, drawparams);
     }
-
-    fn switch_player(&mut self) {
-        if self.active_player == 0 {
-            self.active_player = 1;
-        } else {
-            self.active_player = 0;
-        }
-
-        self.players[self.active_player].start_new_turn();
-    }
 }
 
 impl event::EventHandler for MyGame {
@@ -119,15 +133,15 @@ impl event::EventHandler for MyGame {
             self.help_enabled = !self.help_enabled;
         }
         if keycode == KeyCode::Key1 {
-            let card = self.players[self.active_player].deck.cards[0];
+            let card = self.players[&self.active_player].deck.cards[0];
             self.try_use_card(&card);
         }
         if keycode == KeyCode::Key2 {
-            let card = self.players[self.active_player].deck.cards[1];
+            let card = self.players[&self.active_player].deck.cards[1];
             self.try_use_card(&card);
         }
         if keycode == KeyCode::Key3 {
-            let card = self.players[self.active_player].deck.cards[2];
+            let card = self.players[&self.active_player].deck.cards[2];
             self.try_use_card(&card);
         }
     }
@@ -139,14 +153,14 @@ impl event::EventHandler for MyGame {
         }
         MyGame::draw_player_text(
             ctx,
-            &self.active_player(),
+            &self.players[&self.active_player],
             Point2::new(10.0, 140.0),
             self.font,
             true,
         );
         MyGame::draw_player_text(
             ctx,
-            &self.other_player(),
+            &self.players[&self.other_player()],
             Point2::new(10.0, 10.0),
             self.font,
             false,
