@@ -22,25 +22,30 @@ impl Card {
 
 impl fmt::Display for Card {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut result = String::from(format!("{0}: ",self.id));
+        let mut result = String::from(format!("{0}: ", self.id));
         if self.cost_amount > 0 {
-            result.push_str(&format!("Cost({0}): {1}", Resource::resource_name(&self.cost_resource), self.cost_amount));
+            result.push_str(&format!(
+                "Cost({0}): {1}",
+                Resource::resource_name(&self.cost_resource),
+                self.cost_amount
+            ));
         }
         if self.tower_growth + self.walls_growth > 0 {
-            result.push_str(&format!(", Growth: {0}+{1}", 
-            self.tower_growth,
-            self.walls_growth,
+            result.push_str(&format!(
+                ", Growth: {0}+{1}",
+                self.tower_growth, self.walls_growth,
             ));
         }
         if self.damage > 0 {
-            result.push_str(&format!(", Damage: {0}",self.damage));
+            result.push_str(&format!(", Damage: {0}", self.damage));
         }
         if self.production_change != 0 {
-            result.push_str(&format!(", Production({0}): {1}",
-            Resource::resource_name(&self.production_resource),
-            self.production_change,
+            result.push_str(&format!(
+                ", Production({0}): {1}",
+                Resource::resource_name(&self.production_resource),
+                self.production_change,
             ));
         }
-        write!(f,"{}",result)
+        write!(f, "{}", result)
     }
 }

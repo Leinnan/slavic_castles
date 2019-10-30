@@ -45,10 +45,7 @@ impl MyGame {
         if !card.can_aford(&self.players[&self.active_player].resources) {
             return;
         }
-        let mut player = 
-        self.players
-            .get_mut(&self.other_player())
-            .unwrap();
+        let mut player = self.players.get_mut(&self.other_player()).unwrap();
 
         player.change_resource_amount(&card.cost_resource, -card.cost_amount);
         player.make_tower_higher(card.tower_growth);
@@ -58,7 +55,6 @@ impl MyGame {
             .get_mut(&self.other_player())
             .unwrap()
             .give_damage(card.damage, false);
-
 
         println!("Card used: {}", &card.id);
         self.switch_player();

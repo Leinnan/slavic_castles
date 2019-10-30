@@ -29,12 +29,11 @@ impl Resource {
         self.amount += diff;
     }
 
-
     pub fn change_production(&mut self, diff: i32) {
         self.production += diff;
     }
 
-    pub fn resource_name(res_type : &ResourceType) -> String {
+    pub fn resource_name(res_type: &ResourceType) -> String {
         match res_type {
             ResourceType::Magic => "Magic".to_string(),
             ResourceType::Tools => "Tools".to_string(),

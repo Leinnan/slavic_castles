@@ -60,7 +60,7 @@ impl fmt::Display for Deck {
         write!(
             f,
             "Deck: \n {0},\n {1},\n {2},\n {3}",
-            self.cards[0], self.cards[1], self.cards[2],self.cards[3],
+            self.cards[0], self.cards[1], self.cards[2], self.cards[3],
         )
     }
 }
