@@ -1,3 +1,4 @@
+use crate::deck::Deck;
 use crate::resource::*;
 use std::collections::HashMap;
 use std::fmt;
@@ -9,6 +10,7 @@ pub struct Player {
     pub tower_hp: i32,
     pub walls_hp: i32,
     pub resources: HashMap<ResourceType, Resource>,
+    pub deck: Deck,
 }
 
 impl Player {
@@ -24,6 +26,7 @@ impl Player {
             tower_hp: 20,
             walls_hp: 15,
             resources: resources,
+            deck: Deck::new(),
         }
     }
 
@@ -51,9 +54,9 @@ impl Player {
             self.tower_hp -= amount - self.walls_hp;
             self.walls_hp = 0;
         } else {
-            self.tower_hp -= amount;
-            if self.tower_hp < 0 {
-                self.tower_hp = 0;
+            self.walls_hp -= amount;
+            if self.walls_hp < 0 {
+                self.walls_hp = 0;
             }
         }
 

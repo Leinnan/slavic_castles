@@ -3,6 +3,7 @@ use std::path;
 
 mod card;
 mod consts;
+mod deck;
 mod my_game;
 mod player;
 mod resource;

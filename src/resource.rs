@@ -1,7 +1,7 @@
 use crate::consts;
 use std::fmt;
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Copy, Debug, Clone)]
 pub enum ResourceType {
     Tools,
     Magic,
