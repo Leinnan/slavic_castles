@@ -1,6 +1,7 @@
 use std::env;
 use std::path;
 
+mod card;
 mod consts;
 mod my_game;
 mod player;

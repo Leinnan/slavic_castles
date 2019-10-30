@@ -22,7 +22,11 @@ impl Resource {
     }
 
     pub fn produce(&mut self) {
-        self.amount += self.production;
+        self.change_amount(self.production);
+    }
+
+    pub fn change_amount(&mut self, diff: i32) {
+        self.amount += diff;
     }
 }
 

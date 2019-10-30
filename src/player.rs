@@ -27,8 +27,19 @@ impl Player {
         }
     }
 
+    pub fn change_resource_amount(&mut self, res_type: &ResourceType, amount: i32) {
+        self.resources
+            .get_mut(res_type)
+            .unwrap()
+            .change_amount(amount);
+    }
+
     pub fn make_tower_higher(&mut self, amount: i32) {
         self.tower_hp += amount;
+    }
+
+    pub fn make_walls_higher(&mut self, amount: i32) {
+        self.walls_hp += amount;
     }
 
     pub fn give_damage(&mut self, amount: i32, ignore_wall: bool) {

@@ -1,3 +1,4 @@
+use crate::card::Card;
 use crate::player::*;
 use ggez::event;
 use ggez::event::{KeyCode, KeyMods};
@@ -15,8 +16,12 @@ pub struct MyGame {
 }
 
 impl MyGame {
-    pub fn get_active_player(&self) -> &Player {
+    pub fn active_player(&self) -> &Player {
         &self.players[self.active_player]
+    }
+
+    pub fn other_player(&self) -> &Player {
+        &self.players[(self.active_player + 1) % 2]
     }
 
     pub fn new(ctx: &mut Context) -> GameResult<MyGame> {
@@ -30,6 +35,20 @@ impl MyGame {
             help_enabled: true,
         };
         Ok(game)
+    }
+
+    pub fn try_use_card(&mut self, card: &Card) {
+        if !card.can_aford(&self.players[self.active_player].resources) {
+            return;
+        }
+
+        self.players[self.active_player]
+            .change_resource_amount(&card.cost_resource, -card.cost_amount);
+        self.players[self.active_player].make_tower_higher(card.tower_growth);
+        self.players[self.active_player].make_walls_higher(card.walls_growth);
+        self.players[(self.active_player + 1) % 2].give_damage(card.damage_for_enemy, false);
+
+        println!("Card used: {}", &card.name);
     }
 
     fn draw_player_text(ctx: &mut Context, player: &Player, pos: Point2, font: graphics::Font) {
@@ -90,7 +109,7 @@ impl event::EventHandler for MyGame {
         }
         MyGame::draw_player_text(
             ctx,
-            &self.get_active_player(),
+            &self.active_player(),
             Point2::new(10.0, 10.0),
             self.font,
         );
