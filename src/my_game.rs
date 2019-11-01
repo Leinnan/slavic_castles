@@ -38,6 +38,14 @@ impl MyGame {
         Ok(game)
     }
 
+    pub fn reset_game(&mut self) {
+        self.players.get_mut(&PlayerNumer::First).unwrap().reset(true);
+        self.players.get_mut(&PlayerNumer::Second).unwrap().reset(false);
+        self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
+        self.console.clear();
+        self.console.message("Game restarted");
+    }
+
     pub fn other_player(&self) -> PlayerNumer {
         if self.active_player == PlayerNumer::First {
             PlayerNumer::Second
@@ -71,6 +79,7 @@ impl MyGame {
             .give_damage(card.damage, false);
 
         self.console.message(format!("[{0}]Card used: {1}", self.active_player, card).as_str());
+        self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
     }
 
     fn can_active_player_move(&self) -> bool {
@@ -169,6 +178,10 @@ impl event::EventHandler for MyGame {
 
         if !self.is_human_playing() {
             return;
+        }
+
+        if keycode == KeyCode::R {
+            self.reset_game();
         }
         let shift_pressed = keymod.contains(KeyMods::SHIFT);
 

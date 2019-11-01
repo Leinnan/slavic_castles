@@ -30,12 +30,28 @@ impl Player {
         Player {
             human: human,
             alive: true,
-            tower_hp: 20,
-            walls_hp: 15,
+            tower_hp: consts::BASE_TOWER_HP,
+            walls_hp: consts::BASE_WALLS_HP,
             resources: resources,
             deck: Deck::new(),
             active: active,
         }
+    }
+
+    pub fn reset(&mut self, active: bool) {
+        self.resources
+            .get_mut(&ResourceType::Magic)
+            .unwrap().reset();
+        self.resources
+            .get_mut(&ResourceType::Tools)
+            .unwrap().reset();
+        self.resources
+            .get_mut(&ResourceType::Soldiers)
+            .unwrap().reset();
+            self.tower_hp = consts::BASE_TOWER_HP;
+            self.walls_hp = consts::BASE_WALLS_HP;
+            self.deck.fill_deck();
+            self.active = active;
     }
     
     pub fn is_active(&self) -> bool {

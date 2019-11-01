@@ -27,6 +27,10 @@ impl Console {
         self.infos.push_back(msg.to_string());
     }
 
+    pub fn clear(&mut self) {
+        self.infos = VecDeque::with_capacity(10);
+    }
+
     pub fn draw(&self, ctx: &mut Context, font: graphics::Font) {
         if !self.visible {
             return;

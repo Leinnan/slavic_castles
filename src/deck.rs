@@ -98,7 +98,7 @@ impl Deck {
         self.cards[card_nr as usize] = self.cards_collections[i];
     }
 
-    fn fill_deck(&mut self) {
+    pub fn fill_deck(&mut self) {
         self.cards = Vec::new();
         let mut rng = thread_rng();
         for _x in 0..CARDS_IN_DECK {

@@ -21,6 +21,11 @@ impl Resource {
         }
     }
 
+    pub fn reset(&mut self) {
+        self.amount = consts::BASE_RESOURCE_AMOUNT;
+        self.production = consts::BASE_RESOURCE_PRODUCTION;
+    }
+
     pub fn produce(&mut self) {
         self.change_amount(self.production);
     }
