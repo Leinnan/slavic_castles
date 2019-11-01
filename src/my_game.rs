@@ -1,4 +1,5 @@
 use crate::card::Card;
+use crate::consts;
 use crate::player::*;
 use ggez::event;
 use ggez::event::{KeyCode, KeyMods};
@@ -7,8 +8,6 @@ use ggez::{graphics, Context, GameResult};
 use std::collections::HashMap;
 
 type Point2 = na::Point2<f32>;
-const FONT_COLOR: (f32, f32, f32, f32) = (0.05, 0.05, 0.05, 1.0);
-const ACTIVE_FONT_COLOR: (f32, f32, f32, f32) = (1.0, 0.4, 0.35, 1.0);
 
 pub struct MyGame {
     players: HashMap<PlayerNumer, Player>,
@@ -89,9 +88,9 @@ impl MyGame {
         active: bool,
     ) {
         let color: graphics::Color = if active {
-            ACTIVE_FONT_COLOR.into()
+            consts::ACTIVE_FONT_COLOR.into()
         } else {
-            FONT_COLOR.into()
+            consts::FONT_COLOR.into()
         };
 
         let drawparams = graphics::DrawParam::new()
@@ -111,14 +110,10 @@ impl MyGame {
     pub fn draw_help(ctx: &mut Context, pos: Point2, font: graphics::Font) {
         let drawparams = graphics::DrawParam::new()
             .dest(pos)
-            .color(FONT_COLOR.into())
+            .color(consts::FONT_COLOR.into())
             .rotation(0.0 as f32)
             .offset(Point2::new(0.0, 0.0));
-        let text = graphics::Text::new((
-            "______________\nHelp\n Space- change player\n H- show this info\n______________",
-            font,
-            26.0,
-        ));
+        let text = graphics::Text::new((consts::HELP, font, 26.0));
 
         graphics::draw(ctx, &text, drawparams);
     }
