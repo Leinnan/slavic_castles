@@ -16,10 +16,11 @@ pub struct Player {
     pub walls_hp: i32,
     pub resources: HashMap<ResourceType, Resource>,
     pub deck: Deck,
+    active: bool
 }
 
 impl Player {
-    pub fn new() -> Player {
+    pub fn new(active: bool) -> Player {
         let mut resources = HashMap::new();
         resources.insert(ResourceType::Tools, Resource::new());
         resources.insert(ResourceType::Magic, Resource::new());
@@ -31,7 +32,12 @@ impl Player {
             walls_hp: 15,
             resources: resources,
             deck: Deck::new(),
+            active: active,
         }
+    }
+    
+    pub fn is_active(&self) -> bool {
+        self.active
     }
 
     pub fn change_resource_amount(&mut self, res_type: &ResourceType, amount: i32) {
@@ -89,10 +95,13 @@ impl Player {
             .get_mut(&ResourceType::Soldiers)
             .unwrap()
             .produce();
+        
+        self.active = true;
     }
 
     pub fn replace_card(&mut self, nr: i32) {
         self.deck.replace_card(nr);
+        self.active = false;
     }
 }
 

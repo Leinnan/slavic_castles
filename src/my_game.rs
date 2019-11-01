@@ -21,8 +21,8 @@ pub struct MyGame {
 impl MyGame {
     pub fn new(ctx: &mut Context) -> GameResult<MyGame> {
         let mut players = HashMap::new();
-        players.insert(PlayerNumer::First, Player::new());
-        players.insert(PlayerNumer::Second, Player::new());
+        players.insert(PlayerNumer::First, Player::new(true));
+        players.insert(PlayerNumer::Second, Player::new(false));
 
         let font = graphics::Font::new(ctx, "/coolvetica.ttf")?;
         let game = MyGame {
@@ -47,7 +47,6 @@ impl MyGame {
         let mut player = self.players.get_mut(&self.active_player).unwrap();
         if discard {
             player.replace_card(index);
-            self.switch_player();
             self.console.message(format!("[{0}]Card discarded: {1}", self.active_player, card).as_str());
             return;
         }
@@ -68,7 +67,6 @@ impl MyGame {
             .give_damage(card.damage, false);
 
         self.console.message(format!("[{0}]Card used: {1}", self.active_player, card).as_str());
-        self.switch_player();
     }
 
     fn switch_player(&mut self) {
@@ -129,6 +127,9 @@ impl MyGame {
 
 impl event::EventHandler for MyGame {
     fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
+        if !self.players[&self.active_player].is_active() {
+            self.switch_player();
+        }
         Ok(())
     }
 
