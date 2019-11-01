@@ -1,6 +1,7 @@
 pub const BASE_RESOURCE_AMOUNT: i32 = 5;
 pub const BASE_RESOURCE_PRODUCTION: i32 = 1;
 pub const CARDS_IN_DECK: i32 = 4;
+pub const DELAY_BETWEEN_MOVES: f64 = 0.5;
 // texts
 pub const HELP: &str = "______________\nHelp\n 1-4 use card\n Use with Shift to discard card\n M- show console\n H- show this info\n______________";
 // UI

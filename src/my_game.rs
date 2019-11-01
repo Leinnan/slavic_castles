@@ -3,6 +3,7 @@ use crate::consts;
 use crate::player::*;
 use crate::ui::console::Console;
 use ggez::event;
+use ggez::timer;
 use ggez::event::{KeyCode, KeyMods};
 use ggez::nalgebra as na;
 use ggez::{graphics, Context, GameResult};
@@ -16,6 +17,7 @@ pub struct MyGame {
     active_player: PlayerNumer,
     help_enabled: bool,
     console: Console,
+    time_before_next_move: f64,
 }
 
 impl MyGame {
@@ -31,6 +33,7 @@ impl MyGame {
             active_player: PlayerNumer::First,
             help_enabled: true,
             console: Console::new(),
+            time_before_next_move: 0.0,
         };
         Ok(game)
     }
@@ -48,6 +51,7 @@ impl MyGame {
         if discard {
             player.replace_card(index);
             self.console.message(format!("[{0}]Card discarded: {1}", self.active_player, card).as_str());
+            self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
             return;
         }
 
@@ -69,6 +73,10 @@ impl MyGame {
         self.console.message(format!("[{0}]Card used: {1}", self.active_player, card).as_str());
     }
 
+    fn can_active_player_move(&self) -> bool {
+        self.time_before_next_move <= 0.0
+    }
+
     fn is_human_playing(&self) -> bool {
         self.players[&self.active_player].is_human() 
     }
@@ -79,6 +87,7 @@ impl MyGame {
             .get_mut(&self.active_player)
             .unwrap()
             .start_new_turn();
+        self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
     }
 
     // DRAWING START
@@ -103,7 +112,7 @@ impl MyGame {
             .rotation(0.0 as f32)
             .offset(Point2::new(10.0, 10.0));
 
-        let mut text = if active {
+        let mut text = if player.is_human() {
             graphics::Text::new((format!("{}\n{}", player, player.deck), font, 26.0))
         } else {
             graphics::Text::new((format!("{}", player), font, 26.0))
@@ -130,15 +139,22 @@ impl MyGame {
 }
 
 impl event::EventHandler for MyGame {
-    fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
+    fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
+        if !self.can_active_player_move() {
+            println!("time_before_next_move {}",self.time_before_next_move);
+            self.time_before_next_move -= timer::duration_to_f64(timer::delta(ctx));
+            return Ok(());
+        }
+
         if !self.players[&self.active_player].is_active() {
             self.switch_player();
         }
-        if !self.is_human_playing() {
+        else if !self.is_human_playing() {
             let (i,discard) = self.players[&self.active_player].get_possible_move();
             let card = self.players[&self.active_player].deck.cards[i as usize];
             self.try_use_card(&card, i, discard)
         }
+
         Ok(())
     }
 
@@ -184,7 +200,7 @@ impl event::EventHandler for MyGame {
             &self.players[&PlayerNumer::First],
             Point2::new(10.0, 10.0),
             self.font,
-            PlayerNumer::First == self.active_player && self.players[&PlayerNumer::First].is_human(),
+            PlayerNumer::First == self.active_player,
             graphics::Align::Left,
         );
         MyGame::draw_player_text(
@@ -192,7 +208,7 @@ impl event::EventHandler for MyGame {
             &self.players[&PlayerNumer::Second],
             Point2::new(consts::SCREEN_WIDTH / 2.0 - 10.0, 10.0),
             self.font,
-            PlayerNumer::Second == self.active_player && self.players[&PlayerNumer::Second].is_human(),
+            PlayerNumer::Second == self.active_player,
             graphics::Align::Right,
         );
         self.console.draw(ctx, self.font);
