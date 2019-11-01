@@ -2,6 +2,7 @@ use crate::card::Card;
 use crate::consts;
 use crate::player::*;
 use crate::ui::console::Console;
+use crate::ui::game_ended_text::GameEndedText;
 use ggez::event;
 use ggez::timer;
 use ggez::event::{KeyCode, KeyMods};
@@ -17,13 +18,14 @@ pub struct MyGame {
     active_player: PlayerNumer,
     help_enabled: bool,
     console: Console,
+    game_ended_text: GameEndedText,
     time_before_next_move: f64,
 }
 
 impl MyGame {
     pub fn new(ctx: &mut Context) -> GameResult<MyGame> {
         let mut players = HashMap::new();
-        players.insert(PlayerNumer::First, Player::new(true,true));
+        players.insert(PlayerNumer::First, Player::new(true,false));
         players.insert(PlayerNumer::Second, Player::new(false,false));
 
         let font = graphics::Font::new(ctx, "/coolvetica.ttf")?;
@@ -33,9 +35,14 @@ impl MyGame {
             active_player: PlayerNumer::First,
             help_enabled: true,
             console: Console::new(),
+            game_ended_text: GameEndedText::new(),
             time_before_next_move: 0.0,
         };
         Ok(game)
+    }
+
+    pub fn is_game_ended(&self) -> bool {
+        !self.players[&PlayerNumer::First].is_alive() || !self.players[&PlayerNumer::Second].is_alive()
     }
 
     pub fn reset_game(&mut self) {
@@ -149,6 +156,16 @@ impl MyGame {
 
 impl event::EventHandler for MyGame {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
+        if self.is_game_ended() {
+            let id = if self.players[&PlayerNumer::First].is_alive() {
+                PlayerNumer::First
+            }
+            else {
+                PlayerNumer::Second
+            };
+            self.game_ended_text.set_player_name(id.to_string());
+            return Ok(());
+        }
         if !self.can_active_player_move() {
             println!("time_before_next_move {}",self.time_before_next_move);
             self.time_before_next_move -= timer::duration_to_f64(timer::delta(ctx));
@@ -176,13 +193,14 @@ impl event::EventHandler for MyGame {
             self.console.switch_visibility();
         }
 
-        if !self.is_human_playing() {
-            return;
-        }
-
         if keycode == KeyCode::R {
             self.reset_game();
         }
+
+        if !self.is_human_playing() || self.is_game_ended() {
+            return;
+        }
+
         let shift_pressed = keymod.contains(KeyMods::SHIFT);
 
         if keycode == KeyCode::Key1 {
@@ -224,6 +242,9 @@ impl event::EventHandler for MyGame {
             PlayerNumer::Second == self.active_player,
             graphics::Align::Right,
         );
+        if self.is_game_ended() {
+            self.game_ended_text.draw(ctx,self.font);
+        }
         self.console.draw(ctx, self.font);
         graphics::present(ctx)
     }

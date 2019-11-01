@@ -13,7 +13,6 @@ pub enum PlayerNumer {
 
 pub struct Player {
     human: bool,
-    pub alive: bool,
     pub tower_hp: i32,
     pub walls_hp: i32,
     pub resources: HashMap<ResourceType, Resource>,
@@ -29,7 +28,6 @@ impl Player {
         resources.insert(ResourceType::Soldiers, Resource::new());
         Player {
             human: human,
-            alive: true,
             tower_hp: consts::BASE_TOWER_HP,
             walls_hp: consts::BASE_WALLS_HP,
             resources: resources,
@@ -60,6 +58,10 @@ impl Player {
     
     pub fn is_human(&self) -> bool {
         self.human
+    }
+
+    pub fn is_alive(&self) -> bool {
+        self.tower_hp > 0
     }
 
     pub fn change_resource_amount(&mut self, res_type: &ResourceType, amount: i32) {
@@ -99,8 +101,8 @@ impl Player {
             }
         }
 
-        if self.tower_hp == 0 {
-            self.alive = false;
+        if self.tower_hp < 0 {
+            self.tower_hp = 0
         }
     }
 
