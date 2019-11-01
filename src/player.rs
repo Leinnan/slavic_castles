@@ -1,7 +1,9 @@
 use crate::deck::Deck;
+use crate::consts;
 use crate::resource::*;
 use std::collections::HashMap;
 use std::fmt;
+use rand::prelude::*;
 
 #[derive(PartialEq, Eq, Hash, Copy, Debug, Clone)]
 pub enum PlayerNumer {
@@ -111,11 +113,12 @@ impl Player {
     pub fn get_possible_move(&self) -> (i32, bool) {
         for i in 0..self.deck.cards.len() {
             if self.deck.cards[i].can_aford(&self.resources) {
-                return (i as i32,true);
+                return (i as i32,false);
             }
         }
 
-        (0,true)
+        let mut rng = thread_rng();
+        (rng.gen_range(0, consts::CARDS_IN_DECK),true)
     }
 }
 
