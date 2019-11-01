@@ -1,5 +1,5 @@
-use ggez::{graphics, Context};
 use crate::consts;
+use ggez::{graphics, Context};
 
 type Point2 = ggez::nalgebra::Point2<f32>;
 
@@ -9,7 +9,9 @@ pub struct GameEndedText {
 
 impl GameEndedText {
     pub fn new() -> GameEndedText {
-        GameEndedText{ player_name: "".to_string(),}
+        GameEndedText {
+            player_name: "".to_string(),
+        }
     }
 
     pub fn set_player_name(&mut self, name: String) {
@@ -26,9 +28,10 @@ impl GameEndedText {
             .rotation(0.0 as f32)
             .offset(Point2::new(0.0, 0.0));
 
-        let mut text = graphics::Text::new((format!("Game Ended, {} wins", self.player_name), font, 26.0));
+        let mut text =
+            graphics::Text::new((format!("Game Ended, {} wins", self.player_name), font, 26.0));
         text.set_bounds(size, graphics::Align::Center);
-        
+
         graphics::draw(ctx, &text, drawparams);
     }
 }

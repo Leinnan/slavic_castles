@@ -1,7 +1,7 @@
-pub const BASE_RESOURCE_AMOUNT: i32 = 15;
+pub const BASE_RESOURCE_AMOUNT: i32 = 5;
 pub const BASE_RESOURCE_PRODUCTION: i32 = 1;
-pub const BASE_TOWER_HP: i32 = 10;
-pub const BASE_WALLS_HP: i32 = 5;
+pub const BASE_TOWER_HP: i32 = 20;
+pub const BASE_WALLS_HP: i32 = 15;
 pub const CARDS_IN_DECK: i32 = 4;
 pub const DELAY_BETWEEN_MOVES: f64 = 0.5;
 // texts

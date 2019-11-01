@@ -1,9 +1,9 @@
-use crate::deck::Deck;
 use crate::consts;
+use crate::deck::Deck;
 use crate::resource::*;
+use rand::prelude::*;
 use std::collections::HashMap;
 use std::fmt;
-use rand::prelude::*;
 
 #[derive(PartialEq, Eq, Hash, Copy, Debug, Clone)]
 pub enum PlayerNumer {
@@ -17,7 +17,7 @@ pub struct Player {
     pub walls_hp: i32,
     pub resources: HashMap<ResourceType, Resource>,
     pub deck: Deck,
-    active: bool
+    active: bool,
 }
 
 impl Player {
@@ -39,23 +39,26 @@ impl Player {
     pub fn reset(&mut self, active: bool) {
         self.resources
             .get_mut(&ResourceType::Magic)
-            .unwrap().reset();
+            .unwrap()
+            .reset();
         self.resources
             .get_mut(&ResourceType::Tools)
-            .unwrap().reset();
+            .unwrap()
+            .reset();
         self.resources
             .get_mut(&ResourceType::Soldiers)
-            .unwrap().reset();
-            self.tower_hp = consts::BASE_TOWER_HP;
-            self.walls_hp = consts::BASE_WALLS_HP;
-            self.deck.fill_deck();
-            self.active = active;
+            .unwrap()
+            .reset();
+        self.tower_hp = consts::BASE_TOWER_HP;
+        self.walls_hp = consts::BASE_WALLS_HP;
+        self.deck.fill_deck();
+        self.active = active;
     }
-    
+
     pub fn is_active(&self) -> bool {
         self.active
     }
-    
+
     pub fn is_human(&self) -> bool {
         self.human
     }
@@ -119,7 +122,7 @@ impl Player {
             .get_mut(&ResourceType::Soldiers)
             .unwrap()
             .produce();
-        
+
         self.active = true;
     }
 
@@ -131,12 +134,12 @@ impl Player {
     pub fn get_possible_move(&self) -> (i32, bool) {
         for i in 0..self.deck.cards.len() {
             if self.deck.cards[i].can_aford(&self.resources) {
-                return (i as i32,false);
+                return (i as i32, false);
             }
         }
 
         let mut rng = thread_rng();
-        (rng.gen_range(0, consts::CARDS_IN_DECK),true)
+        (rng.gen_range(0, consts::CARDS_IN_DECK), true)
     }
 }
 
@@ -157,10 +160,9 @@ impl fmt::Display for Player {
 impl fmt::Display for PlayerNumer {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self == &PlayerNumer::First {
-            write!( f, "First")
-        }
-        else {
-            write!( f, "Second")
+            write!(f, "First")
+        } else {
+            write!(f, "Second")
         }
     }
 }

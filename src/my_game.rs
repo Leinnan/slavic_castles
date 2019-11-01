@@ -4,9 +4,9 @@ use crate::player::*;
 use crate::ui::console::Console;
 use crate::ui::game_ended_text::GameEndedText;
 use ggez::event;
-use ggez::timer;
 use ggez::event::{KeyCode, KeyMods};
 use ggez::nalgebra as na;
+use ggez::timer;
 use ggez::{graphics, Context, GameResult};
 use std::collections::HashMap;
 
@@ -20,37 +20,46 @@ pub struct MyGame {
     console: Console,
     game_ended_text: GameEndedText,
     time_before_next_move: f64,
+    game_ended: bool,
 }
 
 impl MyGame {
     pub fn new(ctx: &mut Context) -> GameResult<MyGame> {
         let mut players = HashMap::new();
-        players.insert(PlayerNumer::First, Player::new(true,false));
-        players.insert(PlayerNumer::Second, Player::new(false,false));
+        players.insert(PlayerNumer::First, Player::new(true, true));
+        players.insert(PlayerNumer::Second, Player::new(false, false));
 
         let font = graphics::Font::new(ctx, "/coolvetica.ttf")?;
         let game = MyGame {
             players,
             font,
             active_player: PlayerNumer::First,
-            help_enabled: true,
+            help_enabled: false,
             console: Console::new(),
             game_ended_text: GameEndedText::new(),
             time_before_next_move: 0.0,
+            game_ended: false,
         };
         Ok(game)
     }
 
     pub fn is_game_ended(&self) -> bool {
-        !self.players[&PlayerNumer::First].is_alive() || !self.players[&PlayerNumer::Second].is_alive()
+        self.game_ended
     }
 
     pub fn reset_game(&mut self) {
-        self.players.get_mut(&PlayerNumer::First).unwrap().reset(true);
-        self.players.get_mut(&PlayerNumer::Second).unwrap().reset(false);
+        self.players
+            .get_mut(&PlayerNumer::First)
+            .unwrap()
+            .reset(true);
+        self.players
+            .get_mut(&PlayerNumer::Second)
+            .unwrap()
+            .reset(false);
         self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
         self.console.clear();
         self.console.message("Game restarted");
+        self.game_ended = false;
     }
 
     pub fn other_player(&self) -> PlayerNumer {
@@ -65,7 +74,8 @@ impl MyGame {
         let mut player = self.players.get_mut(&self.active_player).unwrap();
         if discard {
             player.replace_card(index);
-            self.console.message(format!("[{0}]Card discarded: {1}", self.active_player, card).as_str());
+            self.console
+                .message(format!("[{0}]Card discarded: {1}", self.active_player, card).as_str());
             self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
             return;
         }
@@ -85,7 +95,8 @@ impl MyGame {
             .unwrap()
             .give_damage(card.damage, false);
 
-        self.console.message(format!("[{0}]Card used: {1}", self.active_player, card).as_str());
+        self.console
+            .message(format!("[{0}]Card used: {1}", self.active_player, card).as_str());
         self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
     }
 
@@ -94,7 +105,7 @@ impl MyGame {
     }
 
     fn is_human_playing(&self) -> bool {
-        self.players[&self.active_player].is_human() 
+        self.players[&self.active_player].is_human()
     }
 
     fn switch_player(&mut self) {
@@ -104,6 +115,22 @@ impl MyGame {
             .unwrap()
             .start_new_turn();
         self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
+    }
+
+    fn handle_move_end(&mut self) {
+        if !self.players[&PlayerNumer::First].is_alive()
+            || !self.players[&PlayerNumer::Second].is_alive()
+        {
+            let id = if self.players[&PlayerNumer::First].is_alive() {
+                PlayerNumer::First
+            } else {
+                PlayerNumer::Second
+            };
+            self.game_ended_text.set_player_name(id.to_string());
+            self.game_ended = true;
+        } else {
+            self.switch_player();
+        }
     }
 
     // DRAWING START
@@ -157,26 +184,17 @@ impl MyGame {
 impl event::EventHandler for MyGame {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         if self.is_game_ended() {
-            let id = if self.players[&PlayerNumer::First].is_alive() {
-                PlayerNumer::First
-            }
-            else {
-                PlayerNumer::Second
-            };
-            self.game_ended_text.set_player_name(id.to_string());
             return Ok(());
         }
         if !self.can_active_player_move() {
-            println!("time_before_next_move {}",self.time_before_next_move);
             self.time_before_next_move -= timer::duration_to_f64(timer::delta(ctx));
             return Ok(());
         }
 
         if !self.players[&self.active_player].is_active() {
-            self.switch_player();
-        }
-        else if !self.is_human_playing() {
-            let (i,discard) = self.players[&self.active_player].get_possible_move();
+            self.handle_move_end();
+        } else if !self.is_human_playing() {
+            let (i, discard) = self.players[&self.active_player].get_possible_move();
             let card = self.players[&self.active_player].deck.cards[i as usize];
             self.try_use_card(&card, i, discard)
         }
@@ -243,7 +261,7 @@ impl event::EventHandler for MyGame {
             graphics::Align::Right,
         );
         if self.is_game_ended() {
-            self.game_ended_text.draw(ctx,self.font);
+            self.game_ended_text.draw(ctx, self.font);
         }
         self.console.draw(ctx, self.font);
         graphics::present(ctx)

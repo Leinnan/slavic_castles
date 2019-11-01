@@ -1,6 +1,6 @@
-use std::collections::VecDeque;
-use ggez::{graphics, Context};
 use crate::consts;
+use ggez::{graphics, Context};
+use std::collections::VecDeque;
 
 type Point2 = ggez::nalgebra::Point2<f32>;
 
@@ -13,7 +13,10 @@ impl Console {
     pub fn new() -> Console {
         let infos = VecDeque::with_capacity(10);
 
-        Console { infos, visible: true, }
+        Console {
+            infos,
+            visible: true,
+        }
     }
 
     pub fn switch_visibility(&mut self) {
@@ -35,7 +38,10 @@ impl Console {
         if !self.visible {
             return;
         }
-        let size_and_pos = Point2::new(consts::SCREEN_WIDTH / 2.0 - 10.0, consts::SCREEN_HEIGHT /2.0 - 10.0);
+        let size_and_pos = Point2::new(
+            consts::SCREEN_WIDTH / 2.0 - 10.0,
+            consts::SCREEN_HEIGHT / 2.0 - 10.0,
+        );
 
         let drawparams = graphics::DrawParam::new()
             .dest(size_and_pos)
@@ -51,7 +57,7 @@ impl Console {
 
         let mut text = graphics::Text::new((format!("{}", result), font, 16.0));
         text.set_bounds(size_and_pos, graphics::Align::Right);
-        
+
         graphics::draw(ctx, &text, drawparams);
     }
 }

@@ -1,6 +1,6 @@
+use ggez::conf::{WindowMode, WindowSetup};
 use std::env;
 use std::path;
-use ggez::conf::{WindowMode, WindowSetup};
 
 mod card;
 mod consts;
