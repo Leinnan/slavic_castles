@@ -1,5 +1,6 @@
 use std::env;
 use std::path;
+use ggez::conf::{WindowMode, WindowSetup};
 
 mod card;
 mod consts;
@@ -17,9 +18,9 @@ fn main() -> ggez::GameResult {
     } else {
         path::PathBuf::from("./resources")
     };
-    let window_mode = ggez::conf::WindowMode {
-        width: 1280.0,
-        height: 720.0,
+    let window_mode = WindowMode {
+        width: consts::SCREEN_WIDTH,
+        height: consts::SCREEN_HEIGHT,
         maximized: false,
         fullscreen_type: ggez::conf::FullscreenType::Windowed,
         borderless: false,
@@ -32,6 +33,7 @@ fn main() -> ggez::GameResult {
     // Make a Context.
     let cb = ggez::ContextBuilder::new("my_game", "Cool Game Author")
         .window_mode(window_mode)
+        .window_setup(WindowSetup::default().title("Slavic castles!"))
         .add_resource_path(resource_dir);
 
     let (ctx, event_loop) = &mut cb.build()?;

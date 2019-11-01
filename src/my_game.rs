@@ -86,6 +86,7 @@ impl MyGame {
         pos: Point2,
         font: graphics::Font,
         active: bool,
+        align: graphics::Align,
     ) {
         let color: graphics::Color = if active {
             consts::ACTIVE_FONT_COLOR.into()
@@ -97,13 +98,19 @@ impl MyGame {
             .dest(pos)
             .color(color)
             .rotation(0.0 as f32)
-            .offset(Point2::new(0.0, 0.0));
+            .offset(Point2::new(10.0, 10.0));
 
-        let text = if active {
+        let mut text = if active {
             graphics::Text::new((format!("{}\n{}", player, player.deck), font, 26.0))
         } else {
             graphics::Text::new((format!("{}", player), font, 26.0))
         };
+
+        text.set_bounds(
+            Point2::new(consts::SCREEN_WIDTH / 2.0, consts::SCREEN_HEIGHT / 2.0),
+            align,
+        );
+
         graphics::draw(ctx, &text, drawparams);
     }
 
@@ -155,21 +162,23 @@ impl event::EventHandler for MyGame {
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx, [0.62, 0.88, 1.0, 1.0].into());
         if self.help_enabled {
-            MyGame::draw_help(ctx, Point2::new(10.0, 560.0), self.font);
+            MyGame::draw_help(ctx, Point2::new(10.0, 360.0), self.font);
         }
         MyGame::draw_player_text(
             ctx,
-            &self.players[&self.active_player],
-            Point2::new(10.0, 140.0),
+            &self.players[&PlayerNumer::First],
+            Point2::new(10.0, 10.0),
             self.font,
-            true,
+            PlayerNumer::First == self.active_player,
+            graphics::Align::Left,
         );
         MyGame::draw_player_text(
             ctx,
-            &self.players[&self.other_player()],
-            Point2::new(10.0, 10.0),
+            &self.players[&PlayerNumer::Second],
+            Point2::new(consts::SCREEN_WIDTH / 2.0 - 10.0, 10.0),
             self.font,
-            false,
+            PlayerNumer::Second == self.active_player,
+            graphics::Align::Right,
         );
         graphics::present(ctx)
     }

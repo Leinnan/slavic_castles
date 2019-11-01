@@ -6,3 +6,5 @@ pub const HELP: &str = "______________\nHelp\n Space- change player\n 1-4 use ca
 // UI
 pub const FONT_COLOR: (f32, f32, f32, f32) = (0.05, 0.05, 0.05, 1.0);
 pub const ACTIVE_FONT_COLOR: (f32, f32, f32, f32) = (1.0, 0.4, 0.35, 1.0);
+pub const SCREEN_WIDTH: f32 = 1280.0;
+pub const SCREEN_HEIGHT: f32 = 720.0;
