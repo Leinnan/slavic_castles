@@ -109,3 +109,14 @@ impl fmt::Display for Player {
         )
     }
 }
+
+impl fmt::Display for PlayerNumer {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self == &PlayerNumer::First {
+            write!( f, "First")
+        }
+        else {
+            write!( f, "Second")
+        }
+    }
+}

@@ -8,6 +8,7 @@ mod deck;
 mod my_game;
 mod player;
 mod resource;
+mod ui;
 use crate::my_game::MyGame;
 
 fn main() -> ggez::GameResult {

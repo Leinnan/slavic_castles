@@ -1,6 +1,7 @@
 use crate::card::Card;
 use crate::consts;
 use crate::player::*;
+use crate::ui::console::Console;
 use ggez::event;
 use ggez::event::{KeyCode, KeyMods};
 use ggez::nalgebra as na;
@@ -14,6 +15,7 @@ pub struct MyGame {
     font: graphics::Font,
     active_player: PlayerNumer,
     help_enabled: bool,
+    console: Console,
 }
 
 impl MyGame {
@@ -28,6 +30,7 @@ impl MyGame {
             font,
             active_player: PlayerNumer::First,
             help_enabled: true,
+            console: Console::new(),
         };
         Ok(game)
     }
@@ -47,7 +50,7 @@ impl MyGame {
                 .unwrap()
                 .replace_card(index);
             self.switch_player();
-            println!("Card discarded: {}", &card.id);
+            self.console.message(format!("[{0}]Card discarded: {1}", self.active_player, card).as_str());
         }
         let mut player = self.players.get_mut(&self.active_player).unwrap();
 
@@ -66,12 +69,13 @@ impl MyGame {
             .unwrap()
             .give_damage(card.damage, false);
 
-        println!("Card used: {}", &card.id);
+        self.console.message(format!("[{0}]Card used: {1}", self.active_player, card).as_str());
         self.switch_player();
     }
 
     fn switch_player(&mut self) {
         self.active_player = self.other_player();
+        //self.console.message("Player changed");
         self.players
             .get_mut(&self.active_player)
             .unwrap()
@@ -180,6 +184,7 @@ impl event::EventHandler for MyGame {
             PlayerNumer::Second == self.active_player,
             graphics::Align::Right,
         );
+        self.console.draw(ctx, self.font);
         graphics::present(ctx)
     }
 }
