@@ -21,8 +21,8 @@ pub struct MyGame {
 impl MyGame {
     pub fn new(ctx: &mut Context) -> GameResult<MyGame> {
         let mut players = HashMap::new();
-        players.insert(PlayerNumer::First, Player::new(true));
-        players.insert(PlayerNumer::Second, Player::new(false));
+        players.insert(PlayerNumer::First, Player::new(true,true));
+        players.insert(PlayerNumer::Second, Player::new(false,false));
 
         let font = graphics::Font::new(ctx, "/coolvetica.ttf")?;
         let game = MyGame {
@@ -67,6 +67,10 @@ impl MyGame {
             .give_damage(card.damage, false);
 
         self.console.message(format!("[{0}]Card used: {1}", self.active_player, card).as_str());
+    }
+
+    fn is_human_playing(&self) -> bool {
+        self.players[&self.active_player].is_human() 
     }
 
     fn switch_player(&mut self) {
@@ -130,6 +134,11 @@ impl event::EventHandler for MyGame {
         if !self.players[&self.active_player].is_active() {
             self.switch_player();
         }
+        if !self.is_human_playing() {
+            let (i,discard) = self.players[&self.active_player].get_possible_move();
+            let card = self.players[&self.active_player].deck.cards[i as usize];
+            self.try_use_card(&card, i, discard)
+        }
         Ok(())
     }
 
@@ -142,6 +151,9 @@ impl event::EventHandler for MyGame {
             self.console.switch_visibility();
         }
 
+        if !self.is_human_playing() {
+            return;
+        }
         let shift_pressed = keymod.contains(KeyMods::SHIFT);
 
         if keycode == KeyCode::Key1 {
@@ -172,7 +184,7 @@ impl event::EventHandler for MyGame {
             &self.players[&PlayerNumer::First],
             Point2::new(10.0, 10.0),
             self.font,
-            PlayerNumer::First == self.active_player,
+            PlayerNumer::First == self.active_player && self.players[&PlayerNumer::First].is_human(),
             graphics::Align::Left,
         );
         MyGame::draw_player_text(
@@ -180,7 +192,7 @@ impl event::EventHandler for MyGame {
             &self.players[&PlayerNumer::Second],
             Point2::new(consts::SCREEN_WIDTH / 2.0 - 10.0, 10.0),
             self.font,
-            PlayerNumer::Second == self.active_player,
+            PlayerNumer::Second == self.active_player && self.players[&PlayerNumer::Second].is_human(),
             graphics::Align::Right,
         );
         self.console.draw(ctx, self.font);

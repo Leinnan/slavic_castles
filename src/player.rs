@@ -10,7 +10,7 @@ pub enum PlayerNumer {
 }
 
 pub struct Player {
-    pub human: bool,
+    human: bool,
     pub alive: bool,
     pub tower_hp: i32,
     pub walls_hp: i32,
@@ -20,13 +20,13 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new(active: bool) -> Player {
+    pub fn new(active: bool, human: bool) -> Player {
         let mut resources = HashMap::new();
         resources.insert(ResourceType::Tools, Resource::new());
         resources.insert(ResourceType::Magic, Resource::new());
         resources.insert(ResourceType::Soldiers, Resource::new());
         Player {
-            human: true,
+            human: human,
             alive: true,
             tower_hp: 20,
             walls_hp: 15,
@@ -38,6 +38,10 @@ impl Player {
     
     pub fn is_active(&self) -> bool {
         self.active
+    }
+    
+    pub fn is_human(&self) -> bool {
+        self.human
     }
 
     pub fn change_resource_amount(&mut self, res_type: &ResourceType, amount: i32) {
@@ -102,6 +106,16 @@ impl Player {
     pub fn replace_card(&mut self, nr: i32) {
         self.deck.replace_card(nr);
         self.active = false;
+    }
+
+    pub fn get_possible_move(&self) -> (i32, bool) {
+        for i in 0..self.deck.cards.len() {
+            if self.deck.cards[i].can_aford(&self.resources) {
+                return (i as i32,true);
+            }
+        }
+
+        (0,true)
     }
 }
 
