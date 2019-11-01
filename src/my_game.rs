@@ -41,16 +41,27 @@ impl MyGame {
         }
     }
 
-    pub fn try_use_card(&mut self, card: &Card) {
-        if !card.can_aford(&self.players[&self.active_player].resources) {
+    pub fn try_use_card(&mut self, card: &Card, index: i32, discard: bool) {
+        if discard {
+            self.players
+                .get_mut(&self.active_player)
+                .unwrap()
+                .replace_card(index);
+            self.switch_player();
+            println!("Card discarded: {}", &card.id);
+        }
+        let mut player = self.players.get_mut(&self.active_player).unwrap();
+
+        if !card.can_aford(&player.resources) {
             return;
         }
-        let mut player = self.players.get_mut(&self.other_player()).unwrap();
 
         player.change_resource_amount(&card.cost_resource, -card.cost_amount);
         player.make_tower_higher(card.tower_growth);
         player.make_walls_higher(card.walls_growth);
         player.change_resource_production(&card.production_resource, card.production_change);
+        player.replace_card(index);
+
         self.players
             .get_mut(&self.other_player())
             .unwrap()
@@ -125,21 +136,24 @@ impl event::EventHandler for MyGame {
         if keycode == KeyCode::H {
             self.help_enabled = !self.help_enabled;
         }
+
+        let shift_pressed = keymod.contains(KeyMods::SHIFT);
+
         if keycode == KeyCode::Key1 {
             let card = self.players[&self.active_player].deck.cards[0];
-            self.try_use_card(&card);
+            self.try_use_card(&card, 0, shift_pressed);
         }
         if keycode == KeyCode::Key2 {
             let card = self.players[&self.active_player].deck.cards[1];
-            self.try_use_card(&card);
+            self.try_use_card(&card, 1, shift_pressed);
         }
         if keycode == KeyCode::Key3 {
             let card = self.players[&self.active_player].deck.cards[2];
-            self.try_use_card(&card);
+            self.try_use_card(&card, 2, shift_pressed);
         }
         if keycode == KeyCode::Key4 {
             let card = self.players[&self.active_player].deck.cards[3];
-            self.try_use_card(&card);
+            self.try_use_card(&card, 3, shift_pressed);
         }
     }
 

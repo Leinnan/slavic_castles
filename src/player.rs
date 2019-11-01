@@ -90,6 +90,10 @@ impl Player {
             .unwrap()
             .produce();
     }
+
+    pub fn replace_card(&mut self, nr: i32) {
+        self.deck.replace_card(nr);
+    }
 }
 
 impl fmt::Display for Player {
