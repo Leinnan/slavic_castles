@@ -5,14 +5,19 @@ use crate::consts;
 type Point2 = ggez::nalgebra::Point2<f32>;
 
 pub struct Console {
-    pub infos: VecDeque<String>,
+    infos: VecDeque<String>,
+    visible: bool,
 }
 
 impl Console {
     pub fn new() -> Console {
         let infos = VecDeque::with_capacity(10);
 
-        Console { infos }
+        Console { infos, visible: true, }
+    }
+
+    pub fn switch_visibility(&mut self) {
+        self.visible = !self.visible;
     }
 
     pub fn message(&mut self, msg: &str) {
@@ -23,6 +28,9 @@ impl Console {
     }
 
     pub fn draw(&self, ctx: &mut Context, font: graphics::Font) {
+        if !self.visible {
+            return;
+        }
         let size_and_pos = Point2::new(consts::SCREEN_WIDTH / 2.0 - 10.0, consts::SCREEN_HEIGHT /2.0 - 10.0);
 
         let drawparams = graphics::DrawParam::new()

@@ -44,15 +44,13 @@ impl MyGame {
     }
 
     pub fn try_use_card(&mut self, card: &Card, index: i32, discard: bool) {
+        let mut player = self.players.get_mut(&self.active_player).unwrap();
         if discard {
-            self.players
-                .get_mut(&self.active_player)
-                .unwrap()
-                .replace_card(index);
+            player.replace_card(index);
             self.switch_player();
             self.console.message(format!("[{0}]Card discarded: {1}", self.active_player, card).as_str());
+            return;
         }
-        let mut player = self.players.get_mut(&self.active_player).unwrap();
 
         if !card.can_aford(&player.resources) {
             return;
@@ -137,6 +135,10 @@ impl event::EventHandler for MyGame {
     fn key_up_event(&mut self, _ctx: &mut Context, keycode: KeyCode, keymod: KeyMods) {
         if keycode == KeyCode::H {
             self.help_enabled = !self.help_enabled;
+        }
+
+        if keycode == KeyCode::M {
+            self.console.switch_visibility();
         }
 
         let shift_pressed = keymod.contains(KeyMods::SHIFT);
