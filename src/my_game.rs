@@ -215,7 +215,7 @@ impl event::EventHandler for MyGame {
             self.reset_game();
         }
 
-        if !self.is_human_playing() || self.is_game_ended() {
+        if !self.is_human_playing() || self.is_game_ended() || !self.can_active_player_move() {
             return;
         }
 
@@ -240,7 +240,7 @@ impl event::EventHandler for MyGame {
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        graphics::clear(ctx, [0.62, 0.88, 1.0, 1.0].into());
+        graphics::clear(ctx, consts::BG_COLOR.into());
         if self.help_enabled {
             MyGame::draw_help(ctx, Point2::new(10.0, 360.0), self.font);
         }
