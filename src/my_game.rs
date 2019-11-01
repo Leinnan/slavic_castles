@@ -75,7 +75,6 @@ impl MyGame {
 
     fn switch_player(&mut self) {
         self.active_player = self.other_player();
-        //self.console.message("Player changed");
         self.players
             .get_mut(&self.active_player)
             .unwrap()
@@ -136,9 +135,6 @@ impl event::EventHandler for MyGame {
     }
 
     fn key_up_event(&mut self, _ctx: &mut Context, keycode: KeyCode, keymod: KeyMods) {
-        if keycode == KeyCode::Space {
-            self.switch_player();
-        }
         if keycode == KeyCode::H {
             self.help_enabled = !self.help_enabled;
         }
