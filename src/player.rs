@@ -67,6 +67,10 @@ impl Player {
         self.tower_hp > 0
     }
 
+    pub fn has_max_possible_tower(&self) -> bool {
+        self.tower_hp >= consts::MAX_TOWER_HP
+    }
+
     pub fn change_resource_amount(&mut self, res_type: &ResourceType, amount: i32) {
         self.resources
             .get_mut(res_type)
@@ -83,10 +87,16 @@ impl Player {
 
     pub fn make_tower_higher(&mut self, amount: i32) {
         self.tower_hp += amount;
+        if self.tower_hp > consts::MAX_TOWER_HP {
+            self.tower_hp = consts::MAX_TOWER_HP;
+        }
     }
 
     pub fn make_walls_higher(&mut self, amount: i32) {
         self.walls_hp += amount;
+        if self.walls_hp > consts::MAX_WALLS_HP {
+            self.walls_hp = consts::MAX_WALLS_HP;
+        }
     }
 
     pub fn give_damage(&mut self, amount: i32, ignore_wall: bool) {

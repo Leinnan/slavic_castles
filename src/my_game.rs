@@ -128,6 +128,16 @@ impl MyGame {
             };
             self.game_ended_text.set_player_name(id.to_string());
             self.game_ended = true;
+        } else if self.players[&PlayerNumer::First].has_max_possible_tower()
+            || !self.players[&PlayerNumer::Second].has_max_possible_tower()
+        {
+            let id = if self.players[&PlayerNumer::First].has_max_possible_tower() {
+                PlayerNumer::First
+            } else {
+                PlayerNumer::Second
+            };
+            self.game_ended_text.set_player_name(id.to_string());
+            self.game_ended = true;
         } else {
             self.switch_player();
         }
