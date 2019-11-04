@@ -38,9 +38,10 @@ impl Console {
         if !self.visible {
             return;
         }
+        let (w, h) = graphics::drawable_size(ctx);
         let size_and_pos = Point2::new(
-            consts::SCREEN_WIDTH / 2.0 - 10.0,
-            consts::SCREEN_HEIGHT / 2.0 - 10.0,
+            w as f32 / 2.0 - 10.0,
+            h as f32 / 2.0 - 10.0,
         );
 
         let drawparams = graphics::DrawParam::new()
@@ -56,7 +57,7 @@ impl Console {
         }
 
         let mut text = graphics::Text::new((format!("{}", result), font, 18.0));
-        text.set_bounds(size_and_pos, graphics::Align::Right);
+        //text.set_bounds(size_and_pos, graphics::Align::Right);
 
         graphics::draw(ctx, &text, drawparams);
     }

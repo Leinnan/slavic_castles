@@ -1,6 +1,7 @@
-use ggez::conf::{WindowMode, WindowSetup};
-use std::env;
-use std::path;
+#[cfg(not(target_arch = "wasm32"))]
+extern crate ggez;
+#[cfg(target_arch = "wasm32")]
+extern crate good_web_game as ggez;
 
 mod card;
 mod consts;
@@ -11,7 +12,12 @@ mod resource;
 mod ui;
 use crate::my_game::MyGame;
 
+
+#[cfg(not(target_arch = "wasm32"))]
 fn main() -> ggez::GameResult {
+    use ggez::conf::{WindowMode, WindowSetup};
+    use std::env;
+    use std::path;
     let resource_dir = if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
         let mut path = path::PathBuf::from(manifest_dir);
         path.push("resources");
@@ -40,4 +46,24 @@ fn main() -> ggez::GameResult {
     let (ctx, event_loop) = &mut cb.build()?;
     let my_game = &mut MyGame::new(ctx)?;
     ggez::event::run(ctx, event_loop, my_game)
+}
+
+
+#[cfg(target_arch = "wasm32")]
+fn main() -> good_web_game::GameResult {
+    use good_web_game::{
+        event, conf, 
+        Context, GameResult,
+    };
+
+    good_web_game::start(
+        conf::Conf {
+            cache: conf::Cache::Index,
+            ..Default::default()
+        },
+        |mut context| {
+            let state = MyGame::new(&mut context).unwrap();;
+            event::run(context, state)
+        },
+    )
 }

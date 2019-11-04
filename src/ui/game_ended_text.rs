@@ -19,8 +19,9 @@ impl GameEndedText {
     }
 
     pub fn draw(&self, ctx: &mut Context, font: graphics::Font) {
-        let size = Point2::new(consts::SCREEN_WIDTH, 80.0);
-        let pos = Point2::new(0.0, consts::SCREEN_HEIGHT / 2.0 - 26.0);
+        let (w, h) = graphics::drawable_size(ctx);
+        let size = Point2::new(w as f32, 80.0);
+        let pos = Point2::new(0.0, h as f32 / 2.0 - 26.0);
 
         let drawparams = graphics::DrawParam::new()
             .dest(pos)
@@ -30,7 +31,7 @@ impl GameEndedText {
 
         let mut text =
             graphics::Text::new((format!("Game Ended, {} wins", self.player_name), font, 26.0));
-        text.set_bounds(size, graphics::Align::Center);
+        //text.set_bounds(size, graphics::Align::Center);
 
         graphics::draw(ctx, &text, drawparams);
     }

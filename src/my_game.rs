@@ -34,7 +34,7 @@ impl MyGame {
             players,
             font,
             active_player: PlayerNumer::First,
-            help_enabled: false,
+            help_enabled: true,
             console: Console::new(),
             game_ended_text: GameEndedText::new(),
             time_before_next_move: 0.0,
@@ -151,7 +151,7 @@ impl MyGame {
         pos: Point2,
         font: graphics::Font,
         active: bool,
-        align: graphics::Align,
+       // align: graphics::Align,
     ) {
         let color: graphics::Color = if active {
             consts::ACTIVE_FONT_COLOR.into()
@@ -162,7 +162,7 @@ impl MyGame {
         let drawparams = graphics::DrawParam::new()
             .dest(pos)
             .color(color)
-            .rotation(0.0 as f32)
+            .rotation(0.0)
             .offset(Point2::new(10.0, 10.0));
 
         let mut text = if player.is_human() {
@@ -171,10 +171,10 @@ impl MyGame {
             graphics::Text::new((format!("{}", player), font, 26.0))
         };
 
-        text.set_bounds(
-            Point2::new(consts::SCREEN_WIDTH / 2.0, consts::SCREEN_HEIGHT / 2.0),
-            align,
-        );
+        // text.set_bounds(
+        //     Point2::new(consts::SCREEN_WIDTH / 2.0, consts::SCREEN_HEIGHT / 2.0),
+        //     align,
+        // );
 
         graphics::draw(ctx, &text, drawparams);
     }
@@ -246,10 +246,15 @@ impl event::EventHandler for MyGame {
         if keycode == KeyCode::Key4 {
             let card = self.players[&self.active_player].deck.cards[3];
             self.try_use_card(&card, 3, shift_pressed);
+        let (w, h) = graphics::drawable_size(_ctx);
+
+        self.console
+            .message(format!("Window size {0}x{1}", w, h).as_str());
         }
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
+        let (w, h) = graphics::drawable_size(ctx);
         graphics::clear(ctx, consts::BG_COLOR.into());
         if self.help_enabled {
             MyGame::draw_help(ctx, Point2::new(10.0, 360.0), self.font);
@@ -260,15 +265,15 @@ impl event::EventHandler for MyGame {
             Point2::new(10.0, 10.0),
             self.font,
             PlayerNumer::First == self.active_player,
-            graphics::Align::Left,
+            //graphics::Align::Left,
         );
         MyGame::draw_player_text(
             ctx,
             &self.players[&PlayerNumer::Second],
-            Point2::new(consts::SCREEN_WIDTH / 2.0 - 10.0, 10.0),
+            Point2::new(w as f32 / 2.0 - 10.0, 10.0),
             self.font,
             PlayerNumer::Second == self.active_player,
-            graphics::Align::Right,
+            //graphics::Align::Right,
         );
         if self.is_game_ended() {
             self.game_ended_text.draw(ctx, self.font);
