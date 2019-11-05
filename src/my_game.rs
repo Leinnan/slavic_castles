@@ -152,7 +152,6 @@ impl MyGame {
         align_right: bool,
         font: graphics::Font,
         active: bool,
-        // align: graphics::Align,
     ) {
         let color: graphics::Color = if active {
             consts::ACTIVE_FONT_COLOR.into()
@@ -170,7 +169,7 @@ impl MyGame {
             graphics::Text::new((format!("{}", player), font, consts::TEXT_SIZE))
         };
 
-        let dest_point = if alignRight {
+        let dest_point = if align_right {
             let (w, _) = graphics::drawable_size(ctx);
             let text_length =
                 player.to_string().chars().count() as f32 * consts::FONT_WIDTH * consts::TEXT_SCALE;
