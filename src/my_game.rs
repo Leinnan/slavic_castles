@@ -32,7 +32,8 @@ impl MyGame {
         players.insert(PlayerNumer::Second, Player::new(false, false));
 
         let font = graphics::Font::new(ctx, "/coolvetica.ttf")?;
-        let player_info = PlayerInfo::new("Human".to_string(),true,"/avatar.png".to_string(),ctx)?;
+        let player_info =
+            PlayerInfo::new("Human".to_string(), true, "/avatar.png".to_string(), ctx)?;
         let game = MyGame {
             players,
             font,
@@ -264,9 +265,11 @@ impl event::EventHandler for MyGame {
         if self.help_enabled {
             MyGame::draw_help(ctx, Point2::new(10.0, 360.0), self.font);
         }
-        self.player_info.update_info(&self.players[&PlayerNumer::First]);
+        self.player_info
+            .update_info(&self.players[&PlayerNumer::First]);
         self.player_info.draw(ctx, self.font, false);
-        self.player_info.update_info(&self.players[&PlayerNumer::Second]);
+        self.player_info
+            .update_info(&self.players[&PlayerNumer::Second]);
         self.player_info.draw(ctx, self.font, true);
         MyGame::draw_player_text(
             ctx,

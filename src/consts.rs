@@ -13,6 +13,11 @@ pub const FONT_COLOR: (f32, f32, f32, f32) = (29.0 / 255.0, 53.0 / 255.0, 87.0 /
 pub const ACTIVE_FONT_COLOR: (f32, f32, f32, f32) =
     (230.0 / 255.0, 57.0 / 255.0, 70.0 / 255.0, 1.0);
 pub const BG_COLOR: (f32, f32, f32, f32) = (241.0 / 255.0, 250.0 / 255.0, 238.0 / 255.0, 1.0);
+
+pub const TOOLS_COLOR: (f32, f32, f32, f32) = (140.0 / 255.0, 193.0 / 255.0, 1.0, 1.0);
+pub const MAGIC_COLOR: (f32, f32, f32, f32) = (118.0 / 255.0, 206.0 / 255.0, 113.0 / 255.0, 1.0);
+pub const SOLDIERS_COLOR: (f32, f32, f32, f32) = (206.0 / 255.0, 55.0 / 255.0, 75.0 / 255.0, 1.0);
+
 pub const SCREEN_WIDTH: f32 = 1280.0;
 pub const SCREEN_HEIGHT: f32 = 720.0;
 #[cfg(target_arch = "wasm32")]

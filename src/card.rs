@@ -22,7 +22,7 @@ impl Card {
 
 impl fmt::Display for Card {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut result = String::from(format!("{0}: ", self.id));
+        let mut result = String::new();
         if self.cost_amount > 0 {
             result.push_str(&format!(
                 "Cost({0}): {1}",
