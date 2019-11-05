@@ -253,9 +253,10 @@ impl event::EventHandler for MyGame {
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
+        let (_, h) = graphics::drawable_size(ctx);
         graphics::clear(ctx, consts::BG_COLOR.into());
         if self.help_enabled {
-            MyGame::draw_help(ctx, Point2::new(10.0, 360.0), self.font);
+            MyGame::draw_help(ctx, Point2::new(10.0, h as f32 - 260.0), self.font);
         }
         self.player_info
             .update_info(&self.players[&PlayerNumer::First]);
