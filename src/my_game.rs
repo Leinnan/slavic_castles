@@ -164,12 +164,7 @@ impl MyGame {
             consts::FONT_COLOR.into()
         };
 
-        let text = 
-            graphics::Text::new((
-                format!("{}", player.deck),
-                font,
-                consts::TEXT_SIZE,
-            ));
+        let text = graphics::Text::new((format!("{}", player.deck), font, consts::TEXT_SIZE));
 
         let dest_point = if align_right {
             let (w, _) = graphics::drawable_size(ctx);
@@ -268,24 +263,26 @@ impl event::EventHandler for MyGame {
         self.player_info
             .update_info(&self.players[&PlayerNumer::Second]);
         self.player_info.draw(ctx, self.font, true);
-        MyGame::draw_deck_text(
-            ctx,
-            &self.players[&PlayerNumer::First],
-            false,
-            self.font,
-            PlayerNumer::First == self.active_player,
-        );
-        MyGame::draw_deck_text(
-            ctx,
-            &self.players[&PlayerNumer::Second],
-            true,
-            self.font,
-            PlayerNumer::Second == self.active_player,
-        );
+
         if self.is_game_ended() {
             self.game_ended_text.draw(ctx, self.font);
+        } else {
+            MyGame::draw_deck_text(
+                ctx,
+                &self.players[&PlayerNumer::First],
+                false,
+                self.font,
+                PlayerNumer::First == self.active_player,
+            );
+            MyGame::draw_deck_text(
+                ctx,
+                &self.players[&PlayerNumer::Second],
+                true,
+                self.font,
+                PlayerNumer::Second == self.active_player,
+            );
+            self.console.draw(ctx, self.font);
         }
-        self.console.draw(ctx, self.font);
         graphics::present(ctx)
     }
 }

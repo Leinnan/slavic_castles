@@ -20,18 +20,15 @@ impl GameEndedText {
 
     pub fn draw(&self, ctx: &mut Context, font: graphics::Font) {
         let (w, h) = graphics::drawable_size(ctx);
-        let size = Point2::new(w as f32, 80.0);
-        let pos = Point2::new(0.0, h as f32 / 2.0 - 26.0);
+        let pos = Point2::new(w as f32 - 150.0, h as f32 / 2.0 - 26.0);
 
-        let drawparams = graphics::DrawParam::new()
+        let drawparams = graphics::DrawParam::default()
             .dest(pos)
             .color(consts::FONT_COLOR.into())
-            .rotation(0.0 as f32)
-            .offset(Point2::new(0.0, 0.0));
+            .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
 
-        let mut text =
-            graphics::Text::new((format!("Game Ended, {} wins", self.player_name), font, 26.0));
-        //text.set_bounds(size, graphics::Align::Center);
+        let text =
+            graphics::Text::new((format!("Game Ended, {} wins, press R to restart", self.player_name), font, consts::TEXT_SIZE));
 
         graphics::draw(ctx, &text, drawparams);
     }
