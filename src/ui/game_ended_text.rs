@@ -20,7 +20,7 @@ impl GameEndedText {
 
     pub fn draw(&self, ctx: &mut Context, font: graphics::Font) {
         let (w, h) = graphics::drawable_size(ctx);
-        let pos = Point2::new(w as f32 - 150.0, h as f32 / 2.0 - 26.0);
+        let pos = Point2::new(w as f32 / 2.0 - 150.0, h as f32 / 2.0 - 26.0);
 
         let drawparams = graphics::DrawParam::default()
             .dest(pos)

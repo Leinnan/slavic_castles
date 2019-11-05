@@ -36,7 +36,7 @@ impl Player {
         }
     }
 
-    pub fn reset(&mut self, active: bool) {
+    pub fn reset(&mut self, active: bool, human: bool) {
         self.resources
             .get_mut(&ResourceType::Magic)
             .unwrap()
@@ -53,6 +53,7 @@ impl Player {
         self.walls_hp = consts::BASE_WALLS_HP;
         self.deck.fill_deck();
         self.active = active;
+        self.human = human;
     }
 
     pub fn is_active(&self) -> bool {

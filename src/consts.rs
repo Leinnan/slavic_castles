@@ -5,7 +5,7 @@ pub const BASE_WALLS_HP: i32 = 15;
 pub const MAX_TOWER_HP: i32 = 100;
 pub const MAX_WALLS_HP: i32 = 50;
 pub const CARDS_IN_DECK: i32 = 4;
-pub const DELAY_BETWEEN_MOVES: f64 = 0.5;
+pub const DELAY_BETWEEN_MOVES: f64 = 0.3;
 // texts
 pub const HELP: &str = "______________\nHelp\n 1-4 use card\n Use with Shift to discard card\n M- show console\n R- restart game\n H- show this info\n______________";
 // UI

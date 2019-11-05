@@ -52,15 +52,15 @@ impl MyGame {
         self.game_ended
     }
 
-    pub fn reset_game(&mut self) {
+    pub fn reset_game(&mut self, ai_only: bool) {
         self.players
             .get_mut(&PlayerNumer::First)
             .unwrap()
-            .reset(true);
+            .reset(true, !ai_only);
         self.players
             .get_mut(&PlayerNumer::Second)
             .unwrap()
-            .reset(false);
+            .reset(false, false);
         self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
         self.console.clear();
         self.console.message("Game restarted");
@@ -224,15 +224,15 @@ impl event::EventHandler for MyGame {
             self.console.switch_visibility();
         }
 
+        let shift_pressed = keymod.contains(KeyMods::SHIFT);
+
         if keycode == KeyCode::R {
-            self.reset_game();
+            self.reset_game(shift_pressed);
         }
 
         if !self.is_human_playing() || self.is_game_ended() || !self.can_active_player_move() {
             return;
         }
-
-        let shift_pressed = keymod.contains(KeyMods::SHIFT);
 
         if keycode == KeyCode::Key1 {
             let card = self.players[&self.active_player].deck.cards[0];
