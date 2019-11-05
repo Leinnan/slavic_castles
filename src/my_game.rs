@@ -151,7 +151,7 @@ impl MyGame {
 
     // DRAWING START
 
-    fn draw_player_text(
+    fn draw_deck_text(
         ctx: &mut Context,
         player: &Player,
         align_right: bool,
@@ -164,15 +164,12 @@ impl MyGame {
             consts::FONT_COLOR.into()
         };
 
-        let text = if player.is_human() {
+        let text = 
             graphics::Text::new((
-                format!("{}\n{}", player, player.deck),
+                format!("{}", player.deck),
                 font,
                 consts::TEXT_SIZE,
-            ))
-        } else {
-            graphics::Text::new((format!("{}", player), font, consts::TEXT_SIZE))
-        };
+            ));
 
         let dest_point = if align_right {
             let (w, _) = graphics::drawable_size(ctx);
@@ -271,14 +268,14 @@ impl event::EventHandler for MyGame {
         self.player_info
             .update_info(&self.players[&PlayerNumer::Second]);
         self.player_info.draw(ctx, self.font, true);
-        MyGame::draw_player_text(
+        MyGame::draw_deck_text(
             ctx,
             &self.players[&PlayerNumer::First],
             false,
             self.font,
             PlayerNumer::First == self.active_player,
         );
-        MyGame::draw_player_text(
+        MyGame::draw_deck_text(
             ctx,
             &self.players[&PlayerNumer::Second],
             true,
