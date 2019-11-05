@@ -58,7 +58,7 @@ fn main() -> good_web_game::GameResult {
 
     good_web_game::start(
         conf::Conf {
-            cache: conf::Cache::Index,
+            cache: conf::Cache::List(vec!["/coolvetica.ttf"]),
             ..Default::default()
         },
         |mut context| {

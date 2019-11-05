@@ -77,6 +77,7 @@ impl MyGame {
             self.console
                 .message(format!("[{0}]Card discarded: {1}", self.active_player, card).as_str());
             self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
+            
             return;
         }
 
@@ -158,19 +159,17 @@ impl MyGame {
         } else {
             consts::FONT_COLOR.into()
         };
-
-        let drawparams = graphics::DrawParam::new()
+        
+        let drawparams = graphics::DrawParam::default()
             .dest(pos)
             .color(color)
-            .rotation(0.0)
-            .offset(Point2::new(10.0, 10.0));
+            .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
 
         let mut text = if player.is_human() {
-            graphics::Text::new((format!("{}\n{}", player, player.deck), font, 26.0))
+            graphics::Text::new((format!("{}\n{}", player, player.deck), font, consts::TEXT_SIZE))
         } else {
-            graphics::Text::new((format!("{}", player), font, 26.0))
+            graphics::Text::new((format!("{}", player), font, consts::TEXT_SIZE))
         };
-
         // text.set_bounds(
         //     Point2::new(consts::SCREEN_WIDTH / 2.0, consts::SCREEN_HEIGHT / 2.0),
         //     align,
@@ -180,12 +179,11 @@ impl MyGame {
     }
 
     pub fn draw_help(ctx: &mut Context, pos: Point2, font: graphics::Font) {
-        let drawparams = graphics::DrawParam::new()
+        let drawparams = graphics::DrawParam::default()
             .dest(pos)
             .color(consts::FONT_COLOR.into())
-            .rotation(0.0 as f32)
-            .offset(Point2::new(0.0, 0.0));
-        let text = graphics::Text::new((consts::HELP, font, 26.0));
+            .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
+        let text = graphics::Text::new((consts::HELP, font, consts::TEXT_SIZE));
 
         graphics::draw(ctx, &text, drawparams);
     }
@@ -246,10 +244,6 @@ impl event::EventHandler for MyGame {
         if keycode == KeyCode::Key4 {
             let card = self.players[&self.active_player].deck.cards[3];
             self.try_use_card(&card, 3, shift_pressed);
-        let (w, h) = graphics::drawable_size(_ctx);
-
-        self.console
-            .message(format!("Window size {0}x{1}", w, h).as_str());
         }
     }
 

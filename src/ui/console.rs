@@ -44,11 +44,10 @@ impl Console {
             h as f32 / 2.0 - 10.0,
         );
 
-        let drawparams = graphics::DrawParam::new()
+        let drawparams = graphics::DrawParam::default()
             .dest(size_and_pos)
             .color(consts::FONT_COLOR.into())
-            .rotation(0.0 as f32)
-            .offset(Point2::new(0.0, 0.0));
+            .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
 
         let mut result = String::from("Info:\n");
         for el in &self.infos {
@@ -56,7 +55,7 @@ impl Console {
             result.push_str("\n");
         }
 
-        let mut text = graphics::Text::new((format!("{}", result), font, 18.0));
+        let mut text = graphics::Text::new((format!("{}", result), font, consts::TEXT_SIZE * 0.8));
         //text.set_bounds(size_and_pos, graphics::Align::Right);
 
         graphics::draw(ctx, &text, drawparams);
