@@ -149,7 +149,7 @@ impl MyGame {
     fn draw_player_text(
         ctx: &mut Context,
         player: &Player,
-        pos: Point2,
+        alignRight: bool,
         font: graphics::Font,
         active: bool,
        // align: graphics::Align,
@@ -159,21 +159,25 @@ impl MyGame {
         } else {
             consts::FONT_COLOR.into()
         };
-        
-        let drawparams = graphics::DrawParam::default()
-            .dest(pos)
-            .color(color)
-            .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
 
-        let mut text = if player.is_human() {
+        let text = if player.is_human() {
             graphics::Text::new((format!("{}\n{}", player, player.deck), font, consts::TEXT_SIZE))
         } else {
             graphics::Text::new((format!("{}", player), font, consts::TEXT_SIZE))
         };
-        // text.set_bounds(
-        //     Point2::new(consts::SCREEN_WIDTH / 2.0, consts::SCREEN_HEIGHT / 2.0),
-        //     align,
-        // );
+
+        let dest_point = if alignRight {
+            let (w, _) = graphics::drawable_size(ctx);
+            let text_length = player.to_string().chars().count() as f32 * consts::FONT_WIDTH * consts::TEXT_SCALE;
+            Point2::new(w as f32 - text_length - 10.0, 10.0)
+        } else {
+            Point2::new(10.0, 10.0)
+        };
+        
+        let drawparams = graphics::DrawParam::default()
+            .dest(dest_point)
+            .color(color)
+            .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
 
         graphics::draw(ctx, &text, drawparams);
     }
@@ -256,18 +260,16 @@ impl event::EventHandler for MyGame {
         MyGame::draw_player_text(
             ctx,
             &self.players[&PlayerNumer::First],
-            Point2::new(10.0, 10.0),
+            false,
             self.font,
             PlayerNumer::First == self.active_player,
-            //graphics::Align::Left,
         );
         MyGame::draw_player_text(
             ctx,
             &self.players[&PlayerNumer::Second],
-            Point2::new(w as f32 / 2.0 - 10.0, 10.0),
+            true,
             self.font,
             PlayerNumer::Second == self.active_player,
-            //graphics::Align::Right,
         );
         if self.is_game_ended() {
             self.game_ended_text.draw(ctx, self.font);

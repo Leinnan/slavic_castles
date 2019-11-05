@@ -55,8 +55,7 @@ impl Console {
             result.push_str("\n");
         }
 
-        let mut text = graphics::Text::new((format!("{}", result), font, consts::TEXT_SIZE * 0.8));
-        //text.set_bounds(size_and_pos, graphics::Align::Right);
+        let text = graphics::Text::new((format!("{}", result), font, consts::TEXT_SIZE * 0.8));
 
         graphics::draw(ctx, &text, drawparams);
     }

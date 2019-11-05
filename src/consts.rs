@@ -23,3 +23,7 @@ pub const TEXT_SCALE: f32 = 1.0;
 pub const TEXT_SIZE: f32 = 13.0;
 #[cfg(not(target_arch = "wasm32"))]
 pub const TEXT_SIZE: f32 = 26.0;
+#[cfg(target_arch = "wasm32")]
+pub const FONT_WIDTH: f32 = 4.4;
+#[cfg(not(target_arch = "wasm32"))]
+pub const FONT_WIDTH: f32 = 5.3;
