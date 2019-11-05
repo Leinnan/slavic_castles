@@ -12,7 +12,6 @@ mod resource;
 mod ui;
 use crate::my_game::MyGame;
 
-
 #[cfg(not(target_arch = "wasm32"))]
 fn main() -> ggez::GameResult {
     use ggez::conf::{WindowMode, WindowSetup};
@@ -48,13 +47,9 @@ fn main() -> ggez::GameResult {
     ggez::event::run(ctx, event_loop, my_game)
 }
 
-
 #[cfg(target_arch = "wasm32")]
 fn main() -> good_web_game::GameResult {
-    use good_web_game::{
-        event, conf, 
-        Context, GameResult,
-    };
+    use good_web_game::{conf, event, Context, GameResult};
 
     good_web_game::start(
         conf::Conf {

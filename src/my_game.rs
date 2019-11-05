@@ -77,7 +77,7 @@ impl MyGame {
             self.console
                 .message(format!("[{0}]Card discarded: {1}", self.active_player, card).as_str());
             self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
-            
+
             return;
         }
 
@@ -149,10 +149,10 @@ impl MyGame {
     fn draw_player_text(
         ctx: &mut Context,
         player: &Player,
-        alignRight: bool,
+        align_right: bool,
         font: graphics::Font,
         active: bool,
-       // align: graphics::Align,
+        // align: graphics::Align,
     ) {
         let color: graphics::Color = if active {
             consts::ACTIVE_FONT_COLOR.into()
@@ -161,19 +161,24 @@ impl MyGame {
         };
 
         let text = if player.is_human() {
-            graphics::Text::new((format!("{}\n{}", player, player.deck), font, consts::TEXT_SIZE))
+            graphics::Text::new((
+                format!("{}\n{}", player, player.deck),
+                font,
+                consts::TEXT_SIZE,
+            ))
         } else {
             graphics::Text::new((format!("{}", player), font, consts::TEXT_SIZE))
         };
 
         let dest_point = if alignRight {
             let (w, _) = graphics::drawable_size(ctx);
-            let text_length = player.to_string().chars().count() as f32 * consts::FONT_WIDTH * consts::TEXT_SCALE;
+            let text_length =
+                player.to_string().chars().count() as f32 * consts::FONT_WIDTH * consts::TEXT_SCALE;
             Point2::new(w as f32 - text_length - 10.0, 10.0)
         } else {
             Point2::new(10.0, 10.0)
         };
-        
+
         let drawparams = graphics::DrawParam::default()
             .dest(dest_point)
             .color(color)

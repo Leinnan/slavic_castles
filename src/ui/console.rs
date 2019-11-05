@@ -39,10 +39,7 @@ impl Console {
             return;
         }
         let (w, h) = graphics::drawable_size(ctx);
-        let size_and_pos = Point2::new(
-            w as f32 / 2.0 - 10.0,
-            h as f32 / 2.0 - 10.0,
-        );
+        let size_and_pos = Point2::new(w as f32 / 2.0 - 10.0, h as f32 / 2.0 - 10.0);
 
         let drawparams = graphics::DrawParam::default()
             .dest(size_and_pos)
