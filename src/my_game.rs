@@ -3,6 +3,7 @@ use crate::consts;
 use crate::player::*;
 use crate::ui::console::Console;
 use crate::ui::game_ended_text::GameEndedText;
+use crate::ui::player_info::PlayerInfo;
 use ggez::event;
 use ggez::event::{KeyCode, KeyMods};
 use ggez::nalgebra as na;
@@ -19,6 +20,7 @@ pub struct MyGame {
     help_enabled: bool,
     console: Console,
     game_ended_text: GameEndedText,
+    player_info: PlayerInfo,
     time_before_next_move: f64,
     game_ended: bool,
 }
@@ -30,6 +32,7 @@ impl MyGame {
         players.insert(PlayerNumer::Second, Player::new(false, false));
 
         let font = graphics::Font::new(ctx, "/coolvetica.ttf")?;
+        let player_info = PlayerInfo::new("Human".to_string(),true,"/avatar.png".to_string(),ctx)?;
         let game = MyGame {
             players,
             font,
@@ -37,6 +40,7 @@ impl MyGame {
             help_enabled: true,
             console: Console::new(),
             game_ended_text: GameEndedText::new(),
+            player_info: player_info,
             time_before_next_move: 0.0,
             game_ended: false,
         };
@@ -173,9 +177,9 @@ impl MyGame {
             let (w, _) = graphics::drawable_size(ctx);
             let text_length =
                 player.to_string().chars().count() as f32 * consts::FONT_WIDTH * consts::TEXT_SCALE;
-            Point2::new(w as f32 - text_length - 10.0, 10.0)
+            Point2::new(w as f32 - text_length - 10.0, 210.0)
         } else {
-            Point2::new(10.0, 10.0)
+            Point2::new(10.0, 210.0)
         };
 
         let drawparams = graphics::DrawParam::default()
@@ -256,11 +260,14 @@ impl event::EventHandler for MyGame {
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        let (w, h) = graphics::drawable_size(ctx);
         graphics::clear(ctx, consts::BG_COLOR.into());
         if self.help_enabled {
             MyGame::draw_help(ctx, Point2::new(10.0, 360.0), self.font);
         }
+        self.player_info.update_info(&self.players[&PlayerNumer::First]);
+        self.player_info.draw(ctx, self.font, false);
+        self.player_info.update_info(&self.players[&PlayerNumer::Second]);
+        self.player_info.draw(ctx, self.font, true);
         MyGame::draw_player_text(
             ctx,
             &self.players[&PlayerNumer::First],
