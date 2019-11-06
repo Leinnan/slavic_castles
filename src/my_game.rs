@@ -4,7 +4,6 @@ use crate::player::*;
 use crate::ui::board_ui::BoardUI;
 use ggez::event;
 use ggez::event::{KeyCode, KeyMods};
-use ggez::nalgebra as na;
 use ggez::timer;
 use ggez::{graphics, Context, GameResult};
 use std::collections::HashMap;
