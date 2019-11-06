@@ -1,9 +1,9 @@
 use crate::consts;
 use crate::player::*;
+use crate::ui::card_displayer::CardDisplayer;
 use crate::ui::console::Console;
 use crate::ui::game_ended_text::GameEndedText;
 use crate::ui::player_info::PlayerInfo;
-use crate::ui::card_displayer::CardDisplayer;
 use ggez::event::{KeyCode, KeyMods};
 use ggez::nalgebra as na;
 use ggez::{graphics, Context, GameResult};
@@ -16,7 +16,7 @@ pub struct BoardUI {
     game_ended_text: GameEndedText,
     player_info_left: PlayerInfo,
     player_info_right: PlayerInfo,
-    card_displayer: CardDisplayer,
+    card_displayers: Vec<CardDisplayer>,
     active_player: PlayerNumer,
     font: graphics::Font,
     help_enabled: bool,
@@ -40,14 +40,18 @@ impl BoardUI {
             true,
             ctx,
         )?;
-        let card_displayer = CardDisplayer::new(ctx)?;
+        let mut card_displayers = Vec::new();
+        for i in 0..4 {
+            let card_displayer = CardDisplayer::new(ctx)?;
+            card_displayers.push(card_displayer);
+        }
 
         let result = BoardUI {
             console: Console::new(),
             game_ended_text: GameEndedText::new(),
             player_info_left: player_info_left,
             player_info_right: player_info_right,
-            card_displayer: card_displayer,
+            card_displayers: card_displayers,
             active_player: PlayerNumer::First,
             font,
             help_enabled: true,
@@ -123,8 +127,11 @@ impl BoardUI {
         players: &HashMap<PlayerNumer, Player>,
         active_player: PlayerNumer,
     ) {
-        
-        self.card_displayer.update_info(&players[&PlayerNumer::First].deck.cards[0]);
+        for i in 0..4 {
+            let card = players[&PlayerNumer::First].deck.cards[i];
+            let can_afford = card.can_aford(&players[&PlayerNumer::First].resources);
+            self.card_displayers[i].update_info(&card, can_afford);
+        }
         self.player_info_left
             .update_info(&players[&PlayerNumer::First]);
         self.player_info_right
@@ -152,7 +159,14 @@ impl BoardUI {
                 true,
                 PlayerNumer::Second == self.active_player,
             );
-            self.card_displayer.draw(ctx, self.font, 300.0, 250.0);
+            for i in 0..4 {
+                self.card_displayers[i].draw(
+                    ctx,
+                    self.font,
+                    10.0 + i as f32 * 232.0,
+                    h as f32 - 350.0,
+                );
+            }
             self.console.draw(ctx, self.font);
         } else {
             self.game_ended_text.draw(ctx, self.font);

@@ -45,11 +45,13 @@ impl ResourceInfo {
     }
 
     pub fn draw(&self, ctx: &mut Context, font: graphics::Font, x: f32, y: f32) -> GameResult<()> {
-        
         graphics::draw(
             ctx,
             &self.empty_bg,
-            graphics::DrawParam::default().dest(Point2::new(x,y)).scale([SIZE,SIZE]).color(self.color),
+            graphics::DrawParam::default()
+                .dest(Point2::new(x, y))
+                .scale([SIZE, SIZE])
+                .color(self.color),
         );
 
         graphics::draw(

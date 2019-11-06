@@ -10,6 +10,8 @@ pub const DELAY_BETWEEN_MOVES: f64 = 0.3;
 pub const HELP: &str = "______________\nHelp\n 1-4 use card\n Use with Shift to discard card\n M- show console\n R- restart game\n H- show this info\n______________";
 // UI
 pub const FONT_COLOR: (f32, f32, f32, f32) = (29.0 / 255.0, 53.0 / 255.0, 87.0 / 255.0, 1.0);
+pub const FONT_WHITE_COLOR: (f32, f32, f32, f32) = (0.95, 0.95, 0.95, 1.0);
+pub const FONT_GREY_COLOR: (f32, f32, f32, f32) = (0.75, 0.75, 0.75, 1.0);
 pub const ACTIVE_FONT_COLOR: (f32, f32, f32, f32) =
     (230.0 / 255.0, 57.0 / 255.0, 70.0 / 255.0, 1.0);
 pub const BG_COLOR: (f32, f32, f32, f32) = (241.0 / 255.0, 250.0 / 255.0, 238.0 / 255.0, 1.0);
@@ -21,7 +23,7 @@ pub const SOLDIERS_COLOR: (f32, f32, f32, f32) = (206.0 / 255.0, 55.0 / 255.0, 7
 pub const SCREEN_WIDTH: f32 = 1280.0;
 pub const SCREEN_HEIGHT: f32 = 720.0;
 #[cfg(target_arch = "wasm32")]
-pub const TEXT_SCALE: f32 = 2.0;
+pub const TEXT_SCALE: f32 = 1.7;
 #[cfg(not(target_arch = "wasm32"))]
 pub const TEXT_SCALE: f32 = 1.0;
 #[cfg(target_arch = "wasm32")]
