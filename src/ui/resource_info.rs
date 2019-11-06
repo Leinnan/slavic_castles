@@ -42,13 +42,13 @@ impl ResourceInfo {
     }
 
     pub fn draw(&self, ctx: &mut Context, font: graphics::Font, x: f32, y: f32) -> GameResult<()> {
-#[cfg(not(target_arch = "wasm32"))]
+        #[cfg(not(target_arch = "wasm32"))]
         let rect = ggez::graphics::Rect::new(0.0, 0.0, SIZE, SIZE);
-#[cfg(not(target_arch = "wasm32"))]
+        #[cfg(not(target_arch = "wasm32"))]
         let rectangle =
             graphics::Mesh::new_rectangle(ctx, graphics::DrawMode::fill(), rect, self.color)?;
 
-#[cfg(not(target_arch = "wasm32"))]
+        #[cfg(not(target_arch = "wasm32"))]
         graphics::draw(ctx, &rectangle, (Point2::new(x, y),));
 
         graphics::draw(

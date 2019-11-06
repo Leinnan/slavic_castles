@@ -12,7 +12,7 @@ pub struct Deck {
 impl Deck {
     pub fn new() -> Deck {
         let mut cards = Vec::new();
-        cards.push( Card {
+        cards.push(Card {
             id: 1,
             cost_resource: ResourceType::Soldiers,
             cost_amount: 3,

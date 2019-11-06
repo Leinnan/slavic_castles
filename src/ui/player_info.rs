@@ -27,6 +27,7 @@ const TEXT_SCALE_MULTIPLIER: f32 = 1.2;
 
 pub struct PlayerInfo {
     active: bool,
+    align_right: bool,
     name: String,
     tower_hp: i32,
     walls_hp: i32,
@@ -42,6 +43,7 @@ impl PlayerInfo {
         name: String,
         active: bool,
         avatar_path: String,
+        align_right: bool,
         ctx: &mut Context,
     ) -> GameResult<PlayerInfo> {
         let avatar = graphics::Image::new(ctx, avatar_path)?;
@@ -57,6 +59,7 @@ impl PlayerInfo {
 
         let info = PlayerInfo {
             active: active,
+            align_right: align_right,
             name: name,
             tower_hp: consts::BASE_TOWER_HP,
             walls_hp: consts::BASE_WALLS_HP,
@@ -81,9 +84,13 @@ impl PlayerInfo {
             .update_values(&player.resources[&ResourceType::Soldiers]);
     }
 
-    pub fn draw(&self, ctx: &mut Context, font: graphics::Font, align_right: bool) {
+    pub fn draw(&self, ctx: &mut Context, font: graphics::Font) {
         let (w, _) = graphics::drawable_size(ctx);
-        let base_x_pos = if align_right { w as f32 - 210.0 } else { 10.0 };
+        let base_x_pos = if self.align_right {
+            w as f32 - 210.0
+        } else {
+            10.0
+        };
 
         graphics::draw(
             ctx,
@@ -128,12 +135,12 @@ impl PlayerInfo {
                 ]),
         );
 
-        let resources_offset = if align_right {
+        let resources_offset = if self.align_right {
             base_x_pos - 120.0
         } else {
             base_x_pos + 220.0
         };
-        let resource_offset_move = if align_right { -95.0 } else { 95.0 };
+        let resource_offset_move = if self.align_right { -95.0 } else { 95.0 };
 
         self.tools.draw(ctx, font, resources_offset, 25.0);
         self.magic

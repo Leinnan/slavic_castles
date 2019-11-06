@@ -5,13 +5,19 @@ type Point2 = ggez::nalgebra::Point2<f32>;
 
 pub struct GameEndedText {
     player_name: String,
+    enabled: bool,
 }
 
 impl GameEndedText {
     pub fn new() -> GameEndedText {
         GameEndedText {
             player_name: "".to_string(),
+            enabled: false,
         }
+    }
+
+    pub fn enable(&mut self, enable: bool) {
+        self.enabled = enable;
     }
 
     pub fn set_player_name(&mut self, name: String) {
@@ -19,6 +25,9 @@ impl GameEndedText {
     }
 
     pub fn draw(&self, ctx: &mut Context, font: graphics::Font) {
+        if !self.enabled {
+            return;
+        }
         let (w, h) = graphics::drawable_size(ctx);
         let pos = Point2::new(w as f32 / 2.0 - 150.0, h as f32 / 2.0 - 26.0);
 
@@ -27,8 +36,11 @@ impl GameEndedText {
             .color(consts::FONT_COLOR.into())
             .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
 
-        let text =
-            graphics::Text::new((format!("Game Ended, {} wins, press R to restart", self.player_name), font, consts::TEXT_SIZE));
+        let text = graphics::Text::new((
+            format!("Game Ended, {} wins, press R to restart", self.player_name),
+            font,
+            consts::TEXT_SIZE,
+        ));
 
         graphics::draw(ctx, &text, drawparams);
     }
