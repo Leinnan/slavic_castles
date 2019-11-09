@@ -23,6 +23,7 @@ pub struct BoardUI {
     deck_text_enabled: bool,
     deck_ui_enabled: bool,
     game_ended: bool,
+    screen_height: f32,
 }
 
 impl BoardUI {
@@ -65,6 +66,7 @@ impl BoardUI {
             deck_text_enabled: false,
             deck_ui_enabled: true,
             game_ended: false,
+            screen_height: h,
         };
         Ok(result)
     }
@@ -78,6 +80,14 @@ impl BoardUI {
 
     pub fn enable_ui_deck(&mut self, show: bool) {
         self.deck_ui_enabled = show;
+        let y_pos = if show {
+            self.screen_height as f32 - consts::CARD_SIZE_Y
+        } else {
+            self.screen_height as f32 - consts::CARD_SIZE_Y + 100.0
+        };
+        for i in 0..consts::CARDS_IN_DECK as usize {
+            self.card_displayers[i].set_pos(10.0 + i as f32 * consts::CARD_SIZE_X, y_pos);
+        }
     }
 
     pub fn send_message(&mut self, msg: &str) {
@@ -156,8 +166,7 @@ impl BoardUI {
         for i in 0..consts::CARDS_IN_DECK as usize {
             let card = players[&PlayerNumer::First].deck.cards[i];
             let can_afford = card.can_aford(&players[&PlayerNumer::First].resources);
-            let can_use = self.deck_ui_enabled && can_afford;
-            self.card_displayers[i].update_info(&card, can_use);
+            self.card_displayers[i].update_info(&card, can_afford);
         }
         self.player_info_left
             .update_info(&players[&PlayerNumer::First]);

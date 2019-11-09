@@ -171,8 +171,8 @@ impl fmt::Display for Deck {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "Deck: \n {0},\n {1},\n {2},\n {3}",
-            self.cards[0], self.cards[1], self.cards[2], self.cards[3],
+            "Deck: \n {0},\n {1},\n {2},\n {3},\n {4}",
+            self.cards[0], self.cards[1], self.cards[2], self.cards[3], self.cards[4],
         )
     }
 }
