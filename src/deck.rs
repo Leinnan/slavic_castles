@@ -2,6 +2,7 @@ use crate::card::Card;
 use crate::consts::*;
 use crate::resource::*;
 use rand::prelude::*;
+use std::collections::HashMap;
 use std::fmt;
 
 pub struct Deck {
@@ -131,14 +132,25 @@ impl Deck {
         deck
     }
 
-    pub fn replace_card(&mut self, card_nr: i32) {
+    pub fn replace_card(&mut self, card_nr: i32, resources: &HashMap<ResourceType, Resource>) {
         let mut rng = thread_rng();
-        loop {
+        let mut finded = false;
+
+        let mut card = self.cards_collections[0];
+        for attempt in 0..9 {
             let i = rng.gen_range(0, self.cards_collections.len());
-            if self.cards_collections[i].id != self.cards[card_nr as usize].id {
-                self.cards[card_nr as usize] = self.cards_collections[i];
+            card = self.cards_collections[i];
+            let max_cost_amount = resources[&card.cost_resource].amount * 120 / 100;
+            let card_already_in_deck =
+                attempt > 5 || self.cards.iter().any(|&c| c.id == card.id);
+            if card.cost_amount <= max_cost_amount && !card_already_in_deck {
+                self.cards[card_nr as usize] = card;
+                finded = true;
                 break;
             }
+        }
+        if !finded {
+            self.cards[card_nr as usize] = card;
         }
     }
 
@@ -149,9 +161,10 @@ impl Deck {
         for _x in 0..CARDS_IN_DECK {
             let mut finded = false;
 
-            let i = rng.gen_range(0, self.cards_collections.len());
-            let card = self.cards_collections[i];
+            let mut card = self.cards_collections[0];
             for attempt in 0..9 {
+                let i = rng.gen_range(0, self.cards_collections.len());
+                card = self.cards_collections[i];
                 let card_already_in_deck =
                     attempt > 5 || self.cards.iter().any(|&c| c.id == card.id);
                 if card.cost_amount <= max_cost_amount && !card_already_in_deck {

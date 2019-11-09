@@ -138,7 +138,7 @@ impl Player {
     }
 
     pub fn replace_card(&mut self, nr: i32) {
-        self.deck.replace_card(nr);
+        self.deck.replace_card(nr,&self.resources);
         self.active = false;
     }
 
