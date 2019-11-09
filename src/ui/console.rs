@@ -54,7 +54,7 @@ impl Console {
         );
 
         let drawparams = graphics::DrawParam::default()
-            .dest(Point2::new(w as f32 / 2.0,h as f32 / 2.0))
+            .dest(Point2::new(w as f32 / 2.0, h as f32 / 2.0))
             .color(consts::FONT_WHITE_COLOR.into())
             .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
 

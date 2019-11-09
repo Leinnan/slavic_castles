@@ -21,6 +21,7 @@ pub struct BoardUI {
     font: graphics::Font,
     help_enabled: bool,
     deck_text_enabled: bool,
+    deck_ui_enabled: bool,
     game_ended: bool,
 }
 
@@ -57,6 +58,7 @@ impl BoardUI {
             font,
             help_enabled: false,
             deck_text_enabled: false,
+            deck_ui_enabled: true,
             game_ended: false,
         };
         Ok(result)
@@ -66,6 +68,11 @@ impl BoardUI {
         self.console.clear();
         self.console.message("Game restarted");
         self.game_ended_text.enable(false);
+        self.deck_ui_enabled = false;
+    }
+
+    pub fn enable_ui_deck(&mut self, show: bool) {
+        self.deck_ui_enabled = show;
     }
 
     pub fn send_message(&mut self, msg: &str) {
@@ -135,7 +142,8 @@ impl BoardUI {
         for i in 0..consts::CARDS_IN_DECK as usize {
             let card = players[&PlayerNumer::First].deck.cards[i];
             let can_afford = card.can_aford(&players[&PlayerNumer::First].resources);
-            self.card_displayers[i].update_info(&card, can_afford);
+            let can_use = self.deck_ui_enabled && can_afford;
+            self.card_displayers[i].update_info(&card, can_use);
         }
         self.player_info_left
             .update_info(&players[&PlayerNumer::First]);

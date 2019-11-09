@@ -49,6 +49,7 @@ impl MyGame {
         self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
         self.game_ended = false;
         self.ui.reset_game();
+        self.ui.enable_ui_deck(self.is_human_playing());
     }
 
     pub fn other_player(&self) -> PlayerNumer {
@@ -105,6 +106,7 @@ impl MyGame {
             .get_mut(&self.active_player)
             .unwrap()
             .start_new_turn();
+        self.ui.enable_ui_deck(self.is_human_playing());
         self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
     }
 

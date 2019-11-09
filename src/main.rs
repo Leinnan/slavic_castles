@@ -57,7 +57,7 @@ fn main() -> good_web_game::GameResult {
             ..Default::default()
         },
         |mut context| {
-            let state = MyGame::new(&mut context).unwrap();;
+            let state = MyGame::new(&mut context).unwrap();
             event::run(context, state)
         },
     )
