@@ -20,6 +20,7 @@ pub struct BoardUI {
     active_player: PlayerNumer,
     font: graphics::Font,
     help_enabled: bool,
+    deck_text_enabled: bool,
     game_ended: bool,
 }
 
@@ -41,20 +42,21 @@ impl BoardUI {
             ctx,
         )?;
         let mut card_displayers = Vec::new();
-        for i in 0..4 {
+        for i in 0..consts::CARDS_IN_DECK as usize {
             let card_displayer = CardDisplayer::new(ctx)?;
             card_displayers.push(card_displayer);
         }
 
         let result = BoardUI {
-            console: Console::new(),
+            console: Console::new(ctx)?,
             game_ended_text: GameEndedText::new(),
             player_info_left: player_info_left,
             player_info_right: player_info_right,
             card_displayers: card_displayers,
             active_player: PlayerNumer::First,
             font,
-            help_enabled: true,
+            help_enabled: false,
+            deck_text_enabled: false,
             game_ended: false,
         };
         Ok(result)
@@ -115,6 +117,9 @@ impl BoardUI {
         if keycode == KeyCode::H {
             self.help_enabled = !self.help_enabled;
         }
+        if keycode == KeyCode::N {
+            self.deck_text_enabled = !self.deck_text_enabled;
+        }
 
         if keycode == KeyCode::M {
             self.console.switch_visibility();
@@ -127,7 +132,7 @@ impl BoardUI {
         players: &HashMap<PlayerNumer, Player>,
         active_player: PlayerNumer,
     ) {
-        for i in 0..4 {
+        for i in 0..consts::CARDS_IN_DECK as usize {
             let card = players[&PlayerNumer::First].deck.cards[i];
             let can_afford = card.can_aford(&players[&PlayerNumer::First].resources);
             self.card_displayers[i].update_info(&card, can_afford);
@@ -146,7 +151,7 @@ impl BoardUI {
             self.draw_help(ctx, Point2::new(10.0, h as f32 - 260.0));
         }
 
-        if !self.game_ended {
+        if self.deck_text_enabled {
             self.draw_deck_text(
                 ctx,
                 &players[&PlayerNumer::First],
@@ -159,7 +164,10 @@ impl BoardUI {
                 true,
                 PlayerNumer::Second == self.active_player,
             );
-            for i in 0..4 {
+        }
+
+        if !self.game_ended {
+            for i in 0..consts::CARDS_IN_DECK as usize {
                 self.card_displayers[i].draw(
                     ctx,
                     self.font,

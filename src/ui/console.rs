@@ -1,22 +1,26 @@
 use crate::consts;
-use ggez::{graphics, Context};
+use ggez::{graphics, Context, GameResult};
 use std::collections::VecDeque;
 
 type Point2 = ggez::nalgebra::Point2<f32>;
 
 pub struct Console {
+    empty_bg: graphics::Image,
     infos: VecDeque<String>,
     visible: bool,
 }
 
 impl Console {
-    pub fn new() -> Console {
+    pub fn new(ctx: &mut Context) -> GameResult<Console> {
         let infos = VecDeque::with_capacity(10);
+        let empty_bg = graphics::Image::new(ctx, "/empty.png")?;
 
-        Console {
+        let result = Console {
+            empty_bg,
             infos,
-            visible: true,
-        }
+            visible: false,
+        };
+        Ok(result)
     }
 
     pub fn switch_visibility(&mut self) {
@@ -40,10 +44,18 @@ impl Console {
         }
         let (w, h) = graphics::drawable_size(ctx);
         let size_and_pos = Point2::new(w as f32 / 2.0 - 10.0, h as f32 / 2.0 - 10.0);
+        graphics::draw(
+            ctx,
+            &self.empty_bg,
+            graphics::DrawParam::default()
+                .dest(size_and_pos)
+                .scale([w as f32 / 2.0 - 10.0, h as f32 / 2.0 - 10.0])
+                .color((0.0, 0.0, 0.0, 0.4).into()),
+        );
 
         let drawparams = graphics::DrawParam::default()
-            .dest(size_and_pos)
-            .color(consts::FONT_COLOR.into())
+            .dest(Point2::new(w as f32 / 2.0,h as f32 / 2.0))
+            .color(consts::FONT_WHITE_COLOR.into())
             .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
 
         let mut result = String::from("Info:\n");

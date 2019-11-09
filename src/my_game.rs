@@ -187,6 +187,10 @@ impl event::EventHandler for MyGame {
             let card = self.players[&self.active_player].deck.cards[3];
             self.try_use_card(&card, 3, shift_pressed);
         }
+        if keycode == KeyCode::Key5 {
+            let card = self.players[&self.active_player].deck.cards[4];
+            self.try_use_card(&card, 3, shift_pressed);
+        }
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
