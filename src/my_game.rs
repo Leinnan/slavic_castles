@@ -3,7 +3,7 @@ use crate::consts;
 use crate::player::*;
 use crate::ui::board_ui::BoardUI;
 use ggez::event;
-use ggez::event::{KeyCode, KeyMods};
+use ggez::event::{KeyCode, KeyMods, MouseButton};
 use ggez::timer;
 use ggez::{graphics, Context, GameResult};
 use std::collections::HashMap;
@@ -158,6 +158,12 @@ impl event::EventHandler for MyGame {
         }
 
         Ok(())
+    }
+
+    fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, x: f32, y: f32) {
+        if button == MouseButton::Left {
+            println!("Mouse on pos {0}x{1}", x, y);
+        }
     }
 
     fn key_up_event(&mut self, _ctx: &mut Context, keycode: KeyCode, keymod: KeyMods) {

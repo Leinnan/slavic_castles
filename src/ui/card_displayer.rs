@@ -15,6 +15,8 @@ pub struct CardDisplayer {
     description: String,
     can_afford: bool,
     ready: bool,
+    pos_x: f32,
+    pos_y: f32,
 }
 
 impl CardDisplayer {
@@ -30,8 +32,15 @@ impl CardDisplayer {
             description: "".to_string(),
             can_afford: false,
             ready: false,
+            pos_x: 0.0,
+            pos_y: 0.0,
         };
         Ok(result)
+    }
+
+    pub fn set_pos(&mut self, x: f32, y: f32) {
+        self.pos_x = x;
+        self.pos_y = y;
     }
 
     pub fn update_info(&mut self, card: &Card, can_afford: bool) {
@@ -73,7 +82,7 @@ impl CardDisplayer {
         self.ready = true;
     }
 
-    pub fn draw(&self, ctx: &mut Context, font: graphics::Font, x: f32, y: f32) {
+    pub fn draw(&self, ctx: &mut Context, font: graphics::Font) {
         if !self.ready {
             return;
         }
@@ -86,13 +95,13 @@ impl CardDisplayer {
             ctx,
             &self.bg,
             graphics::DrawParam::default()
-                .dest(Point2::new(x, y))
+                .dest(Point2::new(self.pos_x,self.pos_y))
                 .color(self.color),
         );
         graphics::draw(
             ctx,
             &self.front,
-            graphics::DrawParam::default().dest(Point2::new(x, y)),
+            graphics::DrawParam::default().dest(Point2::new(self.pos_x,self.pos_y)),
         );
 
         let cost_text = graphics::Text::new((format!("{}", self.cost), font, consts::TEXT_SIZE));
@@ -100,7 +109,7 @@ impl CardDisplayer {
             ctx,
             &cost_text,
             graphics::DrawParam::default()
-                .dest(Point2::new(x + 26.0, y + 18.0))
+                .dest(Point2::new(self.pos_x + 26.0, self.pos_y + 18.0))
                 .color(txt_color)
                 .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]),
         );
@@ -111,7 +120,7 @@ impl CardDisplayer {
             ctx,
             &description_text,
             graphics::DrawParam::default()
-                .dest(Point2::new(x + 27.0, y + 170.0))
+                .dest(Point2::new(self.pos_x + 27.0, self.pos_y + 170.0))
                 .color(txt_color)
                 .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]),
         );

@@ -42,9 +42,13 @@ impl BoardUI {
             true,
             ctx,
         )?;
+        let (_, h) = graphics::drawable_size(ctx);
         let mut card_displayers = Vec::new();
         for i in 0..consts::CARDS_IN_DECK as usize {
-            let card_displayer = CardDisplayer::new(ctx)?;
+            let mut card_displayer = CardDisplayer::new(ctx)?;
+            card_displayer.set_pos(
+                    10.0 + i as f32 * consts::CARD_SIZE_X,
+                    h as f32 - consts::CARD_SIZE_Y);
             card_displayers.push(card_displayer);
         }
 
@@ -179,8 +183,6 @@ impl BoardUI {
                 self.card_displayers[i].draw(
                     ctx,
                     self.font,
-                    10.0 + i as f32 * 232.0,
-                    h as f32 - 350.0,
                 );
             }
             self.console.draw(ctx, self.font);

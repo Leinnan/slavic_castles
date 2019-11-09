@@ -34,3 +34,6 @@ pub const TEXT_SIZE: f32 = 26.0;
 pub const FONT_WIDTH: f32 = 4.4;
 #[cfg(not(target_arch = "wasm32"))]
 pub const FONT_WIDTH: f32 = 5.3;
+
+pub const CARD_SIZE_X: f32 = 234.0;
+pub const CARD_SIZE_Y: f32 = 320.0;
