@@ -24,6 +24,7 @@ pub struct BoardUI {
     deck_ui_enabled: bool,
     game_ended: bool,
     screen_height: f32,
+    screen_width: f32,
 }
 
 impl BoardUI {
@@ -43,12 +44,13 @@ impl BoardUI {
             true,
             ctx,
         )?;
-        let (_, h) = graphics::drawable_size(ctx);
+        let (w, h) = graphics::drawable_size(ctx);
         let mut card_displayers = Vec::new();
+        let base_x_pos = (w as f32 - consts::CARDS_IN_DECK as f32 * consts::CARD_SIZE_X ) / 2.0;
         for i in 0..consts::CARDS_IN_DECK as usize {
             let mut card_displayer = CardDisplayer::new(ctx)?;
             card_displayer.set_pos(
-                10.0 + i as f32 * consts::CARD_SIZE_X,
+                base_x_pos + i as f32 * consts::CARD_SIZE_X,
                 h as f32 - consts::CARD_SIZE_Y,
             );
             card_displayers.push(card_displayer);
@@ -67,6 +69,7 @@ impl BoardUI {
             deck_ui_enabled: true,
             game_ended: false,
             screen_height: h as f32,
+            screen_width: w as f32,
         };
         Ok(result)
     }
@@ -80,13 +83,14 @@ impl BoardUI {
 
     pub fn enable_ui_deck(&mut self, show: bool) {
         self.deck_ui_enabled = show;
+        let base_x_pos = (self.screen_width - consts::CARDS_IN_DECK as f32 * consts::CARD_SIZE_X ) / 2.0;
         let y_pos = if show {
             self.screen_height as f32 - consts::CARD_SIZE_Y
         } else {
             self.screen_height as f32 - consts::CARD_SIZE_Y + 100.0
         };
         for i in 0..consts::CARDS_IN_DECK as usize {
-            self.card_displayers[i].set_pos(10.0 + i as f32 * consts::CARD_SIZE_X, y_pos);
+            self.card_displayers[i].set_pos(base_x_pos + i as f32 * consts::CARD_SIZE_X, y_pos);
         }
     }
 
