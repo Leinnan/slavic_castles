@@ -47,8 +47,9 @@ impl BoardUI {
         for i in 0..consts::CARDS_IN_DECK as usize {
             let mut card_displayer = CardDisplayer::new(ctx)?;
             card_displayer.set_pos(
-                    10.0 + i as f32 * consts::CARD_SIZE_X,
-                    h as f32 - consts::CARD_SIZE_Y);
+                10.0 + i as f32 * consts::CARD_SIZE_X,
+                h as f32 - consts::CARD_SIZE_Y,
+            );
             card_displayers.push(card_displayer);
         }
 
@@ -112,6 +113,15 @@ impl BoardUI {
             .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
 
         graphics::draw(ctx, &text, drawparams);
+    }
+
+    pub fn card_index_on_pos(&mut self, x: f32, y: f32) -> Option<usize> {
+        for i in 0..self.card_displayers.len() {
+            if self.card_displayers[i].is_pos_over(x, y) {
+                return Some(i);
+            }
+        }
+        None
     }
 
     pub fn draw_help(&self, ctx: &mut Context, pos: Point2) {
@@ -180,10 +190,7 @@ impl BoardUI {
 
         if !self.game_ended {
             for i in 0..consts::CARDS_IN_DECK as usize {
-                self.card_displayers[i].draw(
-                    ctx,
-                    self.font,
-                );
+                self.card_displayers[i].draw(ctx, self.font);
             }
             self.console.draw(ctx, self.font);
         } else {

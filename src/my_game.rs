@@ -161,7 +161,18 @@ impl event::EventHandler for MyGame {
     }
 
     fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, x: f32, y: f32) {
-        if button == MouseButton::Left {
+        println!("Mouse on pos {0}x{1}", x, y);
+        let i = self.ui.card_index_on_pos(x, y);
+        if i.is_some() {
+            let card = self.players[&self.active_player].deck.cards[i.unwrap()];
+            println!(
+                "Card nr {2} clicked, mouse on pos {0}x{1}",
+                x,
+                y,
+                i.unwrap()
+            );
+            self.try_use_card(&card, i.unwrap() as i32, button != MouseButton::Left);
+        } else {
             println!("Mouse on pos {0}x{1}", x, y);
         }
     }

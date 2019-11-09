@@ -43,6 +43,15 @@ impl CardDisplayer {
         self.pos_y = y;
     }
 
+    pub fn is_pos_over(&self, x: f32, y: f32) -> bool {
+        let start_x = self.pos_x + 10.0;
+        let end_x = self.pos_x + consts::CARD_SIZE_X - 10.0 * 2.0;
+        let start_y = self.pos_y + 10.0;
+        let end_y = self.pos_y + consts::CARD_SIZE_Y - 10.0 * 2.0;
+
+        x >= start_x && x <= end_x && y >= start_y && y <= end_y
+    }
+
     pub fn update_info(&mut self, card: &Card, can_afford: bool) {
         self.cost = card.cost_amount;
         self.can_afford = can_afford;
@@ -95,13 +104,13 @@ impl CardDisplayer {
             ctx,
             &self.bg,
             graphics::DrawParam::default()
-                .dest(Point2::new(self.pos_x,self.pos_y))
+                .dest(Point2::new(self.pos_x, self.pos_y))
                 .color(self.color),
         );
         graphics::draw(
             ctx,
             &self.front,
-            graphics::DrawParam::default().dest(Point2::new(self.pos_x,self.pos_y)),
+            graphics::DrawParam::default().dest(Point2::new(self.pos_x, self.pos_y)),
         );
 
         let cost_text = graphics::Text::new((format!("{}", self.cost), font, consts::TEXT_SIZE));
