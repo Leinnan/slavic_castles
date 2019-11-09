@@ -1,8 +1,9 @@
 use crate::resource::*;
 use std::collections::HashMap;
 use std::fmt;
+use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct Card {
     pub id: i32,
     pub cost_resource: ResourceType,

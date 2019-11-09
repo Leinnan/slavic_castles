@@ -5,8 +5,11 @@ use crate::ui::board_ui::BoardUI;
 use ggez::event;
 use ggez::event::{KeyCode, KeyMods, MouseButton};
 use ggez::timer;
-use ggez::{graphics, Context, GameResult};
+use ggez::{graphics,filesystem, Context, GameResult};
 use std::collections::HashMap;
+use std::path;
+use std::str;
+use std::io::{Read, Write};
 
 pub struct MyGame {
     players: HashMap<PlayerNumer, Player>,
@@ -18,9 +21,15 @@ pub struct MyGame {
 
 impl MyGame {
     pub fn new(ctx: &mut Context) -> GameResult<MyGame> {
+        let deck_path = path::Path::new("/deck.json");
+        let mut buffer = Vec::new();
+        let mut file = filesystem::open(ctx, deck_path)?;
+        file.read_to_end(&mut buffer)?;
+        let deck_json = str::from_utf8(&buffer).unwrap();
+
         let mut players = HashMap::new();
-        players.insert(PlayerNumer::First, Player::new(true, true));
-        players.insert(PlayerNumer::Second, Player::new(false, false));
+        players.insert(PlayerNumer::First, Player::new(true, true, deck_json));
+        players.insert(PlayerNumer::Second, Player::new(false, false, deck_json));
         let ui = BoardUI::new(ctx)?;
 
         let game = MyGame {
