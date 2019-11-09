@@ -66,7 +66,7 @@ impl BoardUI {
             deck_text_enabled: false,
             deck_ui_enabled: true,
             game_ended: false,
-            screen_height: h,
+            screen_height: h as f32,
         };
         Ok(result)
     }

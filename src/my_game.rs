@@ -164,6 +164,11 @@ impl event::EventHandler for MyGame {
         if button != MouseButton::Left && button != MouseButton::Right {
             return;
         }
+
+        if !self.is_human_playing() || self.is_game_ended() || !self.can_active_player_move() {
+            return;
+        }
+        
         let i = self.ui.card_index_on_pos(x, y);
         if i.is_some() {
             let card = self.players[&self.active_player].deck.cards[i.unwrap()];
