@@ -133,17 +133,36 @@ impl Deck {
 
     pub fn replace_card(&mut self, card_nr: i32) {
         let mut rng = thread_rng();
-        let i = rng.gen_range(0, self.cards_collections.len());
-        self.cards[card_nr as usize] = self.cards_collections[i];
+        loop {
+            let i = rng.gen_range(0, self.cards_collections.len());
+            if self.cards_collections[i].id != self.cards[card_nr as usize].id {
+                self.cards[card_nr as usize] = self.cards_collections[i];
+                break;
+            }
+        }
     }
 
     pub fn fill_deck(&mut self) {
         self.cards = Vec::new();
         let mut rng = thread_rng();
+        let max_cost_amount = BASE_RESOURCE_AMOUNT * 120 / 100;
         for _x in 0..CARDS_IN_DECK {
+            let mut finded = false;
+
             let i = rng.gen_range(0, self.cards_collections.len());
             let card = self.cards_collections[i];
-            self.cards.push(card);
+            for attempt in 0..9 {
+                let card_already_in_deck =
+                    attempt > 5 || self.cards.iter().any(|&c| c.id == card.id);
+                if card.cost_amount <= max_cost_amount && !card_already_in_deck {
+                    self.cards.push(card);
+                    finded = true;
+                    break;
+                }
+            }
+            if !finded {
+                self.cards.push(card);
+            }
         }
     }
 }
@@ -152,8 +171,8 @@ impl fmt::Display for Deck {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "Deck: \n {0},\n {1},\n {2},\n {3}",
-            self.cards[0], self.cards[1], self.cards[2], self.cards[3],
+            "Deck: \n {0},\n {1},\n {2},\n {3},\n {4}",
+            self.cards[0], self.cards[1], self.cards[2], self.cards[3], self.cards[4],
         )
     }
 }

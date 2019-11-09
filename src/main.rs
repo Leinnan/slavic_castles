@@ -34,7 +34,7 @@ fn main() -> ggez::GameResult {
         max_width: 0.0,
         min_height: 0.0,
         max_height: 0.0,
-        resizable: false,
+        resizable: true,
     };
     // Make a Context.
     let cb = ggez::ContextBuilder::new("my_game", "Cool Game Author")
@@ -57,7 +57,7 @@ fn main() -> good_web_game::GameResult {
             ..Default::default()
         },
         |mut context| {
-            let state = MyGame::new(&mut context).unwrap();;
+            let state = MyGame::new(&mut context).unwrap();
             event::run(context, state)
         },
     )

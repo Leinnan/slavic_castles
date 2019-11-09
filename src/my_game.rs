@@ -3,8 +3,7 @@ use crate::consts;
 use crate::player::*;
 use crate::ui::board_ui::BoardUI;
 use ggez::event;
-use ggez::event::{KeyCode, KeyMods};
-use ggez::nalgebra as na;
+use ggez::event::{KeyCode, KeyMods, MouseButton};
 use ggez::timer;
 use ggez::{graphics, Context, GameResult};
 use std::collections::HashMap;
@@ -50,6 +49,7 @@ impl MyGame {
         self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
         self.game_ended = false;
         self.ui.reset_game();
+        self.ui.enable_ui_deck(self.is_human_playing());
     }
 
     pub fn other_player(&self) -> PlayerNumer {
@@ -106,6 +106,7 @@ impl MyGame {
             .get_mut(&self.active_player)
             .unwrap()
             .start_new_turn();
+        self.ui.enable_ui_deck(self.is_human_playing());
         self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
     }
 
@@ -159,6 +160,22 @@ impl event::EventHandler for MyGame {
         Ok(())
     }
 
+    fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, x: f32, y: f32) {
+        if button != MouseButton::Left && button != MouseButton::Right {
+            return;
+        }
+
+        if !self.is_human_playing() || self.is_game_ended() || !self.can_active_player_move() {
+            return;
+        }
+        
+        let i = self.ui.card_index_on_pos(x, y);
+        if i.is_some() {
+            let card = self.players[&self.active_player].deck.cards[i.unwrap()];
+            self.try_use_card(&card, i.unwrap() as i32, button == MouseButton::Right);
+        }
+    }
+
     fn key_up_event(&mut self, _ctx: &mut Context, keycode: KeyCode, keymod: KeyMods) {
         self.ui.key_up_event(_ctx, keycode, keymod);
 
@@ -186,6 +203,10 @@ impl event::EventHandler for MyGame {
         }
         if keycode == KeyCode::Key4 {
             let card = self.players[&self.active_player].deck.cards[3];
+            self.try_use_card(&card, 3, shift_pressed);
+        }
+        if keycode == KeyCode::Key5 {
+            let card = self.players[&self.active_player].deck.cards[4];
             self.try_use_card(&card, 3, shift_pressed);
         }
     }
