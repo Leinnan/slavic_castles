@@ -4,6 +4,7 @@ use crate::ui::card_displayer::CardDisplayer;
 use crate::ui::console::Console;
 use crate::ui::game_ended_text::GameEndedText;
 use crate::ui::player_info::PlayerInfo;
+use crate::ui::help_displayer::HelpDisplayer;
 use ggez::event::{KeyCode, KeyMods};
 use ggez::nalgebra as na;
 use ggez::{graphics, Context, GameResult};
@@ -18,8 +19,8 @@ pub struct BoardUI {
     player_info_right: PlayerInfo,
     card_displayers: Vec<CardDisplayer>,
     active_player: PlayerNumer,
+    help: HelpDisplayer,
     font: graphics::Font,
-    help_enabled: bool,
     deck_text_enabled: bool,
     deck_ui_enabled: bool,
     game_ended: bool,
@@ -64,7 +65,7 @@ impl BoardUI {
             card_displayers: card_displayers,
             active_player: PlayerNumer::First,
             font,
-            help_enabled: false,
+            help: HelpDisplayer::new(ctx)?,
             deck_text_enabled: false,
             deck_ui_enabled: true,
             game_ended: false,
@@ -79,6 +80,10 @@ impl BoardUI {
         self.console.message("Game restarted");
         self.game_ended_text.enable(false);
         self.deck_ui_enabled = false;
+    }
+
+    pub fn hide_help(&mut self) {
+        self.help.hide();
     }
 
     pub fn enable_ui_deck(&mut self, show: bool) {
@@ -138,19 +143,9 @@ impl BoardUI {
         None
     }
 
-    pub fn draw_help(&self, ctx: &mut Context, pos: Point2) {
-        let drawparams = graphics::DrawParam::default()
-            .dest(pos)
-            .color(consts::FONT_COLOR.into())
-            .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
-        let text = graphics::Text::new((consts::HELP, self.font, consts::TEXT_SIZE));
-
-        graphics::draw(ctx, &text, drawparams);
-    }
-
     pub fn key_up_event(&mut self, _ctx: &mut Context, keycode: KeyCode, keymod: KeyMods) {
         if keycode == KeyCode::H {
-            self.help_enabled = !self.help_enabled;
+            self.help.switch_visibility();
         }
         if keycode == KeyCode::N {
             self.deck_text_enabled = !self.deck_text_enabled;
@@ -182,10 +177,7 @@ impl BoardUI {
 
     pub fn draw(&mut self, ctx: &mut Context, players: &HashMap<PlayerNumer, Player>) {
         let (_, h) = graphics::drawable_size(ctx);
-        if self.help_enabled {
-            self.draw_help(ctx, Point2::new(10.0, h as f32 - 260.0));
-        }
-
+        
         if self.deck_text_enabled {
             self.draw_deck_text(
                 ctx,
@@ -211,5 +203,6 @@ impl BoardUI {
         }
         self.player_info_left.draw(ctx, self.font);
         self.player_info_right.draw(ctx, self.font);
+        self.help.draw(ctx, self.font);
     }
 }

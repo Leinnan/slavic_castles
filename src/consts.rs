@@ -7,7 +7,7 @@ pub const MAX_WALLS_HP: i32 = 50;
 pub const CARDS_IN_DECK: i32 = 5;
 pub const DELAY_BETWEEN_MOVES: f64 = 0.3;
 // texts
-pub const HELP: &str = "______________\nHelp\n 1-4 use card\n Use with Shift to discard card\n M- show console\n R- restart game\n H- show this info\n______________";
+pub const HELP_TEXT: &str = "Help\n Get 100 life or destroy opponent to win\n Left mouse button- use card\n Right mouse button- discard card\n R- restart game\n H- show this info";
 // UI
 pub const FONT_COLOR: (f32, f32, f32, f32) = (29.0 / 255.0, 53.0 / 255.0, 87.0 / 255.0, 1.0);
 pub const FONT_WHITE_COLOR: (f32, f32, f32, f32) = (0.95, 0.95, 0.95, 1.0);

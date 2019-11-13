@@ -22,6 +22,7 @@ pub struct CardDisplayer {
 impl CardDisplayer {
     pub fn new(ctx: &mut Context) -> GameResult<CardDisplayer> {
         let bg = graphics::Image::new(ctx, "/card_bg.png")?;
+        
         let front = graphics::Image::new(ctx, "/card_front.png")?;
 
         let result = CardDisplayer {

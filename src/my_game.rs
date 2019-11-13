@@ -177,6 +177,8 @@ impl event::EventHandler for MyGame {
         if !self.is_human_playing() || self.is_game_ended() || !self.can_active_player_move() {
             return;
         }
+
+        self.ui.hide_help();
         
         let i = self.ui.card_index_on_pos(x, y);
         if i.is_some() {
