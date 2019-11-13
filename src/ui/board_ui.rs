@@ -29,7 +29,7 @@ pub struct BoardUI {
 }
 
 impl BoardUI {
-    pub fn new(ctx: &mut Context) -> GameResult<BoardUI> {
+    pub fn new() -> GameResult<BoardUI> {
         let font = graphics::Font::new(ctx, "/coolvetica.ttf")?;
         let player_info_left = PlayerInfo::new(
             "Human".to_string(),

@@ -2,10 +2,13 @@ use crate::card::Card;
 use crate::consts;
 use crate::player::*;
 use crate::ui::board_ui::BoardUI;
-use ggez::event;
-use ggez::event::{KeyCode, KeyMods, MouseButton};
-use ggez::timer;
-use ggez::{graphics,filesystem, Context, GameResult};
+use quicksilver::{
+    Result,
+    geom::{Circle, Line, Rectangle, Transform, Triangle, Vector},
+    graphics::{Background::Col, Color},
+    input::{ButtonState, MouseButton, Key},
+    lifecycle::{Settings, State, Window, run},
+};
 use std::collections::HashMap;
 use std::path;
 use std::str;
@@ -20,28 +23,6 @@ pub struct MyGame {
 }
 
 impl MyGame {
-    pub fn new(ctx: &mut Context) -> GameResult<MyGame> {
-        let deck_path = path::Path::new("/deck.json");
-        let mut buffer = Vec::new();
-        let mut file = filesystem::open(ctx, deck_path)?;
-        file.read_to_end(&mut buffer)?;
-        let deck_json = str::from_utf8(&buffer).unwrap();
-
-        let mut players = HashMap::new();
-        players.insert(PlayerNumer::First, Player::new(true, true, deck_json));
-        players.insert(PlayerNumer::Second, Player::new(false, false, deck_json));
-        let ui = BoardUI::new(ctx)?;
-
-        let game = MyGame {
-            players,
-            active_player: PlayerNumer::First,
-            time_before_next_move: 0.0,
-            game_ended: false,
-            ui: ui,
-        };
-        Ok(game)
-    }
-
     pub fn is_game_ended(&self) -> bool {
         self.game_ended
     }
@@ -144,17 +125,64 @@ impl MyGame {
             self.switch_player();
         }
     }
+
+    fn handle_mouse_input(&mut self, window: &mut Window) {
+        let lmb_pressed = window.mouse()[MouseButton::Left] == ButtonState::Pressed;
+        let rmb_pressed = window.mouse()[MouseButton::Left] == ButtonState::Pressed;
+        let mouse_pos = window.mouse().pos();
+        if !lmb_pressed && !rmb_pressed {
+            return;
+        }
+
+        if !self.is_human_playing() || self.is_game_ended() || !self.can_active_player_move() {
+            return;
+        }
+
+        self.ui.hide_help();
+        
+        let i = self.ui.card_index_on_pos(mouse_pos.x,mouse_pos.y);
+        if i.is_some() {
+            let card = self.players[&self.active_player].deck.cards[i.unwrap()];
+            self.try_use_card(&card, i.unwrap() as i32, rmb_pressed);
+        }
+    }
+
+    fn handle_keyboard(&mut self, window: &mut Window) {
+        //self.ui.key_up_event(_ctx, keycode, keymod);
+
+        let shift_pressed = window.keyboard()[Key::LShift] == ButtonState::Pressed;
+
+        if window.keyboard()[Key::R] == ButtonState::Pressed {
+            self.reset_game(shift_pressed);
+        }
+    }
 }
 
-impl event::EventHandler for MyGame {
-    fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
-        self.ui
-            .update(self.is_game_ended(), &self.players, self.active_player);
+impl State for MyGame {
+    fn new() -> Result<Self> {
+
+        let mut players = HashMap::new();
+        players.insert(PlayerNumer::First, Player::new(true, true));
+        players.insert(PlayerNumer::Second, Player::new(false, false));
+        let ui = BoardUI::new()?;
+
+        let game = MyGame {
+            players,
+            active_player: PlayerNumer::First,
+            time_before_next_move: 0.0,
+            game_ended: false,
+            ui: ui,
+        };
+        Ok(game)
+    }
+
+    fn update(&mut self, window: &mut Window) -> Result<()> {
+        self.ui.update(self.is_game_ended(), &self.players, self.active_player);
         if self.is_game_ended() {
             return Ok(());
         }
         if !self.can_active_player_move() {
-            self.time_before_next_move -= timer::duration_to_f64(timer::delta(ctx));
+            self.time_before_next_move -= 1.0 / 60.0;
             return Ok(());
         }
 
@@ -168,63 +196,9 @@ impl event::EventHandler for MyGame {
 
         Ok(())
     }
-
-    fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, x: f32, y: f32) {
-        if button != MouseButton::Left && button != MouseButton::Right {
-            return;
-        }
-
-        if !self.is_human_playing() || self.is_game_ended() || !self.can_active_player_move() {
-            return;
-        }
-
-        self.ui.hide_help();
-        
-        let i = self.ui.card_index_on_pos(x, y);
-        if i.is_some() {
-            let card = self.players[&self.active_player].deck.cards[i.unwrap()];
-            self.try_use_card(&card, i.unwrap() as i32, button == MouseButton::Right);
-        }
-    }
-
-    fn key_up_event(&mut self, _ctx: &mut Context, keycode: KeyCode, keymod: KeyMods) {
-        self.ui.key_up_event(_ctx, keycode, keymod);
-
-        let shift_pressed = keymod.contains(KeyMods::SHIFT);
-
-        if keycode == KeyCode::R {
-            self.reset_game(shift_pressed);
-        }
-
-        if !self.is_human_playing() || self.is_game_ended() || !self.can_active_player_move() {
-            return;
-        }
-
-        if keycode == KeyCode::Key1 {
-            let card = self.players[&self.active_player].deck.cards[0];
-            self.try_use_card(&card, 0, shift_pressed);
-        }
-        if keycode == KeyCode::Key2 {
-            let card = self.players[&self.active_player].deck.cards[1];
-            self.try_use_card(&card, 1, shift_pressed);
-        }
-        if keycode == KeyCode::Key3 {
-            let card = self.players[&self.active_player].deck.cards[2];
-            self.try_use_card(&card, 2, shift_pressed);
-        }
-        if keycode == KeyCode::Key4 {
-            let card = self.players[&self.active_player].deck.cards[3];
-            self.try_use_card(&card, 3, shift_pressed);
-        }
-        if keycode == KeyCode::Key5 {
-            let card = self.players[&self.active_player].deck.cards[4];
-            self.try_use_card(&card, 3, shift_pressed);
-        }
-    }
-
-    fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        graphics::clear(ctx, consts::BG_COLOR.into());
-        self.ui.draw(ctx, &self.players);
-        graphics::present(ctx)
+    fn draw(&mut self, window: &mut Window) -> Result<()> {
+        window.clear(Color::WHITE)?;
+        //self.ui.draw(ctx, &self.players);
+        Ok(())
     }
 }

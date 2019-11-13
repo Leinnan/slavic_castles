@@ -21,7 +21,7 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new(active: bool, human: bool, deck_json: &str) -> Player {
+    pub fn new(active: bool, human: bool,) -> Player {
         let mut resources = HashMap::new();
         resources.insert(ResourceType::Tools, Resource::new());
         resources.insert(ResourceType::Magic, Resource::new());
@@ -31,7 +31,7 @@ impl Player {
             tower_hp: consts::BASE_TOWER_HP,
             walls_hp: consts::BASE_WALLS_HP,
             resources: resources,
-            deck: Deck::new(deck_json),
+            deck: Deck::new(),
             active: active,
         }
     }

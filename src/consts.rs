@@ -20,8 +20,8 @@ pub const TOOLS_COLOR: (f32, f32, f32, f32) = (140.0 / 255.0, 193.0 / 255.0, 1.0
 pub const MAGIC_COLOR: (f32, f32, f32, f32) = (118.0 / 255.0, 206.0 / 255.0, 113.0 / 255.0, 1.0);
 pub const SOLDIERS_COLOR: (f32, f32, f32, f32) = (206.0 / 255.0, 55.0 / 255.0, 75.0 / 255.0, 1.0);
 
-pub const SCREEN_WIDTH: f32 = 1280.0;
-pub const SCREEN_HEIGHT: f32 = 720.0;
+pub const SCREEN_WIDTH: i32 = 1280;
+pub const SCREEN_HEIGHT: i32 = 720;
 #[cfg(target_arch = "wasm32")]
 pub const TEXT_SCALE: f32 = 1.7;
 #[cfg(not(target_arch = "wasm32"))]
