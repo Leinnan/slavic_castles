@@ -174,34 +174,39 @@ impl BoardUI {
     pub fn draw(
         &mut self,
         window: &mut Window,
-        players: &HashMap<PlayerNumer, Player>,
     ) -> Result<()> {
-        // if self.deck_text_enabled {
-        //     self.draw_deck_text(
-        //         ctx,
-        //         &players[&PlayerNumer::First],
-        //         false,
-        //         PlayerNumer::First == self.active_player,
-        //     );
-        //     self.draw_deck_text(
-        //         ctx,
-        //         &players[&PlayerNumer::Second],
-        //         true,
-        //         PlayerNumer::Second == self.active_player,
-        //     );
-        // }
-
+        let mut is_ok;
         if !self.game_ended {
             for i in 0..consts::CARDS_IN_DECK as usize {
-                self.card_displayers[i].draw(window);
+                is_ok = self.card_displayers[i].draw(window);
+                if !is_ok.is_ok()
+                {
+                    return is_ok;
+                }
             }
-            self.console.draw(window);
         } else {
-            // self.game_ended_text.draw(ctx, self.font);
+            is_ok = self.game_ended_text.draw(window);
+            if !is_ok.is_ok()
+            {
+                return is_ok;
+            }
         }
-        self.player_info_left.draw(window);
-        self.player_info_right.draw(window);
-        self.help.draw(window);
-        Ok(())
+        is_ok = self.player_info_left.draw(window);
+        if !is_ok.is_ok()
+        {
+            return is_ok;
+        }
+        is_ok = self.player_info_right.draw(window);
+        if !is_ok.is_ok()
+        {
+            return is_ok;
+        }
+        is_ok = self.help.draw(window);
+        if !is_ok.is_ok()
+        {
+            return is_ok;
+        }
+        is_ok = self.console.draw(window);
+        is_ok
     }
 }

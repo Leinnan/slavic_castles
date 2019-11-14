@@ -48,8 +48,8 @@ pub const SOLDIERS_COLOR: Color = Color {
     a: 1.0,
 };
 
-pub const SCREEN_WIDTH: i32 = 1280;
-pub const SCREEN_HEIGHT: i32 = 720;
+pub const SCREEN_WIDTH: f32 = 1280.0;
+pub const SCREEN_HEIGHT: f32 = 720.0;
 pub const TEXT_SCALE: f32 = 1.0;
 pub const TEXT_SIZE: f32 = 26.0;
 pub const FONT_WIDTH: f32 = 5.3;

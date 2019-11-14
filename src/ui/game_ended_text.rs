@@ -11,6 +11,7 @@ use quicksilver::{
 type Point2 = nalgebra::Point2<f32>;
 
 pub struct GameEndedText {
+    font: Asset<Font>,
     player_name: String,
     enabled: bool,
 }
@@ -18,6 +19,7 @@ pub struct GameEndedText {
 impl GameEndedText {
     pub fn new() -> GameEndedText {
         GameEndedText {
+            font: Asset::new(Font::load("coolvetica.ttf")),
             player_name: "".to_string(),
             enabled: false,
         }
@@ -35,21 +37,19 @@ impl GameEndedText {
         if !self.enabled {
             return Ok(());
         }
-        // let (w, h) = graphics::drawable_size(ctx);
-        // let pos = Point2::new(w as f32 / 2.0 - 150.0, h as f32 / 2.0 - 26.0);
+        let center = Vector::new(consts::SCREEN_WIDTH / 2.0, consts::SCREEN_HEIGHT / 2.0);
 
-        // let drawparams = graphics::DrawParam::default()
-        //     .dest(pos)
-        //     .color(consts::FONT_COLOR.into())
-        //     .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
+        let text = format!("Game Ended, {} wins, press R to restart", self.player_name);
 
-        // let text = graphics::Text::new((
-        //     format!("Game Ended, {} wins, press R to restart", self.player_name),
-        //     font,
-        //     consts::TEXT_SIZE,
-        // ));
-
-        // graphics::draw(ctx, &text, drawparams);
+        self.font.execute(|f| {
+            let style = FontStyle::new(50.0, Color::WHITE);
+            let text = f.render(&text, &style)?;
+            window.draw(
+                &text.area().with_center(center),
+                Img(&text),
+            );
+            Ok(())
+        });
         Ok(())
     }
 }

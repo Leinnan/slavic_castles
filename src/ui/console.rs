@@ -12,8 +12,8 @@ use std::collections::VecDeque;
 type Point2 = nalgebra::Point2<f32>;
 
 const BG_AREA: Rectangle = Rectangle {
-    pos: Vector { x: 300.0, y: 400.0 },
-    size: Vector { x: 300.0, y: 300.0 },
+    pos: Vector { x: 0.0, y: 0.0 },
+    size: Vector { x: 400.0, y: 600.0 },
 };
 
 pub struct Console {
@@ -26,7 +26,7 @@ impl Console {
     pub fn new() -> Result<Console> {
         Ok(Console {
             infos: VecDeque::with_capacity(10),
-            visible: true,
+            visible: false,
             font: Asset::new(Font::load("coolvetica.ttf")),
         })
     }
@@ -50,9 +50,7 @@ impl Console {
         if !self.visible {
             return Ok(());
         }
-        let (w, h) = (1280, 720);
-        let size_and_pos = Point2::new(w as f32 / 2.0 - 10.0, h as f32 / 2.0 - 10.0);
-        // window.draw(&BG_AREA, Col(Color::BLUE));
+        window.draw(&BG_AREA, Col(Color::BLACK.with_alpha(0.4)));
 
         let mut result = String::from("Info:\n");
         for el in &self.infos {
