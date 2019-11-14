@@ -11,9 +11,13 @@ mod ui;
 use crate::my_game::MyGame;
 use quicksilver::{
     geom::Vector,
-    lifecycle::{Settings, run},
+    lifecycle::{run, Settings},
 };
 
 fn main() {
-    run::<MyGame>("Slavic castles!", Vector::new(consts::SCREEN_WIDTH,  consts::SCREEN_HEIGHT), Settings::default());
+    run::<MyGame>(
+        "Slavic castles!",
+        Vector::new(consts::SCREEN_WIDTH, consts::SCREEN_HEIGHT),
+        Settings::default(),
+    );
 }

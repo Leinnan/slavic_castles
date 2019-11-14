@@ -3,16 +3,16 @@ use crate::consts;
 use crate::player::*;
 use crate::ui::board_ui::BoardUI;
 use quicksilver::{
-    Result,
     geom::{Circle, Line, Rectangle, Transform, Triangle, Vector},
     graphics::{Background::Col, Color},
-    input::{ButtonState, MouseButton, Key},
-    lifecycle::{Settings, State, Window, run},
+    input::{ButtonState, Key, MouseButton},
+    lifecycle::{run, Settings, State, Window},
+    Result,
 };
 use std::collections::HashMap;
+use std::io::{Read, Write};
 use std::path;
 use std::str;
-use std::io::{Read, Write};
 
 pub struct MyGame {
     players: HashMap<PlayerNumer, Player>,
@@ -139,8 +139,8 @@ impl MyGame {
         }
 
         self.ui.hide_help();
-        
-        let i = self.ui.card_index_on_pos(mouse_pos.x,mouse_pos.y);
+
+        let i = self.ui.card_index_on_pos(mouse_pos.x, mouse_pos.y);
         if i.is_some() {
             let card = self.players[&self.active_player].deck.cards[i.unwrap()];
             self.try_use_card(&card, i.unwrap() as i32, rmb_pressed);
@@ -148,7 +148,7 @@ impl MyGame {
     }
 
     fn handle_keyboard(&mut self, window: &mut Window) {
-        //self.ui.key_up_event(_ctx, keycode, keymod);
+        self.ui.handle_keyboard(window);
 
         let shift_pressed = window.keyboard()[Key::LShift] == ButtonState::Pressed;
 
@@ -160,7 +160,6 @@ impl MyGame {
 
 impl State for MyGame {
     fn new() -> Result<Self> {
-
         let mut players = HashMap::new();
         players.insert(PlayerNumer::First, Player::new(true, true));
         players.insert(PlayerNumer::Second, Player::new(false, false));
@@ -177,6 +176,8 @@ impl State for MyGame {
     }
 
     fn update(&mut self, window: &mut Window) -> Result<()> {
+        self.handle_keyboard(window);
+        self.handle_mouse_input(window);
         self.ui.update(self.is_game_ended(), &self.players, self.active_player);
         if self.is_game_ended() {
             return Ok(());
@@ -198,7 +199,6 @@ impl State for MyGame {
     }
     fn draw(&mut self, window: &mut Window) -> Result<()> {
         window.clear(Color::WHITE)?;
-        //self.ui.draw(ctx, &self.players);
-        Ok(())
+        self.ui.draw(window, &self.players)
     }
 }

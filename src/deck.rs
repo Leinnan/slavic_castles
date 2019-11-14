@@ -2,10 +2,10 @@ use crate::card::Card;
 use crate::consts::*;
 use crate::resource::*;
 use rand::prelude::*;
+use serde::{Deserialize, Serialize};
+use serde_json;
 use std::collections::HashMap;
 use std::fmt;
-use serde::{Serialize, Deserialize};
-use serde_json;
 
 pub struct Deck {
     pub cards: Vec<Card>,
@@ -143,8 +143,7 @@ impl Deck {
             let i = rng.gen_range(0, self.cards_collections.len());
             card = self.cards_collections[i];
             let max_cost_amount = resources[&card.cost_resource].amount * 120 / 100;
-            let card_already_in_deck =
-                attempt > 5 || self.cards.iter().any(|&c| c.id == card.id);
+            let card_already_in_deck = attempt > 5 || self.cards.iter().any(|&c| c.id == card.id);
             if card.cost_amount <= max_cost_amount && !card_already_in_deck {
                 self.cards[card_nr as usize] = card;
                 finded = true;

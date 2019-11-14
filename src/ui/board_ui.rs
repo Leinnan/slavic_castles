@@ -3,14 +3,20 @@ use crate::player::*;
 use crate::ui::card_displayer::CardDisplayer;
 use crate::ui::console::Console;
 use crate::ui::game_ended_text::GameEndedText;
-use crate::ui::player_info::PlayerInfo;
 use crate::ui::help_displayer::HelpDisplayer;
-use ggez::event::{KeyCode, KeyMods};
-use ggez::nalgebra as na;
-use ggez::{graphics, Context, GameResult};
+use crate::ui::player_info::PlayerInfo;
+use quicksilver::{
+    Future, Result,
+    combinators::result,
+    geom::{Shape, Rectangle, Vector},
+    input::{ButtonState, Key, MouseButton},
+    graphics::{Background::Img, Background::Col, Color, Font, FontStyle, Image},
+    lifecycle::{Asset, Settings, State, Window, run},
+};
+use nalgebra;
 use std::collections::HashMap;
 
-type Point2 = na::Point2<f32>;
+type Point2 = nalgebra::Point2<f32>;
 
 pub struct BoardUI {
     console: Console,
@@ -20,7 +26,7 @@ pub struct BoardUI {
     card_displayers: Vec<CardDisplayer>,
     active_player: PlayerNumer,
     help: HelpDisplayer,
-    font: graphics::Font,
+    font: Asset<Font>,
     deck_text_enabled: bool,
     deck_ui_enabled: bool,
     game_ended: bool,
@@ -29,27 +35,25 @@ pub struct BoardUI {
 }
 
 impl BoardUI {
-    pub fn new() -> GameResult<BoardUI> {
-        let font = graphics::Font::new(ctx, "/coolvetica.ttf")?;
+    pub fn new() -> Result<BoardUI> {
+        // let font = graphics::Font::new(ctx, "/coolvetica.ttf")?;
         let player_info_left = PlayerInfo::new(
             "Human".to_string(),
             true,
             "/avatar.png".to_string(),
             false,
-            ctx,
         )?;
         let player_info_right = PlayerInfo::new(
             "Human".to_string(),
             false,
             "/avatar.png".to_string(),
             true,
-            ctx,
         )?;
-        let (w, h) = graphics::drawable_size(ctx);
+        let (w, h) = (1280, 720);
         let mut card_displayers = Vec::new();
-        let base_x_pos = (w as f32 - consts::CARDS_IN_DECK as f32 * consts::CARD_SIZE_X ) / 2.0;
+        let base_x_pos = (w as f32 - consts::CARDS_IN_DECK as f32 * consts::CARD_SIZE_X) / 2.0;
         for i in 0..consts::CARDS_IN_DECK as usize {
-            let mut card_displayer = CardDisplayer::new(ctx)?;
+            let mut card_displayer = CardDisplayer::new()?;
             card_displayer.set_pos(
                 base_x_pos + i as f32 * consts::CARD_SIZE_X,
                 h as f32 - consts::CARD_SIZE_Y,
@@ -58,14 +62,14 @@ impl BoardUI {
         }
 
         let result = BoardUI {
-            console: Console::new(ctx)?,
+            console: Console::new()?,
             game_ended_text: GameEndedText::new(),
             player_info_left: player_info_left,
             player_info_right: player_info_right,
             card_displayers: card_displayers,
             active_player: PlayerNumer::First,
-            font,
-            help: HelpDisplayer::new(ctx)?,
+            font: Asset::new(Font::load("coolvetica.ttf")),
+            help: HelpDisplayer::new()?,
             deck_text_enabled: false,
             deck_ui_enabled: true,
             game_ended: false,
@@ -88,7 +92,8 @@ impl BoardUI {
 
     pub fn enable_ui_deck(&mut self, show: bool) {
         self.deck_ui_enabled = show;
-        let base_x_pos = (self.screen_width - consts::CARDS_IN_DECK as f32 * consts::CARD_SIZE_X ) / 2.0;
+        let base_x_pos =
+            (self.screen_width - consts::CARDS_IN_DECK as f32 * consts::CARD_SIZE_X) / 2.0;
         let y_pos = if show {
             self.screen_height as f32 - consts::CARD_SIZE_Y
         } else {
@@ -108,30 +113,30 @@ impl BoardUI {
         self.game_ended_text.enable(true);
     }
 
-    fn draw_deck_text(&self, ctx: &mut Context, player: &Player, align_right: bool, active: bool) {
-        let color: graphics::Color = if active {
-            consts::ACTIVE_FONT_COLOR.into()
-        } else {
-            consts::FONT_COLOR.into()
-        };
+    fn draw_deck_text(&self, player: &Player, align_right: bool, active: bool) {
+        // let color: graphics::Color = if active {
+        //     consts::ACTIVE_FONT_COLOR.into()
+        // } else {
+        //     consts::FONT_COLOR.into()
+        // };
 
-        let text = graphics::Text::new((format!("{}", player.deck), self.font, consts::TEXT_SIZE));
+        // let text = graphics::Text::new((format!("{}", player.deck), self.font, consts::TEXT_SIZE));
 
-        let dest_point = if align_right {
-            let (w, _) = graphics::drawable_size(ctx);
-            let text_length =
-                player.to_string().chars().count() as f32 * consts::FONT_WIDTH * consts::TEXT_SCALE;
-            Point2::new(w as f32 - text_length - 10.0, 210.0)
-        } else {
-            Point2::new(10.0, 210.0)
-        };
+        // let dest_point = if align_right {
+        //     let (w, _) = graphics::drawable_size(ctx);
+        //     let text_length =
+        //         player.to_string().chars().count() as f32 * consts::FONT_WIDTH * consts::TEXT_SCALE;
+        //     Point2::new(w as f32 - text_length - 10.0, 210.0)
+        // } else {
+        //     Point2::new(10.0, 210.0)
+        // };
 
-        let drawparams = graphics::DrawParam::default()
-            .dest(dest_point)
-            .color(color)
-            .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
+        // let drawparams = graphics::DrawParam::default()
+        //     .dest(dest_point)
+        //     .color(color)
+        //     .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
 
-        graphics::draw(ctx, &text, drawparams);
+        // graphics::draw(ctx, &text, drawparams);
     }
 
     pub fn card_index_on_pos(&mut self, x: f32, y: f32) -> Option<usize> {
@@ -143,15 +148,15 @@ impl BoardUI {
         None
     }
 
-    pub fn key_up_event(&mut self, _ctx: &mut Context, keycode: KeyCode, keymod: KeyMods) {
-        if keycode == KeyCode::H {
+    pub fn handle_keyboard(&mut self, window: &mut Window) {
+        if window.keyboard()[Key::H] == ButtonState::Pressed {
             self.help.switch_visibility();
         }
-        if keycode == KeyCode::N {
+        if window.keyboard()[Key::N] == ButtonState::Pressed {
             self.deck_text_enabled = !self.deck_text_enabled;
         }
 
-        if keycode == KeyCode::M {
+        if window.keyboard()[Key::M] == ButtonState::Pressed {
             self.console.switch_visibility();
         }
     }
@@ -175,34 +180,34 @@ impl BoardUI {
         self.game_ended = game_ended;
     }
 
-    pub fn draw(&mut self, ctx: &mut Context, players: &HashMap<PlayerNumer, Player>) {
-        let (_, h) = graphics::drawable_size(ctx);
-        
-        if self.deck_text_enabled {
-            self.draw_deck_text(
-                ctx,
-                &players[&PlayerNumer::First],
-                false,
-                PlayerNumer::First == self.active_player,
-            );
-            self.draw_deck_text(
-                ctx,
-                &players[&PlayerNumer::Second],
-                true,
-                PlayerNumer::Second == self.active_player,
-            );
-        }
+    pub fn draw(&mut self, window: &mut Window, players: &HashMap<PlayerNumer, Player>) -> Result<()> {
+
+        // if self.deck_text_enabled {
+        //     self.draw_deck_text(
+        //         ctx,
+        //         &players[&PlayerNumer::First],
+        //         false,
+        //         PlayerNumer::First == self.active_player,
+        //     );
+        //     self.draw_deck_text(
+        //         ctx,
+        //         &players[&PlayerNumer::Second],
+        //         true,
+        //         PlayerNumer::Second == self.active_player,
+        //     );
+        // }
 
         if !self.game_ended {
             for i in 0..consts::CARDS_IN_DECK as usize {
-                self.card_displayers[i].draw(ctx, self.font);
+                self.card_displayers[i].draw(window);
             }
-            self.console.draw(ctx, self.font);
+            self.console.draw(window);
         } else {
-            self.game_ended_text.draw(ctx, self.font);
+            // self.game_ended_text.draw(ctx, self.font);
         }
-        self.player_info_left.draw(ctx, self.font);
-        self.player_info_right.draw(ctx, self.font);
-        self.help.draw(ctx, self.font);
+        self.player_info_left.draw(window);
+        self.player_info_right.draw(window);
+        // self.help.draw(ctx, self.font);
+        Ok(())
     }
 }

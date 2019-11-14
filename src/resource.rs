@@ -1,8 +1,8 @@
 use crate::consts;
-use std::fmt;
 use serde::{Deserialize, Serialize};
+use std::fmt;
 
-#[derive(PartialEq, Eq, Hash, Copy, Debug, Clone,Deserialize, Serialize)]
+#[derive(PartialEq, Eq, Hash, Copy, Debug, Clone, Deserialize, Serialize)]
 pub enum ResourceType {
     Tools,
     Magic,

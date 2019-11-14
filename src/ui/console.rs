@@ -1,26 +1,34 @@
 use crate::consts;
-use ggez::{graphics, Context, GameResult};
+use quicksilver::{
+    Future, Result,
+    combinators::result,
+    geom::{Shape, Rectangle, Vector},
+    graphics::{Background::Img, Background::Col, Color, Font, FontStyle, Image},
+    lifecycle::{Asset, Settings, State, Window, run},
+};
+use nalgebra;
 use std::collections::VecDeque;
 
-type Point2 = ggez::nalgebra::Point2<f32>;
+type Point2 = nalgebra::Point2<f32>;
+
+const BG_AREA: Rectangle = Rectangle {
+    pos:  Vector {x: 300.0, y: 400.0},
+    size: Vector {x: 300.0, y: 300.0}
+};
 
 pub struct Console {
-    empty_bg: graphics::Image,
     infos: VecDeque<String>,
     visible: bool,
+    font: Asset<Font>,
 }
 
 impl Console {
-    pub fn new(ctx: &mut Context) -> GameResult<Console> {
-        let infos = VecDeque::with_capacity(10);
-        let empty_bg = graphics::Image::new(ctx, "/empty.png")?;
-
-        let result = Console {
-            empty_bg,
-            infos,
-            visible: false,
-        };
-        Ok(result)
+    pub fn new() -> Result<Console> {
+        Ok(Console {
+            infos: VecDeque::with_capacity(10),
+            visible: true,
+            font: Asset::new(Font::load("coolvetica.ttf")),
+        })
     }
 
     pub fn switch_visibility(&mut self) {
@@ -38,25 +46,13 @@ impl Console {
         self.infos = VecDeque::with_capacity(10);
     }
 
-    pub fn draw(&self, ctx: &mut Context, font: graphics::Font) {
+    pub fn draw(&mut self, window: &mut Window) -> Result<()> {
         if !self.visible {
-            return;
+            return Ok(());
         }
-        let (w, h) = graphics::drawable_size(ctx);
+        let (w, h) = (1280, 720);
         let size_and_pos = Point2::new(w as f32 / 2.0 - 10.0, h as f32 / 2.0 - 10.0);
-        graphics::draw(
-            ctx,
-            &self.empty_bg,
-            graphics::DrawParam::default()
-                .dest(size_and_pos)
-                .scale([w as f32 / 2.0 - 10.0, h as f32 / 2.0 - 10.0])
-                .color((0.0, 0.0, 0.0, 0.4).into()),
-        );
-
-        let drawparams = graphics::DrawParam::default()
-            .dest(Point2::new(w as f32 / 2.0, h as f32 / 2.0))
-            .color(consts::FONT_WHITE_COLOR.into())
-            .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
+        window.draw(&BG_AREA, Col(Color::BLUE));
 
         let mut result = String::from("Info:\n");
         for el in &self.infos {
@@ -64,8 +60,11 @@ impl Console {
             result.push_str("\n");
         }
 
-        let text = graphics::Text::new((format!("{}", result), font, consts::TEXT_SIZE * 0.8));
-
-        graphics::draw(ctx, &text, drawparams);
+        self.font.execute(|f| {
+            let style = FontStyle::new(48.0, Color::BLACK);
+            let text = f.render(&result,&style)?;
+            window.draw(&text.area(), Img(&text));
+            Ok(())
+        })
     }
 }

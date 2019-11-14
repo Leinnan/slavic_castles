@@ -1,16 +1,21 @@
 use crate::card::Card;
 use crate::consts;
 use crate::resource::*;
-use ggez::graphics;
-use ggez::nalgebra as na;
-use ggez::{Context, GameResult};
+use quicksilver::{
+    Future, Result,
+    combinators::result,
+    geom::{Shape, Rectangle, Vector},
+    graphics::{Background::Img, Background::Col, Color, Font, FontStyle, Image},
+    lifecycle::{Asset, Settings, State, Window, run},
+};
+use nalgebra;
 
-type Point2 = na::Point2<f32>;
+type Point2 = nalgebra::Point2<f32>;
 
 pub struct CardDisplayer {
-    bg: graphics::Image,
-    color: graphics::Color,
-    front: graphics::Image,
+    bg: Asset<Image>,
+    color: Color,
+    front: Asset<Image>,
     cost: i32,
     description: String,
     can_afford: bool,
@@ -20,14 +25,14 @@ pub struct CardDisplayer {
 }
 
 impl CardDisplayer {
-    pub fn new(ctx: &mut Context) -> GameResult<CardDisplayer> {
-        let bg = graphics::Image::new(ctx, "/card_bg.png")?;
-        
-        let front = graphics::Image::new(ctx, "/card_front.png")?;
+    pub fn new() -> Result<CardDisplayer> {
+        let bg = Asset::new(Image::load( "/card_bg.png"));
+
+        let front = Asset::new(Image::load("/card_front.png"));
 
         let result = CardDisplayer {
             bg: bg,
-            color: consts::SOLDIERS_COLOR.into(),
+            color: consts::SOLDIERS_COLOR,
             front: front,
             cost: 0,
             description: "".to_string(),
@@ -57,9 +62,9 @@ impl CardDisplayer {
         self.cost = card.cost_amount;
         self.can_afford = can_afford;
         self.color = match card.cost_resource {
-            ResourceType::Magic => consts::MAGIC_COLOR.into(),
-            ResourceType::Soldiers => consts::SOLDIERS_COLOR.into(),
-            ResourceType::Tools => consts::TOOLS_COLOR.into(),
+            ResourceType::Magic => consts::MAGIC_COLOR,
+            ResourceType::Soldiers => consts::SOLDIERS_COLOR,
+            ResourceType::Tools => consts::TOOLS_COLOR,
         };
 
         self.description.clear();
@@ -92,47 +97,49 @@ impl CardDisplayer {
         self.ready = true;
     }
 
-    pub fn draw(&self, ctx: &mut Context, font: graphics::Font) {
+    pub fn draw(&mut self, window: &mut Window) -> Result<()> {
         if !self.ready {
-            return;
+            return Ok(());
         }
-        let txt_color = if self.can_afford {
-            consts::FONT_WHITE_COLOR.into()
-        } else {
-            consts::FONT_GREY_COLOR.into()
-        };
-        graphics::draw(
-            ctx,
-            &self.bg,
-            graphics::DrawParam::default()
-                .dest(Point2::new(self.pos_x, self.pos_y))
-                .color(self.color),
-        );
-        graphics::draw(
-            ctx,
-            &self.front,
-            graphics::DrawParam::default().dest(Point2::new(self.pos_x, self.pos_y)),
-        );
+        // let txt_color = if self.can_afford {
+        //     consts::FONT_WHITE_COLOR.into()
+        // } else {
+        //     consts::FONT_GREY_COLOR.into()
+        // };
+        // graphics::draw(
+        //     ctx,
+        //     &self.bg,
+        //     graphics::DrawParam::default()
+        //         .dest(Point2::new(self.pos_x, self.pos_y))
+        //         .color(self.color),
+        // );
+        // graphics::draw(
+        //     ctx,
+        //     &self.front,
+        //     graphics::DrawParam::default().dest(Point2::new(self.pos_x, self.pos_y)),
+        // );
 
-        let cost_text = graphics::Text::new((format!("{}", self.cost), font, consts::TEXT_SIZE));
-        graphics::draw(
-            ctx,
-            &cost_text,
-            graphics::DrawParam::default()
-                .dest(Point2::new(self.pos_x + 26.0, self.pos_y + 18.0))
-                .color(txt_color)
-                .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]),
-        );
+        // let cost_text = graphics::Text::new((format!("{}", self.cost), font, consts::TEXT_SIZE));
+        // graphics::draw(
+        //     ctx,
+        //     &cost_text,
+        //     graphics::DrawParam::default()
+        //         .dest(Point2::new(self.pos_x + 26.0, self.pos_y + 18.0))
+        //         .color(txt_color)
+        //         .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]),
+        // );
 
-        let description_text =
-            graphics::Text::new((format!("{}", self.description), font, consts::TEXT_SIZE));
-        graphics::draw(
-            ctx,
-            &description_text,
-            graphics::DrawParam::default()
-                .dest(Point2::new(self.pos_x + 27.0, self.pos_y + 170.0))
-                .color(txt_color)
-                .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]),
-        );
+        // let description_text =
+        //     graphics::Text::new((format!("{}", self.description), font, consts::TEXT_SIZE));
+        // graphics::draw(
+        //     ctx,
+        //     &description_text,
+        //     graphics::DrawParam::default()
+        //         .dest(Point2::new(self.pos_x + 27.0, self.pos_y + 170.0))
+        //         .color(txt_color)
+        //         .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]),
+        // );
+
+        Ok(())
     }
 }

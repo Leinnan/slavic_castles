@@ -1,7 +1,14 @@
 use crate::consts;
-use ggez::{graphics, Context};
+use quicksilver::{
+    Future, Result,
+    combinators::result,
+    geom::{Shape, Rectangle, Vector},
+    graphics::{Background::Img, Background::Col, Color, Font, FontStyle, Image},
+    lifecycle::{Asset, Settings, State, Window, run},
+};
+use nalgebra;
 
-type Point2 = ggez::nalgebra::Point2<f32>;
+type Point2 = nalgebra::Point2<f32>;
 
 pub struct GameEndedText {
     player_name: String,
@@ -24,24 +31,25 @@ impl GameEndedText {
         self.player_name = name;
     }
 
-    pub fn draw(&self, ctx: &mut Context, font: graphics::Font) {
+    pub fn draw(&mut self, window: &mut Window) -> Result<()> {
         if !self.enabled {
-            return;
+            return Ok(());
         }
-        let (w, h) = graphics::drawable_size(ctx);
-        let pos = Point2::new(w as f32 / 2.0 - 150.0, h as f32 / 2.0 - 26.0);
+        // let (w, h) = graphics::drawable_size(ctx);
+        // let pos = Point2::new(w as f32 / 2.0 - 150.0, h as f32 / 2.0 - 26.0);
 
-        let drawparams = graphics::DrawParam::default()
-            .dest(pos)
-            .color(consts::FONT_COLOR.into())
-            .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
+        // let drawparams = graphics::DrawParam::default()
+        //     .dest(pos)
+        //     .color(consts::FONT_COLOR.into())
+        //     .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
 
-        let text = graphics::Text::new((
-            format!("Game Ended, {} wins, press R to restart", self.player_name),
-            font,
-            consts::TEXT_SIZE,
-        ));
+        // let text = graphics::Text::new((
+        //     format!("Game Ended, {} wins, press R to restart", self.player_name),
+        //     font,
+        //     consts::TEXT_SIZE,
+        // ));
 
-        graphics::draw(ctx, &text, drawparams);
+        // graphics::draw(ctx, &text, drawparams);
+        Ok(())
     }
 }

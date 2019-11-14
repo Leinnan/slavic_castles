@@ -21,7 +21,7 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new(active: bool, human: bool,) -> Player {
+    pub fn new(active: bool, human: bool) -> Player {
         let mut resources = HashMap::new();
         resources.insert(ResourceType::Tools, Resource::new());
         resources.insert(ResourceType::Magic, Resource::new());
@@ -138,7 +138,7 @@ impl Player {
     }
 
     pub fn replace_card(&mut self, nr: i32) {
-        self.deck.replace_card(nr,&self.resources);
+        self.deck.replace_card(nr, &self.resources);
         self.active = false;
     }
 
