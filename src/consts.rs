@@ -27,17 +27,8 @@ pub const SOLDIERS_COLOR: Color = Color {r: 206.0 / 255.0, g:55.0 / 255.0, b:75.
 
 pub const SCREEN_WIDTH: i32 = 1280;
 pub const SCREEN_HEIGHT: i32 = 720;
-#[cfg(target_arch = "wasm32")]
-pub const TEXT_SCALE: f32 = 1.7;
-#[cfg(not(target_arch = "wasm32"))]
 pub const TEXT_SCALE: f32 = 1.0;
-#[cfg(target_arch = "wasm32")]
-pub const TEXT_SIZE: f32 = 13.0;
-#[cfg(not(target_arch = "wasm32"))]
 pub const TEXT_SIZE: f32 = 26.0;
-#[cfg(target_arch = "wasm32")]
-pub const FONT_WIDTH: f32 = 4.4;
-#[cfg(not(target_arch = "wasm32"))]
 pub const FONT_WIDTH: f32 = 5.3;
 
 pub const CARD_SIZE_X: f32 = 234.0;

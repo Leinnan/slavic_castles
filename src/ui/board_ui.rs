@@ -207,7 +207,7 @@ impl BoardUI {
         }
         self.player_info_left.draw(window);
         self.player_info_right.draw(window);
-        // self.help.draw(ctx, self.font);
+        self.help.draw(window);
         Ok(())
     }
 }

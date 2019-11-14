@@ -128,7 +128,8 @@ impl MyGame {
 
     fn handle_mouse_input(&mut self, window: &mut Window) {
         let lmb_pressed = window.mouse()[MouseButton::Left] == ButtonState::Pressed;
-        let rmb_pressed = window.mouse()[MouseButton::Left] == ButtonState::Pressed;
+        let rmb_pressed = window.mouse()[MouseButton::Right] == ButtonState::Pressed;
+        let shift_pressed = window.keyboard()[Key::LShift] == ButtonState::Pressed;
         let mouse_pos = window.mouse().pos();
         if !lmb_pressed && !rmb_pressed {
             return;
@@ -143,7 +144,7 @@ impl MyGame {
         let i = self.ui.card_index_on_pos(mouse_pos.x, mouse_pos.y);
         if i.is_some() {
             let card = self.players[&self.active_player].deck.cards[i.unwrap()];
-            self.try_use_card(&card, i.unwrap() as i32, rmb_pressed);
+            self.try_use_card(&card, i.unwrap() as i32, rmb_pressed || shift_pressed);
         }
     }
 

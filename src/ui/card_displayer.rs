@@ -26,14 +26,10 @@ pub struct CardDisplayer {
 
 impl CardDisplayer {
     pub fn new() -> Result<CardDisplayer> {
-        let bg = Asset::new(Image::load( "/card_bg.png"));
-
-        let front = Asset::new(Image::load("/card_front.png"));
-
         let result = CardDisplayer {
-            bg: bg,
+            bg: Asset::new(Image::load( "card_bg.png")),
             color: consts::SOLDIERS_COLOR,
-            front: front,
+            front: Asset::new(Image::load("card_front.png")),
             cost: 0,
             description: "".to_string(),
             can_afford: false,
@@ -106,18 +102,15 @@ impl CardDisplayer {
         // } else {
         //     consts::FONT_GREY_COLOR.into()
         // };
-        // graphics::draw(
-        //     ctx,
-        //     &self.bg,
-        //     graphics::DrawParam::default()
-        //         .dest(Point2::new(self.pos_x, self.pos_y))
-        //         .color(self.color),
-        // );
-        // graphics::draw(
-        //     ctx,
-        //     &self.front,
-        //     graphics::DrawParam::default().dest(Point2::new(self.pos_x, self.pos_y)),
-        // );
+        let pos = [self.pos_x + (consts::CARD_SIZE_X / 2.0),self.pos_y + (consts::CARD_SIZE_Y / 2.0)];
+        self.bg.execute(|image| {
+            window.draw(&image.area().with_center((pos[0],pos[1])), Img(&image));
+            Ok(())
+        });
+        self.front.execute(|image| {
+            window.draw(&image.area().with_center((pos[0],pos[1])), Img(&image));
+            Ok(())
+        });
 
         // let cost_text = graphics::Text::new((format!("{}", self.cost), font, consts::TEXT_SIZE));
         // graphics::draw(

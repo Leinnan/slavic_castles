@@ -52,7 +52,7 @@ impl Console {
         }
         let (w, h) = (1280, 720);
         let size_and_pos = Point2::new(w as f32 / 2.0 - 10.0, h as f32 / 2.0 - 10.0);
-        window.draw(&BG_AREA, Col(Color::BLUE));
+        // window.draw(&BG_AREA, Col(Color::BLUE));
 
         let mut result = String::from("Info:\n");
         for el in &self.infos {
@@ -61,7 +61,7 @@ impl Console {
         }
 
         self.font.execute(|f| {
-            let style = FontStyle::new(48.0, Color::BLACK);
+            let style = FontStyle::new(23.0, Color::BLACK);
             let text = f.render(&result,&style)?;
             window.draw(&text.area(), Img(&text));
             Ok(())
