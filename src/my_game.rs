@@ -201,6 +201,6 @@ impl State for MyGame {
     }
     fn draw(&mut self, window: &mut Window) -> Result<()> {
         window.clear(Color::WHITE)?;
-        self.ui.draw(window, &self.players)
+        self.ui.draw(window)
     }
 }

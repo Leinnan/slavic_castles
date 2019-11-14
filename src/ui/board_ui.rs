@@ -163,10 +163,11 @@ impl BoardUI {
             let can_afford = card.can_aford(&players[&PlayerNumer::First].resources);
             self.card_displayers[i].update_info(&card, can_afford);
         }
+        let player_left_is_active = active_player == PlayerNumer::First;
         self.player_info_left
-            .update_info(&players[&PlayerNumer::First]);
+            .update_info(&players[&PlayerNumer::First],player_left_is_active);
         self.player_info_right
-            .update_info(&players[&PlayerNumer::Second]);
+            .update_info(&players[&PlayerNumer::Second], !player_left_is_active);
         self.active_player = active_player;
         self.game_ended = game_ended;
     }

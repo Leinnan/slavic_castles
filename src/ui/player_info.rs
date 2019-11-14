@@ -61,9 +61,10 @@ impl PlayerInfo {
         Ok(info)
     }
 
-    pub fn update_info(&mut self, player: &Player) {
+    pub fn update_info(&mut self, player: &Player, active: bool) {
         self.walls_hp = player.walls_hp;
         self.tower_hp = player.tower_hp;
+        self.active = active;
 
         self.tools
             .update_values(&player.resources[&ResourceType::Tools]);
@@ -138,34 +139,6 @@ impl PlayerInfo {
         if !is_ok.is_ok() {
             return is_ok;
         }
-
-        // let walls_text =
-        //     graphics::Text::new((format!("{}", self.walls_hp), font, consts::TEXT_SIZE));
-        // graphics::draw(
-        //     ctx,
-        //     &walls_text,
-        //     graphics::DrawParam::default()
-        //         .dest(Point2::new(base_x_pos + WALLS_TEXT_X_OFFSET, TEXTS_Y_POS))
-        //         .color((consts::FONT_COLOR).into())
-        //         .scale([
-        //             consts::TEXT_SCALE * TEXT_SCALE_MULTIPLIER,
-        //             consts::TEXT_SCALE * TEXT_SCALE_MULTIPLIER,
-        //         ]),
-        // );
-
-        // let tower_text =
-        //     graphics::Text::new((format!("{}", self.tower_hp), font, consts::TEXT_SIZE));
-        // graphics::draw(
-        //     ctx,
-        //     &tower_text,
-        //     graphics::DrawParam::default()
-        //         .dest(Point2::new(base_x_pos + TOWER_TEXT_X_OFFSET, TEXTS_Y_POS))
-        //         .color((0.9, 0.9, 0.9, 1.0).into())
-        //         .scale([
-        //             consts::TEXT_SCALE * TEXT_SCALE_MULTIPLIER,
-        //             consts::TEXT_SCALE * TEXT_SCALE_MULTIPLIER,
-        //         ]),
-        // );
 
         let resources_offset = if self.align_right {
             base_x_pos - 120.0
