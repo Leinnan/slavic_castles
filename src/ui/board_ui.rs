@@ -5,15 +5,15 @@ use crate::ui::console::Console;
 use crate::ui::game_ended_text::GameEndedText;
 use crate::ui::help_displayer::HelpDisplayer;
 use crate::ui::player_info::PlayerInfo;
-use quicksilver::{
-    Future, Result,
-    combinators::result,
-    geom::{Shape, Rectangle, Vector},
-    input::{ButtonState, Key, MouseButton},
-    graphics::{Background::Img, Background::Col, Color, Font, FontStyle, Image},
-    lifecycle::{Asset, Settings, State, Window, run},
-};
 use nalgebra;
+use quicksilver::{
+    combinators::result,
+    geom::{Rectangle, Shape, Vector},
+    graphics::{Background::Col, Background::Img, Color, Font, FontStyle, Image},
+    input::{ButtonState, Key, MouseButton},
+    lifecycle::{run, Asset, Settings, State, Window},
+    Future, Result,
+};
 use std::collections::HashMap;
 
 type Point2 = nalgebra::Point2<f32>;
@@ -36,19 +36,10 @@ pub struct BoardUI {
 
 impl BoardUI {
     pub fn new() -> Result<BoardUI> {
-        // let font = graphics::Font::new(ctx, "/coolvetica.ttf")?;
-        let player_info_left = PlayerInfo::new(
-            "Human".to_string(),
-            true,
-            "/avatar.png".to_string(),
-            false,
-        )?;
-        let player_info_right = PlayerInfo::new(
-            "Human".to_string(),
-            false,
-            "/avatar.png".to_string(),
-            true,
-        )?;
+        let player_info_left =
+            PlayerInfo::new("Human".to_string(), true, "avatar.png".to_string(), false)?;
+        let player_info_right =
+            PlayerInfo::new("Human".to_string(), false, "avatar.png".to_string(), true)?;
         let (w, h) = (1280, 720);
         let mut card_displayers = Vec::new();
         let base_x_pos = (w as f32 - consts::CARDS_IN_DECK as f32 * consts::CARD_SIZE_X) / 2.0;
@@ -180,8 +171,11 @@ impl BoardUI {
         self.game_ended = game_ended;
     }
 
-    pub fn draw(&mut self, window: &mut Window, players: &HashMap<PlayerNumer, Player>) -> Result<()> {
-
+    pub fn draw(
+        &mut self,
+        window: &mut Window,
+        players: &HashMap<PlayerNumer, Player>,
+    ) -> Result<()> {
         // if self.deck_text_enabled {
         //     self.draw_deck_text(
         //         ctx,

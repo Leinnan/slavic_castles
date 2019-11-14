@@ -1,14 +1,16 @@
 use crate::card::Card;
 use crate::consts;
 use crate::resource::*;
-use quicksilver::{
-    Future, Result,
-    combinators::result,
-    geom::{Shape, Rectangle, Vector},
-    graphics::{Background::Img, Background::Col, Color, Font, FontStyle, Image},
-    lifecycle::{Asset, Settings, State, Window, run},
-};
 use nalgebra;
+use quicksilver::{
+    combinators::result,
+    geom::{Rectangle, Shape, Vector},
+    graphics::{
+        Background::Blended, Background::Col, Background::Img, Color, Font, FontStyle, Image,
+    },
+    lifecycle::{run, Asset, Settings, State, Window},
+    Future, Result,
+};
 
 type Point2 = nalgebra::Point2<f32>;
 
@@ -16,6 +18,7 @@ pub struct CardDisplayer {
     bg: Asset<Image>,
     color: Color,
     front: Asset<Image>,
+    font: Asset<Font>,
     cost: i32,
     description: String,
     can_afford: bool,
@@ -27,10 +30,11 @@ pub struct CardDisplayer {
 impl CardDisplayer {
     pub fn new() -> Result<CardDisplayer> {
         let result = CardDisplayer {
-            bg: Asset::new(Image::load( "card_bg.png")),
+            bg: Asset::new(Image::load("card_bg.png")),
             color: consts::SOLDIERS_COLOR,
             front: Asset::new(Image::load("card_front.png")),
             cost: 0,
+            font: Asset::new(Font::load("coolvetica.ttf")),
             description: "".to_string(),
             can_afford: false,
             ready: false,
@@ -97,42 +101,59 @@ impl CardDisplayer {
         if !self.ready {
             return Ok(());
         }
-        // let txt_color = if self.can_afford {
-        //     consts::FONT_WHITE_COLOR.into()
-        // } else {
-        //     consts::FONT_GREY_COLOR.into()
-        // };
-        let pos = [self.pos_x + (consts::CARD_SIZE_X / 2.0),self.pos_y + (consts::CARD_SIZE_Y / 2.0)];
-        self.bg.execute(|image| {
-            window.draw(&image.area().with_center((pos[0],pos[1])), Img(&image));
+        let mut is_ok;
+        let pos = [
+            self.pos_x + (consts::CARD_SIZE_X / 2.0),
+            self.pos_y + (consts::CARD_SIZE_Y / 2.0),
+        ];
+        let color = if self.can_afford {
+            self.color
+        } else {
+            self.color.multiply(consts::GREY)
+        };
+        is_ok = self.bg.execute(|image| {
+            window.draw(
+                &image.area().with_center((pos[0], pos[1])),
+                Blended(&image, color),
+            );
             Ok(())
         });
-        self.front.execute(|image| {
-            window.draw(&image.area().with_center((pos[0],pos[1])), Img(&image));
+        if !is_ok.is_ok() {
+            return is_ok;
+        }
+        is_ok = self.front.execute(|image| {
+            window.draw(&image.area().with_center((pos[0], pos[1])), Img(&image));
             Ok(())
         });
 
-        // let cost_text = graphics::Text::new((format!("{}", self.cost), font, consts::TEXT_SIZE));
-        // graphics::draw(
-        //     ctx,
-        //     &cost_text,
-        //     graphics::DrawParam::default()
-        //         .dest(Point2::new(self.pos_x + 26.0, self.pos_y + 18.0))
-        //         .color(txt_color)
-        //         .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]),
-        // );
+        if !is_ok.is_ok() {
+            return is_ok;
+        }
+        let cost_text = format!("{}", self.cost);
+        is_ok = self.font.execute(|f| {
+            let style = FontStyle::new(30.0, Color::WHITE);
+            let text = f.render(&cost_text, &style)?;
+            window.draw(
+                &text.area().with_center((pos[0] - 85.0, pos[1] - 130.0)),
+                Img(&text),
+            );
+            Ok(())
+        });
+        let result = self.description.clone();
 
-        // let description_text =
-        //     graphics::Text::new((format!("{}", self.description), font, consts::TEXT_SIZE));
-        // graphics::draw(
-        //     ctx,
-        //     &description_text,
-        //     graphics::DrawParam::default()
-        //         .dest(Point2::new(self.pos_x + 27.0, self.pos_y + 170.0))
-        //         .color(txt_color)
-        //         .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]),
-        // );
+        if !is_ok.is_ok() {
+            return is_ok;
+        }
+        is_ok = self.font.execute(|f| {
+            let style = FontStyle::new(23.0, Color::WHITE);
+            let text = f.render(&result, &style)?;
+            window.draw(
+                &text.area().with_center((pos[0], pos[1] + 30.0)),
+                Img(&text),
+            );
+            Ok(())
+        });
 
-        Ok(())
+        is_ok
     }
 }

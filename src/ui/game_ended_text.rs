@@ -1,12 +1,12 @@
 use crate::consts;
-use quicksilver::{
-    Future, Result,
-    combinators::result,
-    geom::{Shape, Rectangle, Vector},
-    graphics::{Background::Img, Background::Col, Color, Font, FontStyle, Image},
-    lifecycle::{Asset, Settings, State, Window, run},
-};
 use nalgebra;
+use quicksilver::{
+    combinators::result,
+    geom::{Rectangle, Shape, Vector},
+    graphics::{Background::Col, Background::Img, Color, Font, FontStyle, Image},
+    lifecycle::{run, Asset, Settings, State, Window},
+    Future, Result,
+};
 
 type Point2 = nalgebra::Point2<f32>;
 

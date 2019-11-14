@@ -1,19 +1,19 @@
 use crate::consts;
-use quicksilver::{
-    Future, Result,
-    combinators::result,
-    geom::{Shape, Rectangle, Vector},
-    graphics::{Background::Img, Background::Col, Color, Font, FontStyle, Image},
-    lifecycle::{Asset, Settings, State, Window, run},
-};
 use nalgebra;
+use quicksilver::{
+    combinators::result,
+    geom::{Rectangle, Shape, Vector},
+    graphics::{Background::Col, Background::Img, Color, Font, FontStyle, Image},
+    lifecycle::{run, Asset, Settings, State, Window},
+    Future, Result,
+};
 use std::collections::VecDeque;
 
 type Point2 = nalgebra::Point2<f32>;
 
 const BG_AREA: Rectangle = Rectangle {
-    pos:  Vector {x: 300.0, y: 400.0},
-    size: Vector {x: 300.0, y: 300.0}
+    pos: Vector { x: 300.0, y: 400.0 },
+    size: Vector { x: 300.0, y: 300.0 },
 };
 
 pub struct Console {
@@ -62,7 +62,7 @@ impl Console {
 
         self.font.execute(|f| {
             let style = FontStyle::new(23.0, Color::BLACK);
-            let text = f.render(&result,&style)?;
+            let text = f.render(&result, &style)?;
             window.draw(&text.area(), Img(&text));
             Ok(())
         })

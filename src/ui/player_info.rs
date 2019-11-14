@@ -2,14 +2,14 @@ use crate::consts;
 use crate::player::*;
 use crate::resource::*;
 use crate::ui::resource_info::ResourceInfo;
-use quicksilver::{
-    Future, Result,
-    combinators::result,
-    geom::{Shape, Rectangle, Vector},
-    graphics::{Background::Img, Background::Col, Color, Font, FontStyle, Image},
-    lifecycle::{Asset, Settings, State, Window, run},
-};
 use nalgebra;
+use quicksilver::{
+    combinators::result,
+    geom::{Rectangle, Shape, Vector},
+    graphics::{Background::Col, Background::Img, Color, Font, FontStyle, Image},
+    lifecycle::{run, Asset, Settings, State, Window},
+    Future, Result,
+};
 
 type Point2 = nalgebra::Point2<f32>;
 
@@ -41,12 +41,8 @@ impl PlayerInfo {
         // let avatar = graphics::Image::new(ctx, avatar_path)?;
         // let frame = graphics::Image::new(ctx, "/frame.png")?;
         let tools = ResourceInfo::new("tools.png".to_string(), consts::TOOLS_COLOR.into())?;
-        let magic = ResourceInfo::new(
-            "potionBlue.png".to_string(),
-            consts::MAGIC_COLOR.into(),
-        )?;
-        let soldiers =
-            ResourceInfo::new("axe.png".to_string(), consts::SOLDIERS_COLOR.into())?;
+        let magic = ResourceInfo::new("potionBlue.png".to_string(), consts::MAGIC_COLOR.into())?;
+        let soldiers = ResourceInfo::new("axe.png".to_string(), consts::SOLDIERS_COLOR.into())?;
 
         let info = PlayerInfo {
             active: active,
@@ -136,10 +132,8 @@ impl PlayerInfo {
         self.tools.draw(window, resources_offset, 25.0);
         self.magic
             .draw(window, resources_offset + resource_offset_move, 25.0);
-        self.soldiers.draw(window,
-            resources_offset + resource_offset_move * 2.0,
-            25.0,
-        );
+        self.soldiers
+            .draw(window, resources_offset + resource_offset_move * 2.0, 25.0);
         Ok(())
     }
 }

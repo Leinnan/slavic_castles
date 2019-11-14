@@ -179,7 +179,8 @@ impl State for MyGame {
     fn update(&mut self, window: &mut Window) -> Result<()> {
         self.handle_keyboard(window);
         self.handle_mouse_input(window);
-        self.ui.update(self.is_game_ended(), &self.players, self.active_player);
+        self.ui
+            .update(self.is_game_ended(), &self.players, self.active_player);
         if self.is_game_ended() {
             return Ok(());
         }
