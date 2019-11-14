@@ -1,11 +1,9 @@
 use crate::consts;
-use nalgebra;
 use quicksilver::{
-    combinators::result,
-    geom::{Rectangle, Shape, Vector},
-    graphics::{Background::Col, Background::Img, Color, Font, FontStyle, Image},
-    lifecycle::{run, Asset, Settings, State, Window},
-    Future, Result,
+    geom::{Shape, Vector},
+    graphics::{ Background::Img, Color, Font, FontStyle},
+    lifecycle::{ Asset, Window},
+    Result,
 };
 
 pub struct GameEndedText {
