@@ -9,25 +9,23 @@ use quicksilver::{
 };
 
 type Point2 = nalgebra::Point2<f32>;
-// use ggez::{graphics, Context, GameResult};
-// use std::collections::VecDeque;
 
-// type Point2 = ggez::nalgebra::Point2<f32>;
+const BG_AREA: Rectangle = Rectangle {
+    pos: Vector { x: 0.0, y: 0.0 },
+    size: Vector { x: 320.0, y: 210.0 },
+};
 
 pub struct HelpDisplayer {
-    // empty_bg: graphics::Image,
+    font: Asset<Font>,
     visible: bool,
 }
 
 impl HelpDisplayer {
     pub fn new() -> Result<Self> {
-        // let empty_bg = graphics::Image::new(ctx, "/empty.png")?;
-
-        let result = HelpDisplayer {
-            // empty_bg,
+        Ok(HelpDisplayer {
+            font: Asset::new(Font::load("coolvetica.ttf")),
             visible: true,
-        };
-        Ok(result)
+        })
     }
 
     pub fn switch_visibility(&mut self) {
@@ -42,29 +40,17 @@ impl HelpDisplayer {
         if !self.visible {
             return Ok(());
         }
-        // let (w, h) = graphics::drawable_size(ctx);
-        // let size_and_pos = Point2::new(400.0, 30.0);
-        // graphics::draw(
-        //     ctx,
-        //     &self.empty_bg,
-        //     graphics::DrawParam::default()
-        //         .dest(size_and_pos)
-        //         .scale([330.0, 230.0])
-        //         .color((0.0, 0.0, 0.0, 0.6).into()),
-        // );
-
-        // let drawparams = graphics::DrawParam::default()
-        //     .dest(Point2::new(410.0, 40.0))
-        //     .color(consts::FONT_WHITE_COLOR.into())
-        //     .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
-
-        // let text = graphics::Text::new((
-        //     format!("{}", consts::HELP_TEXT),
-        //     font,
-        //     consts::TEXT_SIZE * 1.2,
-        // ));
-
-        // graphics::draw(ctx, &text, drawparams);
+        let center = Vector::new(consts::SCREEN_WIDTH / 2.0, consts::SCREEN_HEIGHT / 2.0 - 120.0);
+        window.draw(&BG_AREA.with_center(center), Col(Color::BLACK.with_alpha(0.4)));
+        self.font.execute(|f| {
+            let style = FontStyle::new(30.0, Color::WHITE);
+            let text = f.render(consts::HELP_TEXT, &style)?;
+            window.draw(
+                &text.area().with_center(center),
+                Img(&text),
+            );
+            Ok(())
+        });
         return Ok(());
     }
 }

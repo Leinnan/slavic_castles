@@ -8,8 +8,6 @@ use quicksilver::{
     Future, Result,
 };
 
-type Point2 = nalgebra::Point2<f32>;
-
 pub struct GameEndedText {
     font: Asset<Font>,
     player_name: String,
@@ -49,7 +47,6 @@ impl GameEndedText {
                 Img(&text),
             );
             Ok(())
-        });
-        Ok(())
+        })
     }
 }
