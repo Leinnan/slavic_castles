@@ -30,15 +30,13 @@
     <script src="slavic_castles.js"></script>
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-30624165-2"></script>
-    <script>
-        canvas.oncontextmenu = function (e) {
-            e.preventDefault();
-        };        
+    <script>       
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
 
         gtag('config', 'UA-30624165-2');
+        setTimeout("document.getElementsByTagName('canvas')[0].oncontextmenu = function (e) {e.preventDefault();};", 3000);
     </script>
 </body>
 
