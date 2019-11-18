@@ -65,17 +65,11 @@ impl MyGame {
         if !card.can_aford(&player.resources) {
             return;
         }
-
-        player.change_resource_amount(&card.cost_resource, -card.cost_amount);
-        player.make_tower_higher(card.tower_growth);
-        player.make_walls_higher(card.walls_growth);
-        player.change_resource_production(&card.production_resource, card.production_change);
+        player.card_used(card,true);
         player.replace_card(index);
 
-        self.players
-            .get_mut(&self.other_player())
-            .unwrap()
-            .give_damage(card.damage, false);
+        let mut other_player = self.players.get_mut(&self.other_player()).unwrap();
+        other_player.card_used(card,false);
 
         self.ui
             .send_message(format!("[{0}]Card used: {1}", self.active_player, card).as_str());

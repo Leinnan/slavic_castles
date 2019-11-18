@@ -1,5 +1,6 @@
 use crate::consts;
 use crate::deck::Deck;
+use crate::card::Card;
 use crate::resource::*;
 use rand::prelude::*;
 use std::collections::HashMap;
@@ -151,6 +152,18 @@ impl Player {
 
         let mut rng = thread_rng();
         (rng.gen_range(0, consts::CARDS_IN_DECK), true)
+    }
+
+    pub fn card_used(&mut self, card: &Card, is_user: bool) {
+        if is_user {
+            self.change_resource_amount(&card.cost_resource, -card.cost_amount);
+        }
+        let prod = card.production_change(is_user);
+        self.change_resource_production(&prod.0, prod.1);
+        let damage = card.damage(is_user);
+        self.give_damage(damage.0, damage.1);
+        self.make_tower_higher(card.tower_growth(is_user));
+        self.make_walls_higher(card.walls_growth(is_user));
     }
 }
 

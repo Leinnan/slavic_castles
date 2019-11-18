@@ -1,6 +1,7 @@
 extern crate quicksilver;
 
 mod card;
+mod card_effect;
 mod consts;
 mod deck;
 mod my_game;

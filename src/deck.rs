@@ -1,4 +1,5 @@
 use crate::card::Card;
+use crate::card_effect::*;
 use crate::consts::*;
 use crate::resource::*;
 use rand::prelude::*;
@@ -15,10 +16,19 @@ pub struct Deck {
 impl Deck {
     pub fn new() -> Deck {
         let mut cards = Vec::new();
+        let none = CardEffect::Empty();
         cards.push(Card {
             id: 1,
             cost_resource: ResourceType::Soldiers,
             cost_amount: 3,
+            effects: [
+                CardEffect {
+                    affects_user: false,
+                    effect_type: EffectType::Damage(3, false),
+                },
+                none,
+                none,
+            ],
             tower_growth: 0,
             walls_growth: 0,
             damage: 3,
@@ -29,6 +39,20 @@ impl Deck {
             id: 2,
             cost_resource: ResourceType::Tools,
             cost_amount: 4,
+            effects: [
+                CardEffect {
+                    affects_user: false,
+                    effect_type: EffectType::Damage(1, false),
+                },
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::WallsGrowth(3),
+                },
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::TowerGrowth(1),
+                },
+            ],
             tower_growth: 1,
             walls_growth: 3,
             damage: 1,
@@ -39,6 +63,14 @@ impl Deck {
             id: 3,
             cost_resource: ResourceType::Soldiers,
             cost_amount: 3,
+            effects: [
+                CardEffect {
+                    affects_user: false,
+                    effect_type: EffectType::Damage(5, false),
+                },
+                none,
+                none,
+            ],
             tower_growth: 0,
             walls_growth: 0,
             damage: 5,
@@ -49,6 +81,17 @@ impl Deck {
             id: 4,
             cost_resource: ResourceType::Soldiers,
             cost_amount: 7,
+            effects: [
+                CardEffect {
+                    affects_user: false,
+                    effect_type: EffectType::Damage(1, false),
+                },
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::ProductionChange(ResourceType::Soldiers, 2),
+                },
+                none,
+            ],
             tower_growth: 0,
             walls_growth: 0,
             damage: 1,
@@ -59,6 +102,17 @@ impl Deck {
             id: 5,
             cost_resource: ResourceType::Tools,
             cost_amount: 10,
+            effects: [
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::WallsGrowth(3),
+                },
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::ProductionChange(ResourceType::Tools, 2),
+                },
+                none,
+            ],
             tower_growth: 0,
             walls_growth: 3,
             damage: 0,
@@ -69,6 +123,17 @@ impl Deck {
             id: 6,
             cost_resource: ResourceType::Tools,
             cost_amount: 15,
+            effects: [
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::TowerGrowth(3),
+                },
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::ProductionChange(ResourceType::Tools, 2),
+                },
+                none,
+            ],
             tower_growth: 10,
             walls_growth: 0,
             damage: 0,
@@ -79,6 +144,14 @@ impl Deck {
             id: 7,
             cost_resource: ResourceType::Soldiers,
             cost_amount: 12,
+            effects: [
+                CardEffect {
+                    affects_user: false,
+                    effect_type: EffectType::Damage(10, false),
+                },
+                none,
+                none,
+            ],
             tower_growth: 0,
             walls_growth: 0,
             damage: 10,
@@ -89,6 +162,17 @@ impl Deck {
             id: 8,
             cost_resource: ResourceType::Magic,
             cost_amount: 8,
+            effects: [
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::TowerGrowth(4),
+                },
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::ProductionChange(ResourceType::Magic, 1),
+                },
+                none,
+            ],
             tower_growth: 4,
             walls_growth: 0,
             damage: 0,
@@ -99,6 +183,14 @@ impl Deck {
             id: 9,
             cost_resource: ResourceType::Magic,
             cost_amount: 1,
+            effects: [
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::WallsGrowth(1),
+                },
+                none,
+                none,
+            ],
             tower_growth: 0,
             walls_growth: 1,
             damage: 0,
@@ -109,6 +201,17 @@ impl Deck {
             id: 10,
             cost_resource: ResourceType::Magic,
             cost_amount: 3,
+            effects: [
+                CardEffect {
+                    affects_user: false,
+                    effect_type: EffectType::Damage(2, true),
+                },
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::WallsGrowth(2),
+                },
+                none,
+            ],
             tower_growth: 0,
             walls_growth: 2,
             damage: 2,
@@ -119,6 +222,20 @@ impl Deck {
             id: 11,
             cost_resource: ResourceType::Magic,
             cost_amount: 6,
+            effects: [
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::TowerGrowth(2),
+                },
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::WallsGrowth(3),
+                },
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::ProductionChange(ResourceType::Magic, 1),
+                },
+            ],
             tower_growth: 2,
             walls_growth: 3,
             damage: 0,

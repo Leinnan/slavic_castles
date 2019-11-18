@@ -7,11 +7,8 @@ pub const BASE_WALLS_HP: i32 = 15;
 pub const MAX_TOWER_HP: i32 = 100;
 pub const MAX_WALLS_HP: i32 = 50;
 pub const CARDS_IN_DECK: i32 = 5;
-#[cfg(debug_assertion)]
-pub const DELAY_BETWEEN_MOVES: f64 = 0.3;
-#[cfg(not(debug_assertions))]
-pub const DELAY_BETWEEN_MOVES: f64 = 2.0;
 
+pub const DELAY_BETWEEN_MOVES: f64 = 0.6;
 pub const AVATAR_SHAKE_DURATION: f64 = 0.6;
 pub const RESOURCE_SHAKE_DURATION: f64 = 0.6;
 pub const AVATAR_SHAKE_STRENGTH: (f32, f32) = (4.0, 4.0);
