@@ -1,6 +1,5 @@
 use crate::consts;
 use crate::resource::*;
-use rand::prelude::*;
 use nalgebra;
 use quicksilver::{
     combinators::result,
@@ -9,8 +8,7 @@ use quicksilver::{
     lifecycle::{run, Asset, Settings, State, Window},
     Future, Result,
 };
-
-type Point2 = nalgebra::Point2<f32>;
+use rand::prelude::*;
 
 pub const SIZE: f32 = 90.0;
 
@@ -22,7 +20,7 @@ pub struct ResourceInfo {
     production: i32,
     color: Color,
     shake_duration: f64,
-    offset: (f32,f32),
+    offset: (f32, f32),
 }
 
 impl ResourceInfo {
@@ -35,7 +33,7 @@ impl ResourceInfo {
             production: consts::BASE_RESOURCE_PRODUCTION,
             color: color,
             shake_duration: 0.0,
-            offset: (0f32,0f32),
+            offset: (0f32, 0f32),
         };
 
         Ok(result)
@@ -43,7 +41,7 @@ impl ResourceInfo {
 
     pub fn update_values(&mut self, resource: &Resource) {
         if self.amount > resource.amount || self.production > resource.production {
-            self.shake_duration = 0.4;
+            self.shake_duration = consts::RESOURCE_SHAKE_DURATION;
         }
         self.amount = resource.amount;
         self.production = resource.production;
@@ -53,9 +51,18 @@ impl ResourceInfo {
         if self.shake_duration >= 0.0 {
             self.shake_duration -= delta;
             let mut rng = thread_rng();
-            self.offset = (rng.gen_range(-5.0, 5.0),rng.gen_range(-15.0, 15.0));
+            self.offset = (
+                rng.gen_range(
+                    -consts::RESOURCE_SHAKE_STRENGTH.0,
+                    consts::RESOURCE_SHAKE_STRENGTH.0,
+                ),
+                rng.gen_range(
+                    -consts::RESOURCE_SHAKE_STRENGTH.1,
+                    consts::RESOURCE_SHAKE_STRENGTH.1,
+                ),
+            );
         } else {
-            self.offset = (0.0,0.0);
+            self.offset = (0.0, 0.0);
         }
     }
 
@@ -101,7 +108,12 @@ impl ResourceInfo {
 
         is_draw_ok = self.font.execute(|f| {
             let text = f.render(&amount_text, &style)?;
-            window.draw(&text.area().with_center((base_pos.0 + 17.0, base_pos.1 + 17.0)), Img(&text));
+            window.draw(
+                &text
+                    .area()
+                    .with_center((base_pos.0 + 17.0, base_pos.1 + 17.0)),
+                Img(&text),
+            );
             Ok(())
         });
 
@@ -112,7 +124,9 @@ impl ResourceInfo {
         is_draw_ok = self.font.execute(|f| {
             let text = f.render(&prod_text, &style)?;
             window.draw(
-                &text.area().with_center((base_pos.0 + 17.0, base_pos.1 + SIZE - 17.0)),
+                &text
+                    .area()
+                    .with_center((base_pos.0 + 17.0, base_pos.1 + SIZE - 17.0)),
                 Img(&text),
             );
             Ok(())

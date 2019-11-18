@@ -164,7 +164,7 @@ impl BoardUI {
         game_ended: bool,
         players: &HashMap<PlayerNumer, Player>,
         active_player: PlayerNumer,
-        delta_time: f64
+        delta_time: f64,
     ) {
         for i in 0..consts::CARDS_IN_DECK as usize {
             let card = players[&PlayerNumer::First].deck.cards[i];
@@ -172,47 +172,45 @@ impl BoardUI {
             self.card_displayers[i].update_info(&card, can_afford);
         }
         let player_left_is_active = active_player == PlayerNumer::First;
-        self.player_info_left
-            .update_info(&players[&PlayerNumer::First],player_left_is_active,delta_time);
-        self.player_info_right
-            .update_info(&players[&PlayerNumer::Second], !player_left_is_active,delta_time);
+        self.player_info_left.update_info(
+            &players[&PlayerNumer::First],
+            player_left_is_active,
+            delta_time,
+        );
+        self.player_info_right.update_info(
+            &players[&PlayerNumer::Second],
+            !player_left_is_active,
+            delta_time,
+        );
         self.active_player = active_player;
         self.game_ended = game_ended;
     }
 
-    pub fn draw(
-        &mut self,
-        window: &mut Window,
-    ) -> Result<()> {
+    pub fn draw(&mut self, window: &mut Window) -> Result<()> {
         let mut is_ok;
         if !self.game_ended {
             for i in 0..consts::CARDS_IN_DECK as usize {
                 is_ok = self.card_displayers[i].draw(window);
-                if !is_ok.is_ok()
-                {
+                if !is_ok.is_ok() {
                     return is_ok;
                 }
             }
         } else {
             is_ok = self.game_ended_text.draw(window);
-            if !is_ok.is_ok()
-            {
+            if !is_ok.is_ok() {
                 return is_ok;
             }
         }
         is_ok = self.player_info_left.draw(window);
-        if !is_ok.is_ok()
-        {
+        if !is_ok.is_ok() {
             return is_ok;
         }
         is_ok = self.player_info_right.draw(window);
-        if !is_ok.is_ok()
-        {
+        if !is_ok.is_ok() {
             return is_ok;
         }
         is_ok = self.help.draw(window);
-        if !is_ok.is_ok()
-        {
+        if !is_ok.is_ok() {
             return is_ok;
         }
         is_ok = self.console.draw(window);

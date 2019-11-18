@@ -6,7 +6,7 @@ use quicksilver::{
     geom::{Circle, Line, Rectangle, Transform, Triangle, Vector},
     graphics::{Background::Col, Color},
     input::{ButtonState, Key, MouseButton},
-    lifecycle::{run, Settings, State, Window,Event},
+    lifecycle::{run, Event, Settings, State, Window},
     Result,
 };
 use std::collections::HashMap;
@@ -181,20 +181,23 @@ impl State for MyGame {
             Event::MouseMoved(_) => {
                 let mouse_pos = window.mouse().pos();
                 self.ui.update_hovered_card(mouse_pos.x, mouse_pos.y);
-                
-            },
-            Event::MouseButton(_,_) => self.handle_mouse_input(window),
-            Event::Key(_,_) => self.handle_keyboard(window),
+            }
+            Event::MouseButton(_, _) => self.handle_mouse_input(window),
+            Event::Key(_, _) => self.handle_keyboard(window),
             _ => {}
         };
-                
+
         Ok(())
     }
 
     fn update(&mut self, window: &mut Window) -> Result<()> {
         let delta = window.current_fps() / 1000.0;
-        self.ui
-            .update(self.is_game_ended(), &self.players, self.active_player, delta);
+        self.ui.update(
+            self.is_game_ended(),
+            &self.players,
+            self.active_player,
+            delta,
+        );
         if self.is_game_ended() {
             return Ok(());
         }

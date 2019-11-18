@@ -1,8 +1,8 @@
 use crate::consts;
 use quicksilver::{
     geom::{Shape, Vector},
-    graphics::{ Background::Img, Color, Font, FontStyle},
-    lifecycle::{ Asset, Window},
+    graphics::{Background::Img, Color, Font, FontStyle},
+    lifecycle::{Asset, Window},
     Result,
 };
 
@@ -40,10 +40,7 @@ impl GameEndedText {
         self.font.execute(|f| {
             let style = FontStyle::new(50.0, Color::WHITE);
             let text = f.render(&text, &style)?;
-            window.draw(
-                &text.area().with_center(center),
-                Img(&text),
-            );
+            window.draw(&text.area().with_center(center), Img(&text));
             Ok(())
         })
     }

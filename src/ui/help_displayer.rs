@@ -40,15 +40,18 @@ impl HelpDisplayer {
         if !self.visible {
             return Ok(());
         }
-        let center = Vector::new(consts::SCREEN_WIDTH / 2.0, consts::SCREEN_HEIGHT / 2.0 - 120.0);
-        window.draw(&BG_AREA.with_center(center), Col(Color::BLACK.with_alpha(0.4)));
+        let center = Vector::new(
+            consts::SCREEN_WIDTH / 2.0,
+            consts::SCREEN_HEIGHT / 2.0 - 120.0,
+        );
+        window.draw(
+            &BG_AREA.with_center(center),
+            Col(Color::BLACK.with_alpha(0.4)),
+        );
         self.font.execute(|f| {
             let style = FontStyle::new(30.0, Color::WHITE);
             let text = f.render(consts::HELP_TEXT, &style)?;
-            window.draw(
-                &text.area().with_center(center),
-                Img(&text),
-            );
+            window.draw(&text.area().with_center(center), Img(&text));
             Ok(())
         });
         return Ok(());

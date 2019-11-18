@@ -113,9 +113,9 @@ impl CardDisplayer {
             self.pos_y + (consts::CARD_SIZE_Y / 2.0),
         ];
         let scale = if !self.can_afford || !self.hovered {
-            (0.9,0.9)
+            (0.9, 0.9)
         } else {
-            (1.0,1.0)
+            (1.0, 1.0)
         };
         let color = if self.can_afford {
             self.color
@@ -127,7 +127,7 @@ impl CardDisplayer {
                 &image.area().with_center((pos[0], pos[1])),
                 Blended(&image, color),
                 Transform::scale(scale),
-                0
+                0,
             );
             Ok(())
         });
@@ -135,9 +135,12 @@ impl CardDisplayer {
             return is_ok;
         }
         is_ok = self.front.execute(|image| {
-            window.draw_ex(&image.area().with_center((pos[0], pos[1])), Img(&image),
-            Transform::scale(scale),
-            1);
+            window.draw_ex(
+                &image.area().with_center((pos[0], pos[1])),
+                Img(&image),
+                Transform::scale(scale),
+                1,
+            );
             Ok(())
         });
 
@@ -149,7 +152,9 @@ impl CardDisplayer {
             let style = FontStyle::new(30.0, Color::WHITE);
             let text = f.render(&cost_text, &style)?;
             window.draw_ex(
-                &text.area().with_center((pos[0] - 85.0 * scale.0, pos[1] - 130.0 * scale.1)),
+                &text
+                    .area()
+                    .with_center((pos[0] - 85.0 * scale.0, pos[1] - 130.0 * scale.1)),
                 Img(&text),
                 Transform::IDENTITY,
                 2,
