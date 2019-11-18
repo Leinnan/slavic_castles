@@ -17,29 +17,29 @@ impl Card {
         resources[&self.cost_resource].amount >= self.cost_amount
     }
 
-    pub fn production_change(&self, is_user: bool) -> (ResourceType,i32) {
-        let mut production_change = (ResourceType::Magic,0i32);
+    pub fn production_change(&self, is_user: bool) -> (ResourceType, i32) {
+        let mut production_change = (ResourceType::Magic, 0i32);
         for el in self.effects.iter() {
             match el.effect_type {
-                EffectType::ProductionChange(effect_type,amount) if el.affects_user == is_user => {
+                EffectType::ProductionChange(effect_type, amount) if el.affects_user == is_user => {
                     production_change.0 = effect_type;
                     production_change.1 += amount;
-                },
-                _ => {},
+                }
+                _ => {}
             }
         }
         production_change
     }
 
-    pub fn damage(&self, is_user: bool) -> (i32,bool) {
-        let mut damage = (0i32,false);
+    pub fn damage(&self, is_user: bool) -> (i32, bool) {
+        let mut damage = (0i32, false);
         for el in self.effects.iter() {
             match el.effect_type {
                 EffectType::Damage(amount, ignore_wall) if el.affects_user == is_user => {
                     damage.0 += amount;
                     damage.1 = ignore_wall;
-                },
-                _ => {},
+                }
+                _ => {}
             }
         }
         damage
@@ -51,8 +51,8 @@ impl Card {
             match el.effect_type {
                 EffectType::TowerGrowth(amount) if el.affects_user == is_user => {
                     growth += amount;
-                },
-                _ => {},
+                }
+                _ => {}
             }
         }
         growth
@@ -64,8 +64,8 @@ impl Card {
             match el.effect_type {
                 EffectType::WallsGrowth(amount) if el.affects_user == is_user => {
                     growth += amount;
-                },
-                _ => {},
+                }
+                _ => {}
             }
         }
         growth
@@ -83,7 +83,7 @@ impl fmt::Display for Card {
             ));
         }
         for el in self.effects.iter() {
-            result.push_str(&format!(", {}",el));
+            result.push_str(&format!(", {}", el));
         }
         write!(f, "{}", result)
     }

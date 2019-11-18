@@ -33,10 +33,16 @@ impl Resource {
 
     pub fn change_amount(&mut self, diff: i32) {
         self.amount += diff;
+        if self.amount <= 0 {
+            self.amount = 0;
+        }
     }
 
     pub fn change_production(&mut self, diff: i32) {
         self.production += diff;
+        if self.production <= 0 {
+            self.production = 1;
+        }
     }
 
     pub fn resource_name(res_type: &ResourceType) -> String {

@@ -91,7 +91,10 @@ impl Deck {
                     affects_user: true,
                     effect_type: EffectType::ProductionChange(ResourceType::Tools, 2),
                 },
-                none,
+                CardEffect {
+                    affects_user: false,
+                    effect_type: EffectType::ProductionChange(ResourceType::Tools, -1),
+                },
             ],
         });
         cards.push(Card {
@@ -111,6 +114,22 @@ impl Deck {
             ],
         });
         cards.push(Card {
+            id: 6,
+            cost_resource: ResourceType::Tools,
+            cost_amount: 15,
+            effects: [
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::TowerGrowth(5),
+                },
+                CardEffect {
+                    affects_user: false,
+                    effect_type: EffectType::ProductionChange(ResourceType::Tools, -1),
+                },
+                none,
+            ],
+        });
+        cards.push(Card {
             id: 7,
             cost_resource: ResourceType::Soldiers,
             cost_amount: 12,
@@ -119,7 +138,10 @@ impl Deck {
                     affects_user: false,
                     effect_type: EffectType::Damage(10, false),
                 },
-                none,
+                CardEffect {
+                    affects_user: false,
+                    effect_type: EffectType::ResourceChange(ResourceType::Soldiers, -4),
+                },
                 none,
             ],
         });
@@ -199,6 +221,60 @@ impl Deck {
                 CardEffect {
                     affects_user: false,
                     effect_type: EffectType::ProductionChange(ResourceType::Magic, -1),
+                },
+                none,
+            ],
+        });
+        cards.push(Card {
+            id: 13,
+            cost_resource: ResourceType::Magic,
+            cost_amount: 10,
+            effects: [
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::TowerGrowth(5),
+                },
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::WallsGrowth(-3),
+                },
+                CardEffect {
+                    affects_user: false,
+                    effect_type: EffectType::ResourceChange(ResourceType::Magic, -3),
+                },
+            ],
+        });
+        cards.push(Card {
+            id: 14,
+            cost_resource: ResourceType::Magic,
+            cost_amount: 35,
+            effects: [
+                CardEffect {
+                    affects_user: false,
+                    effect_type: EffectType::ResourceChange(ResourceType::Soldiers, -30),
+                },
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::ResourceChange(ResourceType::Soldiers, -30),
+                },
+                CardEffect {
+                    affects_user: true,
+                    effect_type: EffectType::TowerGrowth(5),
+                },
+            ],
+        });
+        cards.push(Card {
+            id: 15,
+            cost_resource: ResourceType::Tools,
+            cost_amount: 15,
+            effects: [
+                CardEffect {
+                    affects_user: false,
+                    effect_type: EffectType::ProductionChange(ResourceType::Tools, -2),
+                },
+                CardEffect {
+                    affects_user: false,
+                    effect_type: EffectType::ProductionChange(ResourceType::Tools, -2),
                 },
                 none,
             ],

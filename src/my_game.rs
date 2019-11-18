@@ -64,11 +64,11 @@ impl MyGame {
         if !card.can_aford(&player.resources) {
             return;
         }
-        player.card_used(card,true);
+        player.card_used(card, true);
         player.replace_card(index);
 
         let mut other_player = self.players.get_mut(&self.other_player()).unwrap();
-        other_player.card_used(card,false);
+        other_player.card_used(card, false);
 
         self.ui
             .send_message(format!("[{0}]Card used: {1}", self.active_player, card).as_str());

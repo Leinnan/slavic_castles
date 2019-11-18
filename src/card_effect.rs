@@ -31,21 +31,35 @@ impl fmt::Display for CardEffect {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut result: String = match self.effect_type {
             EffectType::ProductionChange(resource, amount) => {
-                let sign = if amount > 0 { '+'} else { '-'};
+                let sign = if amount > 0 { '+' } else { '-' };
                 format!(
-                "{}{} {} production",sign,
-                amount,
-                Resource::resource_name(&resource)
-            )},
+                    "{}{} {} production",
+                    sign,
+                    amount,
+                    Resource::resource_name(&resource)
+                )
+            }
             EffectType::Damage(amount, ignore_wall) if ignore_wall => {
                 format!("{} damage(ignores wall)", amount)
             }
             EffectType::Damage(amount, _) => format!("{} damage", amount),
             EffectType::ResourceChange(resource, amount) => {
-                format!("Adds {} of {}", amount, Resource::resource_name(&resource))
+                let sign = if amount > 0 { '+' } else { '-' };
+                format!(
+                    "{}{} of {}",
+                    sign,
+                    amount,
+                    Resource::resource_name(&resource)
+                )
             }
-            EffectType::TowerGrowth(growth) => format!("Adds {0} HP", growth,),
-            EffectType::WallsGrowth(growth) => format!("Adds {0} shield", growth,),
+            EffectType::TowerGrowth(growth) => {
+                let start_text = if growth > 0 { "Adds" } else { "Remove" };
+                format!("{} {} HP", start_text, growth)
+            }
+            EffectType::WallsGrowth(growth) => {
+                let start_text = if growth > 0 { "Adds" } else { "Remove" };
+                format!("{} {} shield", start_text, growth)
+            }
             EffectType::None => String::new(),
         };
         if self.effect_type != EffectType::None {

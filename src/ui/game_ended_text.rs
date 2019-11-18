@@ -38,7 +38,7 @@ impl GameEndedText {
         let text = format!("Game Ended, {} wins, press R to restart", self.player_name);
 
         self.font.execute(|f| {
-            let style = FontStyle::new(50.0, Color::WHITE);
+            let style = FontStyle::new(50.0, Color::BLACK);
             let text = f.render(&text, &style)?;
             window.draw(&text.area().with_center(center), Img(&text));
             Ok(())

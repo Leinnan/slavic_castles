@@ -1,6 +1,6 @@
+use crate::card::Card;
 use crate::consts;
 use crate::deck::Deck;
-use crate::card::Card;
 use crate::resource::*;
 use rand::prelude::*;
 use std::collections::HashMap;

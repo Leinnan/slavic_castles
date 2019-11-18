@@ -75,7 +75,7 @@ impl CardDisplayer {
 
         self.description.clear();
         for el in card.effects.iter() {
-            self.description.push_str(&format!("{}\n",el));
+            self.description.push_str(&format!("{}\n", el));
         }
 
         self.ready = true;
