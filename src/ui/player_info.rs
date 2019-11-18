@@ -61,7 +61,7 @@ impl PlayerInfo {
         Ok(info)
     }
 
-    pub fn update_info(&mut self, player: &Player, active: bool) {
+    pub fn update_info(&mut self, player: &Player, active: bool, delta_time: f64) {
         self.walls_hp = player.walls_hp;
         self.tower_hp = player.tower_hp;
         self.active = active;
@@ -72,6 +72,10 @@ impl PlayerInfo {
             .update_values(&player.resources[&ResourceType::Magic]);
         self.soldiers
             .update_values(&player.resources[&ResourceType::Soldiers]);
+
+        self.tools.update(delta_time);
+        self.magic.update(delta_time);
+        self.soldiers.update(delta_time);
     }
 
     pub fn draw(&mut self, window: &mut Window) -> Result<()> {

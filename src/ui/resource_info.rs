@@ -1,5 +1,6 @@
 use crate::consts;
 use crate::resource::*;
+use rand::prelude::*;
 use nalgebra;
 use quicksilver::{
     combinators::result,
@@ -20,6 +21,8 @@ pub struct ResourceInfo {
     amount: i32,
     production: i32,
     color: Color,
+    shake_duration: f64,
+    offset: (f32,f32),
 }
 
 impl ResourceInfo {
@@ -31,19 +34,35 @@ impl ResourceInfo {
             amount: consts::BASE_RESOURCE_AMOUNT,
             production: consts::BASE_RESOURCE_PRODUCTION,
             color: color,
+            shake_duration: 0.0,
+            offset: (0f32,0f32),
         };
 
         Ok(result)
     }
 
     pub fn update_values(&mut self, resource: &Resource) {
+        if self.amount > resource.amount || self.production > resource.production {
+            self.shake_duration = 0.4;
+        }
         self.amount = resource.amount;
         self.production = resource.production;
     }
 
+    pub fn update(&mut self, delta: f64) {
+        if self.shake_duration >= 0.0 {
+            self.shake_duration -= delta;
+            let mut rng = thread_rng();
+            self.offset = (rng.gen_range(-5.0, 5.0),rng.gen_range(-15.0, 15.0));
+        } else {
+            self.offset = (0.0,0.0);
+        }
+    }
+
     pub fn draw(&mut self, window: &mut Window, x: f32, y: f32) -> Result<()> {
+        let base_pos = (x + self.offset.0, y + self.offset.1);
         let bg = Rectangle {
-            pos: Vector { x: x, y: y },
+            pos: base_pos.into(),
             size: Vector { x: SIZE, y: SIZE },
         };
         window.draw(&bg, Col(self.color));
@@ -52,7 +71,7 @@ impl ResourceInfo {
             window.draw(
                 &image
                     .area()
-                    .with_center((x + (SIZE / 2.0), y + (SIZE / 2.0))),
+                    .with_center((base_pos.0 + (SIZE / 2.0), base_pos.1 + (SIZE / 2.0))),
                 Img(&image),
             );
             Ok(())
@@ -66,7 +85,7 @@ impl ResourceInfo {
             window.draw(
                 &image
                     .area()
-                    .with_center((x + (SIZE / 2.0), y + (SIZE / 2.0))),
+                    .with_center((base_pos.0 + (SIZE / 2.0), base_pos.1 + (SIZE / 2.0))),
                 Img(&image),
             );
             Ok(())
@@ -82,7 +101,7 @@ impl ResourceInfo {
 
         is_draw_ok = self.font.execute(|f| {
             let text = f.render(&amount_text, &style)?;
-            window.draw(&text.area().with_center((x + 17.0, y + 17.0)), Img(&text));
+            window.draw(&text.area().with_center((base_pos.0 + 17.0, base_pos.1 + 17.0)), Img(&text));
             Ok(())
         });
 
@@ -93,7 +112,7 @@ impl ResourceInfo {
         is_draw_ok = self.font.execute(|f| {
             let text = f.render(&prod_text, &style)?;
             window.draw(
-                &text.area().with_center((x + 17.0, y + SIZE - 17.0)),
+                &text.area().with_center((base_pos.0 + 17.0, base_pos.1 + SIZE - 17.0)),
                 Img(&text),
             );
             Ok(())

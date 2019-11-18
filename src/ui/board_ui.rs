@@ -164,6 +164,7 @@ impl BoardUI {
         game_ended: bool,
         players: &HashMap<PlayerNumer, Player>,
         active_player: PlayerNumer,
+        delta_time: f64
     ) {
         for i in 0..consts::CARDS_IN_DECK as usize {
             let card = players[&PlayerNumer::First].deck.cards[i];
@@ -172,9 +173,9 @@ impl BoardUI {
         }
         let player_left_is_active = active_player == PlayerNumer::First;
         self.player_info_left
-            .update_info(&players[&PlayerNumer::First],player_left_is_active);
+            .update_info(&players[&PlayerNumer::First],player_left_is_active,delta_time);
         self.player_info_right
-            .update_info(&players[&PlayerNumer::Second], !player_left_is_active);
+            .update_info(&players[&PlayerNumer::Second], !player_left_is_active,delta_time);
         self.active_player = active_player;
         self.game_ended = game_ended;
     }

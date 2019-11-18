@@ -192,13 +192,14 @@ impl State for MyGame {
     }
 
     fn update(&mut self, window: &mut Window) -> Result<()> {
+        let delta = window.current_fps() / 1000.0;
         self.ui
-            .update(self.is_game_ended(), &self.players, self.active_player);
+            .update(self.is_game_ended(), &self.players, self.active_player, delta);
         if self.is_game_ended() {
             return Ok(());
         }
         if !self.can_active_player_move() {
-            self.time_before_next_move -= 1.0 / 60.0;
+            self.time_before_next_move -= delta;
             return Ok(());
         }
 
