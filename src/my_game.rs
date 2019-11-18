@@ -6,7 +6,7 @@ use quicksilver::{
     geom::{Circle, Line, Rectangle, Transform, Triangle, Vector},
     graphics::{Background::Col, Color},
     input::{ButtonState, Key, MouseButton},
-    lifecycle::{run, Settings, State, Window},
+    lifecycle::{run, Settings, State, Window,Event},
     Result,
 };
 use std::collections::HashMap;
@@ -176,9 +176,13 @@ impl State for MyGame {
         Ok(game)
     }
 
-    fn update(&mut self, window: &mut Window) -> Result<()> {
+    fn event(&mut self, _event: &Event, window: &mut Window) -> Result<()> {
         self.handle_keyboard(window);
         self.handle_mouse_input(window);
+        Ok(())
+    }
+
+    fn update(&mut self, window: &mut Window) -> Result<()> {
         self.ui
             .update(self.is_game_ended(), &self.players, self.active_player);
         if self.is_game_ended() {
