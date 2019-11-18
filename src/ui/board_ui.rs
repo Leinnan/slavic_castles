@@ -44,10 +44,10 @@ impl BoardUI {
         let mut card_displayers = Vec::new();
         let base_x_pos = (w as f32 - consts::CARDS_IN_DECK as f32 * consts::CARD_SIZE_X) / 2.0;
         for i in 0..consts::CARDS_IN_DECK as usize {
-            let mut card_displayer = CardDisplayer::new()?;
+            let mut card_displayer = CardDisplayer::new(1.0)?;
             card_displayer.set_pos(
                 base_x_pos + i as f32 * consts::CARD_SIZE_X,
-                h as f32 - consts::CARD_SIZE_Y,
+                h as f32 - consts::CARD_SIZE_Y + 20.0,
             );
             card_displayers.push(card_displayer);
         }
@@ -86,7 +86,7 @@ impl BoardUI {
         let base_x_pos =
             (self.screen_width - consts::CARDS_IN_DECK as f32 * consts::CARD_SIZE_X) / 2.0;
         let y_pos = if show {
-            self.screen_height as f32 - consts::CARD_SIZE_Y
+            self.screen_height as f32 - consts::CARD_SIZE_Y + 20.0
         } else {
             self.screen_height as f32 - consts::CARD_SIZE_Y + 100.0
         };

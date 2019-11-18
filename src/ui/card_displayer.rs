@@ -26,10 +26,11 @@ pub struct CardDisplayer {
     ready: bool,
     pos_x: f32,
     pos_y: f32,
+    base_scale: f32,
 }
 
 impl CardDisplayer {
-    pub fn new() -> Result<CardDisplayer> {
+    pub fn new(base_scale: f32) -> Result<CardDisplayer> {
         let result = CardDisplayer {
             bg: Asset::new(Image::load("card_bg.png")),
             color: consts::SOLDIERS_COLOR,
@@ -42,6 +43,7 @@ impl CardDisplayer {
             ready: false,
             pos_x: 0.0,
             pos_y: 0.0,
+            base_scale: base_scale,
         };
         Ok(result)
     }
@@ -75,7 +77,7 @@ impl CardDisplayer {
 
         self.description.clear();
         for el in card.effects.iter() {
-            self.description.push_str(&format!("{}\n", el));
+            self.description.push_str(&format!("{}\n",el));
         }
 
         self.ready = true;
@@ -91,9 +93,9 @@ impl CardDisplayer {
             self.pos_y + (consts::CARD_SIZE_Y / 2.0),
         ];
         let scale = if !self.can_afford || !self.hovered {
-            (0.9, 0.9)
+            (0.9 * self.base_scale, 0.9 * self.base_scale)
         } else {
-            (1.0, 1.0)
+            (1.0 * self.base_scale, 1.0 * self.base_scale)
         };
         let color = if self.can_afford {
             self.color
