@@ -139,6 +139,13 @@ impl BoardUI {
         None
     }
 
+    pub fn update_hovered_card(&mut self, x: f32, y: f32) {
+        for i in 0..self.card_displayers.len() {
+            let is_over = self.card_displayers[i].is_pos_over(x, y);
+            self.card_displayers[i].set_hovered(is_over);
+        }
+    }
+
     pub fn handle_keyboard(&mut self, window: &mut Window) {
         if window.keyboard()[Key::H] == ButtonState::Pressed {
             self.help.switch_visibility();

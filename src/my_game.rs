@@ -177,8 +177,17 @@ impl State for MyGame {
     }
 
     fn event(&mut self, _event: &Event, window: &mut Window) -> Result<()> {
-        self.handle_keyboard(window);
-        self.handle_mouse_input(window);
+        match _event {
+            Event::MouseMoved(_) => {
+                let mouse_pos = window.mouse().pos();
+                self.ui.update_hovered_card(mouse_pos.x, mouse_pos.y);
+                
+            },
+            Event::MouseButton(_,_) => self.handle_mouse_input(window),
+            Event::Key(_,_) => self.handle_keyboard(window),
+            _ => {}
+        };
+                
         Ok(())
     }
 

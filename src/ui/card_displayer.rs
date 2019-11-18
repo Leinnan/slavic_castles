@@ -4,7 +4,7 @@ use crate::resource::*;
 use nalgebra;
 use quicksilver::{
     combinators::result,
-    geom::{Rectangle, Shape, Vector},
+    geom::{Rectangle, Shape, Transform, Vector},
     graphics::{
         Background::Blended, Background::Col, Background::Img, Color, Font, FontStyle, Image,
     },
@@ -22,6 +22,7 @@ pub struct CardDisplayer {
     cost: i32,
     description: String,
     can_afford: bool,
+    hovered: bool,
     ready: bool,
     pos_x: f32,
     pos_y: f32,
@@ -37,6 +38,7 @@ impl CardDisplayer {
             font: Asset::new(Font::load("coolvetica.ttf")),
             description: "".to_string(),
             can_afford: false,
+            hovered: false,
             ready: false,
             pos_x: 0.0,
             pos_y: 0.0,
@@ -47,6 +49,10 @@ impl CardDisplayer {
     pub fn set_pos(&mut self, x: f32, y: f32) {
         self.pos_x = x;
         self.pos_y = y;
+    }
+
+    pub fn set_hovered(&mut self, hovered: bool) {
+        self.hovered = hovered;
     }
 
     pub fn is_pos_over(&self, x: f32, y: f32) -> bool {
@@ -106,15 +112,22 @@ impl CardDisplayer {
             self.pos_x + (consts::CARD_SIZE_X / 2.0),
             self.pos_y + (consts::CARD_SIZE_Y / 2.0),
         ];
+        let scale = if !self.can_afford || !self.hovered {
+            (0.9,0.9)
+        } else {
+            (1.0,1.0)
+        };
         let color = if self.can_afford {
             self.color
         } else {
             self.color.multiply(consts::GREY)
         };
         is_ok = self.bg.execute(|image| {
-            window.draw(
+            window.draw_ex(
                 &image.area().with_center((pos[0], pos[1])),
                 Blended(&image, color),
+                Transform::scale(scale),
+                0
             );
             Ok(())
         });
@@ -122,7 +135,9 @@ impl CardDisplayer {
             return is_ok;
         }
         is_ok = self.front.execute(|image| {
-            window.draw(&image.area().with_center((pos[0], pos[1])), Img(&image));
+            window.draw_ex(&image.area().with_center((pos[0], pos[1])), Img(&image),
+            Transform::scale(scale),
+            1);
             Ok(())
         });
 
@@ -133,9 +148,11 @@ impl CardDisplayer {
         is_ok = self.font.execute(|f| {
             let style = FontStyle::new(30.0, Color::WHITE);
             let text = f.render(&cost_text, &style)?;
-            window.draw(
-                &text.area().with_center((pos[0] - 85.0, pos[1] - 130.0)),
+            window.draw_ex(
+                &text.area().with_center((pos[0] - 85.0 * scale.0, pos[1] - 130.0 * scale.1)),
                 Img(&text),
+                Transform::IDENTITY,
+                2,
             );
             Ok(())
         });
@@ -145,11 +162,13 @@ impl CardDisplayer {
             return is_ok;
         }
         is_ok = self.font.execute(|f| {
-            let style = FontStyle::new(23.0, Color::WHITE);
+            let style = FontStyle::new(23.0 * scale.0, Color::WHITE);
             let text = f.render(&result, &style)?;
-            window.draw(
-                &text.area().with_center((pos[0], pos[1] + 30.0)),
+            window.draw_ex(
+                &text.area().with_center((pos[0], pos[1] + 30.0 * scale.1)),
                 Img(&text),
+                Transform::IDENTITY,
+                2,
             );
             Ok(())
         });
