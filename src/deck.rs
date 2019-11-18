@@ -29,11 +29,6 @@ impl Deck {
                 none,
                 none,
             ],
-            tower_growth: 0,
-            walls_growth: 0,
-            damage: 3,
-            production_resource: ResourceType::Soldiers,
-            production_change: 0,
         });
         cards.push(Card {
             id: 2,
@@ -53,11 +48,6 @@ impl Deck {
                     effect_type: EffectType::TowerGrowth(1),
                 },
             ],
-            tower_growth: 1,
-            walls_growth: 3,
-            damage: 1,
-            production_resource: ResourceType::Soldiers,
-            production_change: 0,
         });
         cards.push(Card {
             id: 3,
@@ -71,11 +61,6 @@ impl Deck {
                 none,
                 none,
             ],
-            tower_growth: 0,
-            walls_growth: 0,
-            damage: 5,
-            production_resource: ResourceType::Soldiers,
-            production_change: 0,
         });
         cards.push(Card {
             id: 4,
@@ -92,11 +77,6 @@ impl Deck {
                 },
                 none,
             ],
-            tower_growth: 0,
-            walls_growth: 0,
-            damage: 1,
-            production_resource: ResourceType::Soldiers,
-            production_change: 2,
         });
         cards.push(Card {
             id: 5,
@@ -113,11 +93,6 @@ impl Deck {
                 },
                 none,
             ],
-            tower_growth: 0,
-            walls_growth: 3,
-            damage: 0,
-            production_resource: ResourceType::Tools,
-            production_change: 2,
         });
         cards.push(Card {
             id: 6,
@@ -134,11 +109,6 @@ impl Deck {
                 },
                 none,
             ],
-            tower_growth: 10,
-            walls_growth: 0,
-            damage: 0,
-            production_resource: ResourceType::Tools,
-            production_change: 2,
         });
         cards.push(Card {
             id: 7,
@@ -152,11 +122,6 @@ impl Deck {
                 none,
                 none,
             ],
-            tower_growth: 0,
-            walls_growth: 0,
-            damage: 10,
-            production_resource: ResourceType::Soldiers,
-            production_change: 0,
         });
         cards.push(Card {
             id: 8,
@@ -173,11 +138,6 @@ impl Deck {
                 },
                 none,
             ],
-            tower_growth: 4,
-            walls_growth: 0,
-            damage: 0,
-            production_resource: ResourceType::Magic,
-            production_change: 1,
         });
         cards.push(Card {
             id: 9,
@@ -191,11 +151,6 @@ impl Deck {
                 none,
                 none,
             ],
-            tower_growth: 0,
-            walls_growth: 1,
-            damage: 0,
-            production_resource: ResourceType::Magic,
-            production_change: 0,
         });
         cards.push(Card {
             id: 10,
@@ -212,11 +167,6 @@ impl Deck {
                 },
                 none,
             ],
-            tower_growth: 0,
-            walls_growth: 2,
-            damage: 2,
-            production_resource: ResourceType::Magic,
-            production_change: 0,
         });
         cards.push(Card {
             id: 11,
@@ -236,13 +186,27 @@ impl Deck {
                     effect_type: EffectType::ProductionChange(ResourceType::Magic, 1),
                 },
             ],
-            tower_growth: 2,
-            walls_growth: 3,
-            damage: 0,
-            production_resource: ResourceType::Magic,
-            production_change: 1,
         });
-
+        cards.push(Card {
+            id: 12,
+            cost_resource: ResourceType::Magic,
+            cost_amount: 9,
+            effects: [
+                CardEffect {
+                    affects_user: false,
+                    effect_type: EffectType::Damage(5, true),
+                },
+                CardEffect {
+                    affects_user: false,
+                    effect_type: EffectType::ProductionChange(ResourceType::Magic, -1),
+                },
+                none,
+            ],
+        });
+        // let cards_json = serde_json::to_string(&cards);
+        // if cards_json.is_ok() {
+        //     println!("{}",cards_json.unwrap());
+        // }
         let mut deck = Deck {
             cards: Vec::new(),
             cards_collections: cards,

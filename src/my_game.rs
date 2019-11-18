@@ -3,8 +3,7 @@ use crate::consts;
 use crate::player::*;
 use crate::ui::board_ui::BoardUI;
 use quicksilver::{
-    geom::{Circle, Line, Rectangle, Transform, Triangle, Vector},
-    graphics::{Background::Col, Color},
+    graphics::Color,
     input::{ButtonState, Key, MouseButton},
     lifecycle::{run, Event, Settings, State, Window},
     Result,

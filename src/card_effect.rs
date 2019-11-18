@@ -30,15 +30,17 @@ impl CardEffect {
 impl fmt::Display for CardEffect {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut result: String = match self.effect_type {
-            EffectType::ProductionChange(resource, amount) => format!(
-                "{} to {} production",
+            EffectType::ProductionChange(resource, amount) => {
+                let sign = if amount > 0 { '+'} else { '-'};
+                format!(
+                "{}{} {} production",sign,
                 amount,
                 Resource::resource_name(&resource)
-            ),
+            )},
             EffectType::Damage(amount, ignore_wall) if ignore_wall => {
                 format!("{} damage(ignores wall)", amount)
             }
-            EffectType::Damage(amount, ignore_wall) => format!("{} damage", amount),
+            EffectType::Damage(amount, _) => format!("{} damage", amount),
             EffectType::ResourceChange(resource, amount) => {
                 format!("Adds {} of {}", amount, Resource::resource_name(&resource))
             }

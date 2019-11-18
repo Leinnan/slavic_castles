@@ -1,112 +1,313 @@
 [
     {
         "id": 1,
-        "cost_resource": "Soldiers",
         "cost_amount": 3,
-        "tower_growth": 0,
-        "walls_growth": 0,
-        "damage": 3,
-        "production_resource": "Soldiers",
-        "production_change": 0
+        "cost_resource": "Soldiers",
+        "effects": [
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        3,
+                        false
+                    ]
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": "None"
+            },
+            {
+                "affects_user": true,
+                "effect_type": "None"
+            }
+        ]
     },
     {
         "id": 2,
-        "cost_resource": "Tools",
         "cost_amount": 4,
-        "tower_growth": 1,
-        "walls_growth": 3,
-        "damage": 1,
-        "production_resource": "Soldiers",
-        "production_change": 0
+        "cost_resource": "Tools",
+        "effects": [
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        1,
+                        false
+                    ]
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "WallsGrowth": 3
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "TowerGrowth": 1
+                }
+            }
+        ]
     },
     {
         "id": 3,
-        "cost_resource": "Soldiers",
         "cost_amount": 3,
-        "tower_growth": 0,
-        "walls_growth": 0,
-        "damage": 5,
-        "production_resource": "Soldiers",
-        "production_change": 0
+        "cost_resource": "Soldiers",
+        "effects": [
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        5,
+                        false
+                    ]
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": "None"
+            },
+            {
+                "affects_user": true,
+                "effect_type": "None"
+            }
+        ]
     },
     {
         "id": 4,
-        "cost_resource": "Soldiers",
         "cost_amount": 7,
-        "tower_growth": 0,
-        "walls_growth": 0,
-        "damage": 1,
-        "production_resource": "Soldiers",
-        "production_change": 2
+        "cost_resource": "Soldiers",
+        "effects": [
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        1,
+                        false
+                    ]
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "ProductionChange": [
+                        "Soldiers",
+                        2
+                    ]
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": "None"
+            }
+        ]
     },
     {
         "id": 5,
-        "cost_resource": "Tools",
         "cost_amount": 10,
-        "tower_growth": 0,
-        "walls_growth": 3,
-        "damage": 0,
-        "production_resource": "Tools",
-        "production_change": 2
+        "cost_resource": "Tools",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "WallsGrowth": 3
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "ProductionChange": [
+                        "Tools",
+                        2
+                    ]
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": "None"
+            }
+        ]
     },
     {
         "id": 6,
-        "cost_resource": "Tools",
         "cost_amount": 15,
-        "tower_growth": 10,
-        "walls_growth": 0,
-        "damage": 0,
-        "production_resource": "Tools",
-        "production_change": 2
+        "cost_resource": "Tools",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "TowerGrowth": 3
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "ProductionChange": [
+                        "Tools",
+                        2
+                    ]
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": "None"
+            }
+        ]
     },
     {
         "id": 7,
-        "cost_resource": "Soldiers",
         "cost_amount": 12,
-        "tower_growth": 0,
-        "walls_growth": 0,
-        "damage": 10,
-        "production_resource": "Soldiers",
-        "production_change": 0
+        "cost_resource": "Soldiers",
+        "effects": [
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        10,
+                        false
+                    ]
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": "None"
+            },
+            {
+                "affects_user": true,
+                "effect_type": "None"
+            }
+        ]
     },
     {
         "id": 8,
-        "cost_resource": "Magic",
         "cost_amount": 8,
-        "tower_growth": 4,
-        "walls_growth": 0,
-        "damage": 0,
-        "production_resource": "Magic",
-        "production_change": 1
+        "cost_resource": "Magic",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "TowerGrowth": 4
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "ProductionChange": [
+                        "Magic",
+                        1
+                    ]
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": "None"
+            }
+        ]
     },
     {
         "id": 9,
-        "cost_resource": "Magic",
         "cost_amount": 1,
-        "tower_growth": 0,
-        "walls_growth": 1,
-        "damage": 0,
-        "production_resource": "Magic",
-        "production_change": 0
+        "cost_resource": "Magic",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "WallsGrowth": 1
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": "None"
+            },
+            {
+                "affects_user": true,
+                "effect_type": "None"
+            }
+        ]
     },
     {
         "id": 10,
-        "cost_resource": "Magic",
         "cost_amount": 3,
-        "tower_growth": 0,
-        "walls_growth": 2,
-        "damage": 2,
-        "production_resource": "Magic",
-        "production_change": 0
+        "cost_resource": "Magic",
+        "effects": [
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        2,
+                        true
+                    ]
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "WallsGrowth": 2
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": "None"
+            }
+        ]
     },
     {
         "id": 11,
-        "cost_resource": "Magic",
         "cost_amount": 6,
-        "tower_growth": 2,
-        "walls_growth": 3,
-        "damage": 0,
-        "production_resource": "Magic",
-        "production_change": 1
+        "cost_resource": "Magic",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "TowerGrowth": 2
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "WallsGrowth": 3
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "ProductionChange": [
+                        "Magic",
+                        1
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "id": 12,
+        "cost_amount": 9,
+        "cost_resource": "Magic",
+        "effects": [
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        5,
+                        true
+                    ]
+                }
+            },
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "ProductionChange": [
+                        "Magic",
+                        -1
+                    ]
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": "None"
+            }
+        ]
     }
 ]

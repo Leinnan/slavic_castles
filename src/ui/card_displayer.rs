@@ -77,31 +77,6 @@ impl CardDisplayer {
         for el in card.effects.iter() {
             self.description.push_str(&format!("{}\n",el));
         }
-        // let growth = (card.tower_growth > 0, card.walls_growth > 0);
-        // match growth {
-        //     (true, true) => self.description.push_str(&format!(
-        //         "Adds {0} HP and {1} shield\n",
-        //         card.tower_growth, card.walls_growth,
-        //     )),
-        //     (true, false) => self
-        //         .description
-        //         .push_str(&format!("Adds {0} HP\n", card.tower_growth,)),
-        //     (false, true) => self
-        //         .description
-        //         .push_str(&format!("Adds {0} shield\n", card.walls_growth,)),
-        //     _ => self.description.clear(),
-        // };
-        // if card.damage > 0 {
-        //     self.description
-        //         .push_str(&format!("{0} Damage to enemy\n", card.damage));
-        // }
-        // if card.production_change != 0 {
-        //     self.description.push_str(&format!(
-        //         "+{1} to {0} production",
-        //         Resource::resource_name(&card.production_resource),
-        //         card.production_change,
-        //     ));
-        // }
 
         self.ready = true;
     }

@@ -7,14 +7,9 @@ use std::fmt;
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct Card {
     pub id: i32,
+    pub cost_amount: i32,
     pub cost_resource: ResourceType,
     pub effects: [CardEffect; 3],
-    pub cost_amount: i32,
-    pub tower_growth: i32,
-    pub walls_growth: i32,
-    pub damage: i32,
-    pub production_resource: ResourceType,
-    pub production_change: i32,
 }
 
 impl Card {
@@ -87,21 +82,8 @@ impl fmt::Display for Card {
                 self.cost_amount
             ));
         }
-        if self.tower_growth + self.walls_growth > 0 {
-            result.push_str(&format!(
-                ", Growth: {0}+{1}",
-                self.tower_growth, self.walls_growth,
-            ));
-        }
-        if self.damage > 0 {
-            result.push_str(&format!(", Damage: {0}", self.damage));
-        }
-        if self.production_change != 0 {
-            result.push_str(&format!(
-                ", Production({0}): {1}",
-                Resource::resource_name(&self.production_resource),
-                self.production_change,
-            ));
+        for el in self.effects.iter() {
+            result.push_str(&format!(", {}",el));
         }
         write!(f, "{}", result)
     }
