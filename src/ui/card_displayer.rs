@@ -129,7 +129,7 @@ impl CardDisplayer {
         }
         let cost_text = format!("{}", self.cost);
         is_ok = self.font.execute(|f| {
-            let style = FontStyle::new(30.0, Color::WHITE);
+            let style = FontStyle::new(30.0 * scale.0, Color::WHITE);
             let text = f.render(&cost_text, &style)?;
             window.draw_ex(
                 &text
