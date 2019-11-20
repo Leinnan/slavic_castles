@@ -16,8 +16,6 @@ use quicksilver::{
 };
 use std::collections::HashMap;
 
-type Point2 = nalgebra::Point2<f32>;
-
 pub struct BoardUI {
     console: Console,
     game_ended_text: GameEndedText,
@@ -75,6 +73,8 @@ impl BoardUI {
         self.console.message("Game restarted");
         self.game_ended_text.enable(false);
         self.deck_ui_enabled = false;
+        self.player_info_left.game_restarted();
+        self.player_info_right.game_restarted();
     }
 
     pub fn hide_help(&mut self) {

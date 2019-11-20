@@ -1,11 +1,12 @@
 use crate::consts;
 use crate::player::*;
 use crate::resource::*;
+use crate::ui::animations;
 use crate::ui::resource_info::ResourceInfo;
 use nalgebra;
 use quicksilver::{
     combinators::result,
-    geom::{Rectangle, Shape, Vector},
+    geom::{Rectangle, Shape, Transform, Vector},
     graphics::{
         Background::Blended, Background::Col, Background::Img, Color, Font, FontStyle, Image,
     },
@@ -13,8 +14,6 @@ use quicksilver::{
     Future, Result,
 };
 use rand::prelude::*;
-
-type Point2 = nalgebra::Point2<f32>;
 
 const TEXTS_Y_POS: f32 = 175.0;
 const TOWER_TEXT_X_OFFSET: f32 = 164.0;
@@ -35,6 +34,7 @@ pub struct PlayerInfo {
     soldiers: ResourceInfo,
     shake_duration: f64,
     offset: (f32, f32),
+    scale_anim: animations::AnimationFloat,
 }
 
 impl PlayerInfo {
@@ -64,11 +64,17 @@ impl PlayerInfo {
             soldiers: soldiers,
             shake_duration: 0.0,
             offset: (0f32, 0f32),
+            scale_anim: animations::AnimationFloat::new(0.0, 1.0, 0.5, 0.9),
         };
         Ok(info)
     }
 
+    pub fn game_restarted(&mut self) {
+        self.scale_anim.reset();
+    }
+
     pub fn update_info(&mut self, player: &Player, active: bool, delta: f64) {
+        self.scale_anim.update(delta);
         if self.walls_hp > player.walls_hp || self.tower_hp > player.tower_hp {
             self.shake_duration = consts::AVATAR_SHAKE_DURATION;
         }
@@ -115,6 +121,10 @@ impl PlayerInfo {
             base_x_pos + (FRAME_SIZE / 2.0),
             base_y_pos + (FRAME_SIZE / 2.0),
         );
+        let scale = (
+            self.scale_anim.get_current_value(),
+            self.scale_anim.get_current_value(),
+        );
         let mut is_ok;
 
         let color = if self.active {
@@ -124,7 +134,12 @@ impl PlayerInfo {
         };
 
         is_ok = self.avatar.execute(|image| {
-            window.draw(&image.area().with_center(center), Blended(&image, color));
+            window.draw_ex(
+                &image.area().with_center(center),
+                Blended(&image, color),
+                Transform::scale(scale),
+                0,
+            );
             Ok(())
         });
 
@@ -133,22 +148,33 @@ impl PlayerInfo {
         }
 
         is_ok = self.frame.execute(|image| {
-            window.draw(&image.area().with_center(center), Img(&image));
+            window.draw_ex(
+                &image.area().with_center(center),
+                Img(&image),
+                Transform::scale(scale),
+                1,
+            );
             Ok(())
         });
 
         if !is_ok.is_ok() {
             return is_ok;
         }
+
+        if !self.scale_anim.is_ended() {
+            return is_ok;
+        }
         let walls_text = format!("{}", self.walls_hp);
         let style = FontStyle::new(26.0, consts::FONT_COLOR);
         is_ok = self.font.execute(|f| {
             let text = f.render(&walls_text, &style)?;
-            window.draw(
+            window.draw_ex(
                 &text
                     .area()
-                    .with_center((base_x_pos + 26.0, base_y_pos + 172.0)),
+                    .with_center((base_x_pos + 26.0 * scale.0, base_y_pos + 172.0 * scale.1)),
                 Img(&text),
+                Transform::scale(scale),
+                2,
             );
             Ok(())
         });
@@ -159,11 +185,14 @@ impl PlayerInfo {
 
         is_ok = self.font.execute(|f| {
             let text = f.render(&tower_text, &style)?;
-            window.draw(
-                &text
-                    .area()
-                    .with_center((base_x_pos + FRAME_SIZE - 23.0, base_y_pos + 175.0)),
+            window.draw_ex(
+                &text.area().with_center((
+                    base_x_pos + (FRAME_SIZE - 23.0) * scale.0,
+                    base_y_pos + 175.0 * scale.1,
+                )),
                 Img(&text),
+                Transform::scale(scale),
+                2,
             );
             Ok(())
         });

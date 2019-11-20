@@ -159,13 +159,14 @@ impl State for MyGame {
         players.insert(PlayerNumer::Second, Player::new(false, false));
         let ui = BoardUI::new()?;
 
-        let game = MyGame {
+        let mut game = MyGame {
             players,
             active_player: PlayerNumer::First,
             time_before_next_move: 0.0,
             game_ended: false,
             ui: ui,
         };
+        game.reset_game(false);
         Ok(game)
     }
 

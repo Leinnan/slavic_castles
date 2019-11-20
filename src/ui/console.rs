@@ -9,8 +9,6 @@ use quicksilver::{
 };
 use std::collections::VecDeque;
 
-type Point2 = nalgebra::Point2<f32>;
-
 const BG_AREA: Rectangle = Rectangle {
     pos: Vector { x: 0.0, y: 0.0 },
     size: Vector { x: 400.0, y: 600.0 },

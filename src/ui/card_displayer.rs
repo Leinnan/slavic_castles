@@ -1,7 +1,7 @@
 use crate::card::Card;
-use crate::ui::animations;
 use crate::consts;
 use crate::resource::*;
+use crate::ui::animations;
 use nalgebra;
 use quicksilver::{
     combinators::result,
@@ -12,8 +12,6 @@ use quicksilver::{
     lifecycle::{run, Asset, Settings, State, Window},
     Future, Result,
 };
-
-type Point2 = nalgebra::Point2<f32>;
 
 pub struct CardDisplayer {
     bg: Asset<Image>,
@@ -44,7 +42,7 @@ impl CardDisplayer {
             ready: false,
             pos_x: 0.0,
             pos_y: 0.0,
-            scale_anim: animations::AnimationFloat::new(0.9,base_scale,0.0,0.3),
+            scale_anim: animations::AnimationFloat::new(0.9, base_scale, 0.0, 0.3),
         };
         Ok(result)
     }
@@ -83,7 +81,7 @@ impl CardDisplayer {
 
         self.description.clear();
         for el in card.effects.iter() {
-            self.description.push_str(&format!("{}\n",el));
+            self.description.push_str(&format!("{}\n", el));
         }
 
         self.ready = true;
@@ -99,9 +97,12 @@ impl CardDisplayer {
             self.pos_y + (consts::CARD_SIZE_Y / 2.0),
         ];
         let scale = if !self.can_afford {
-            (0.9,0.9)
+            (0.9, 0.9)
         } else {
-            (self.scale_anim.get_current_value(), self.scale_anim.get_current_value())
+            (
+                self.scale_anim.get_current_value(),
+                self.scale_anim.get_current_value(),
+            )
         };
         let color = if self.can_afford {
             self.color

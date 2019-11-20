@@ -1,4 +1,5 @@
 use crate::consts;
+use crate::ui::animations;
 use nalgebra;
 use quicksilver::{
     combinators::result,
@@ -7,8 +8,6 @@ use quicksilver::{
     lifecycle::{run, Asset, Settings, State, Window},
     Future, Result,
 };
-
-type Point2 = nalgebra::Point2<f32>;
 
 const BG_AREA: Rectangle = Rectangle {
     pos: Vector { x: 0.0, y: 0.0 },

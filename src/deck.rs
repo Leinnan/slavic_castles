@@ -2,11 +2,6 @@ use crate::card::Card;
 use crate::card_effect::*;
 use crate::consts::*;
 use crate::resource::*;
-use rand::prelude::*;
-use serde::{Deserialize, Serialize};
-use serde_json;
-use std::collections::HashMap;
-use std::fmt;
 use quicksilver::{
     combinators::result,
     geom::{Rectangle, Shape, Vector},
@@ -14,6 +9,11 @@ use quicksilver::{
     lifecycle::{run, Asset, Settings, State, Window},
     Future, Result,
 };
+use rand::prelude::*;
+use serde::{Deserialize, Serialize};
+use serde_json;
+use std::collections::HashMap;
+use std::fmt;
 use std::str;
 
 pub struct Deck {
@@ -79,9 +79,8 @@ impl Deck {
 
     #[cfg(not(target_arch = "wasm32"))]
     fn load_deck() -> Vec<Card> {
-        
         let mut json_file = Asset::new(quicksilver::load_file("deck.json"));
-        let mut buf : Vec<u8> = Vec::new();
+        let mut buf: Vec<u8> = Vec::new();
         json_file.execute(|f| {
             buf = f.clone();
             Ok(())
