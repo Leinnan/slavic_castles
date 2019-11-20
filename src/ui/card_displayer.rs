@@ -24,12 +24,12 @@ pub struct CardDisplayer {
     hovered: bool,
     ready: bool,
     pos_x: f32,
-    pos_y: f32,
     scale_anim: animations::AnimationFloat,
+    pos_y_anim: animations::AnimationFloat,
 }
 
 impl CardDisplayer {
-    pub fn new(base_scale: f32) -> Result<CardDisplayer> {
+    pub fn new(base_scale: f32, x: f32, y: f32) -> Result<CardDisplayer> {
         let result = CardDisplayer {
             bg: Asset::new(Image::load("card_bg.png")),
             color: consts::SOLDIERS_COLOR,
@@ -40,16 +40,15 @@ impl CardDisplayer {
             can_afford: false,
             hovered: false,
             ready: false,
-            pos_x: 0.0,
-            pos_y: 0.0,
+            pos_x: x,
             scale_anim: animations::AnimationFloat::new(0.9, base_scale, 0.0, 0.3),
+            pos_y_anim: animations::AnimationFloat::new(y, y + 230.0, 0.0, 0.3),
         };
         Ok(result)
     }
 
-    pub fn set_pos(&mut self, x: f32, y: f32) {
-        self.pos_x = x;
-        self.pos_y = y;
+    pub fn show(&mut self, show: bool) {
+        self.pos_y_anim.play(show, false);
     }
 
     pub fn set_hovered(&mut self, hovered: bool) {
@@ -60,14 +59,15 @@ impl CardDisplayer {
     pub fn is_pos_over(&self, x: f32, y: f32) -> bool {
         let start_x = self.pos_x + 10.0;
         let end_x = self.pos_x + consts::CARD_SIZE_X - 10.0 * 2.0;
-        let start_y = self.pos_y + 10.0;
-        let end_y = self.pos_y + consts::CARD_SIZE_Y - 10.0 * 2.0;
+        let start_y = self.pos_y_anim.get_current_value() + 10.0;
+        let end_y = self.pos_y_anim.get_current_value() + consts::CARD_SIZE_Y - 10.0 * 2.0;
 
         x >= start_x && x <= end_x && y >= start_y && y <= end_y
     }
 
     pub fn update(&mut self, delta_time: f64) {
         self.scale_anim.update(delta_time);
+        self.pos_y_anim.update(delta_time);
     }
 
     pub fn update_info(&mut self, card: &Card, can_afford: bool) {
@@ -94,7 +94,7 @@ impl CardDisplayer {
         let mut is_ok;
         let pos = [
             self.pos_x + (consts::CARD_SIZE_X / 2.0),
-            self.pos_y + (consts::CARD_SIZE_Y / 2.0),
+            self.pos_y_anim.get_current_value() + (consts::CARD_SIZE_Y / 2.0),
         ];
         let scale = if !self.can_afford {
             (0.9, 0.9)

@@ -42,11 +42,11 @@ impl BoardUI {
         let mut card_displayers = Vec::new();
         let base_x_pos = (w as f32 - consts::CARDS_IN_DECK as f32 * consts::CARD_SIZE_X) / 2.0;
         for i in 0..consts::CARDS_IN_DECK as usize {
-            let mut card_displayer = CardDisplayer::new(1.0)?;
-            card_displayer.set_pos(
+            let mut card_displayer = CardDisplayer::new(
+                1.0,
                 base_x_pos + i as f32 * consts::CARD_SIZE_X,
                 h as f32 - consts::CARD_SIZE_Y + 20.0,
-            );
+            )?;
             card_displayers.push(card_displayer);
         }
 
@@ -83,15 +83,8 @@ impl BoardUI {
 
     pub fn enable_ui_deck(&mut self, show: bool) {
         self.deck_ui_enabled = show;
-        let base_x_pos =
-            (self.screen_width - consts::CARDS_IN_DECK as f32 * consts::CARD_SIZE_X) / 2.0;
-        let y_pos = if show {
-            self.screen_height as f32 - consts::CARD_SIZE_Y + 20.0
-        } else {
-            self.screen_height as f32 - consts::CARD_SIZE_Y + 100.0
-        };
         for i in 0..consts::CARDS_IN_DECK as usize {
-            self.card_displayers[i].set_pos(base_x_pos + i as f32 * consts::CARD_SIZE_X, y_pos);
+            self.card_displayers[i].show(show);
         }
     }
 
@@ -102,32 +95,6 @@ impl BoardUI {
     pub fn set_winner(&mut self, name: String) {
         self.game_ended_text.set_player_name(name);
         self.game_ended_text.enable(true);
-    }
-
-    fn draw_deck_text(&self, player: &Player, align_right: bool, active: bool) {
-        // let color: graphics::Color = if active {
-        //     consts::ACTIVE_FONT_COLOR.into()
-        // } else {
-        //     consts::FONT_COLOR.into()
-        // };
-
-        // let text = graphics::Text::new((format!("{}", player.deck), self.font, consts::TEXT_SIZE));
-
-        // let dest_point = if align_right {
-        //     let (w, _) = graphics::drawable_size(ctx);
-        //     let text_length =
-        //         player.to_string().chars().count() as f32 * consts::FONT_WIDTH * consts::TEXT_SCALE;
-        //     Point2::new(w as f32 - text_length - 10.0, 210.0)
-        // } else {
-        //     Point2::new(10.0, 210.0)
-        // };
-
-        // let drawparams = graphics::DrawParam::default()
-        //     .dest(dest_point)
-        //     .color(color)
-        //     .scale([consts::TEXT_SCALE, consts::TEXT_SCALE]);
-
-        // graphics::draw(ctx, &text, drawparams);
     }
 
     pub fn card_index_on_pos(&mut self, x: f32, y: f32) -> Option<usize> {
