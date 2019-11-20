@@ -1,4 +1,5 @@
 use crate::card::Card;
+use crate::ui::animations;
 use crate::consts;
 use crate::resource::*;
 use nalgebra;
@@ -26,7 +27,7 @@ pub struct CardDisplayer {
     ready: bool,
     pos_x: f32,
     pos_y: f32,
-    base_scale: f32,
+    scale_anim: animations::AnimationFloat,
 }
 
 impl CardDisplayer {
@@ -43,7 +44,7 @@ impl CardDisplayer {
             ready: false,
             pos_x: 0.0,
             pos_y: 0.0,
-            base_scale: base_scale,
+            scale_anim: animations::AnimationFloat::new(0.9,base_scale,0.0,0.3),
         };
         Ok(result)
     }
@@ -54,6 +55,7 @@ impl CardDisplayer {
     }
 
     pub fn set_hovered(&mut self, hovered: bool) {
+        self.scale_anim.play(!hovered, false);
         self.hovered = hovered;
     }
 
@@ -64,6 +66,10 @@ impl CardDisplayer {
         let end_y = self.pos_y + consts::CARD_SIZE_Y - 10.0 * 2.0;
 
         x >= start_x && x <= end_x && y >= start_y && y <= end_y
+    }
+
+    pub fn update(&mut self, delta_time: f64) {
+        self.scale_anim.update(delta_time);
     }
 
     pub fn update_info(&mut self, card: &Card, can_afford: bool) {
@@ -92,10 +98,10 @@ impl CardDisplayer {
             self.pos_x + (consts::CARD_SIZE_X / 2.0),
             self.pos_y + (consts::CARD_SIZE_Y / 2.0),
         ];
-        let scale = if !self.can_afford || !self.hovered {
-            (0.9 * self.base_scale, 0.9 * self.base_scale)
+        let scale = if !self.can_afford {
+            (0.9,0.9)
         } else {
-            (1.0 * self.base_scale, 1.0 * self.base_scale)
+            (self.scale_anim.get_current_value(), self.scale_anim.get_current_value())
         };
         let color = if self.can_afford {
             self.color
@@ -129,14 +135,14 @@ impl CardDisplayer {
         }
         let cost_text = format!("{}", self.cost);
         is_ok = self.font.execute(|f| {
-            let style = FontStyle::new(30.0 * scale.0, Color::WHITE);
+            let style = FontStyle::new(30.0, Color::WHITE);
             let text = f.render(&cost_text, &style)?;
             window.draw_ex(
                 &text
                     .area()
                     .with_center((pos[0] - 85.0 * scale.0, pos[1] - 130.0 * scale.1)),
                 Img(&text),
-                Transform::IDENTITY,
+                Transform::scale(scale),
                 2,
             );
             Ok(())
@@ -147,12 +153,12 @@ impl CardDisplayer {
             return is_ok;
         }
         is_ok = self.font.execute(|f| {
-            let style = FontStyle::new(23.0 * scale.0, Color::WHITE);
+            let style = FontStyle::new(23.0, Color::WHITE);
             let text = f.render(&result, &style)?;
             window.draw_ex(
                 &text.area().with_center((pos[0], pos[1] + 50.0 * scale.1)),
                 Img(&text),
-                Transform::IDENTITY,
+                Transform::scale(scale),
                 2,
             );
             Ok(())

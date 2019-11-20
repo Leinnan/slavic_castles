@@ -170,6 +170,7 @@ impl BoardUI {
             let card = players[&PlayerNumer::First].deck.cards[i];
             let can_afford = card.can_aford(&players[&PlayerNumer::First].resources);
             self.card_displayers[i].update_info(&card, can_afford);
+            self.card_displayers[i].update(delta_time);
         }
         let player_left_is_active = active_player == PlayerNumer::First;
         self.player_info_left.update_info(
