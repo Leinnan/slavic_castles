@@ -1,10 +1,10 @@
 use crate::consts;
 use crate::ui::animations;
-use nalgebra;
 use quicksilver::{
-    combinators::result,
-    geom::{Rectangle, Shape, Vector},
-    graphics::{Background::Col, Background::Img, Color, Font, FontStyle, Image},
+    geom::{Rectangle, Shape, Transform, Vector},
+    graphics::{
+        Background::Blended, Background::Col, Background::Img, Color, Font, FontStyle, Image,
+    },
     lifecycle::{run, Asset, Settings, State, Window},
     Future, Result,
 };
@@ -43,14 +43,21 @@ impl HelpDisplayer {
             consts::SCREEN_WIDTH / 2.0,
             consts::SCREEN_HEIGHT / 2.0 - 120.0,
         );
-        window.draw(
+        window.draw_ex(
             &BG_AREA.with_center(center),
             Col(Color::BLACK.with_alpha(0.4)),
+            Transform::IDENTITY,
+            10,
         );
         self.font.execute(|f| {
             let style = FontStyle::new(30.0, Color::WHITE);
             let text = f.render(consts::HELP_TEXT, &style)?;
-            window.draw(&text.area().with_center(center), Img(&text));
+            window.draw_ex(
+                &text.area().with_center(center),
+                Img(&text),
+                Transform::IDENTITY,
+                11,
+            );
             Ok(())
         });
         return Ok(());

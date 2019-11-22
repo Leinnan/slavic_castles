@@ -16,6 +16,7 @@ use std::collections::HashMap;
 use std::fmt;
 use std::str;
 
+#[derive(Serialize, Deserialize)]
 pub struct Deck {
     pub cards: Vec<Card>,
     cards_collections: Vec<Card>,

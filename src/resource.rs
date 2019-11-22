@@ -9,6 +9,7 @@ pub enum ResourceType {
     Soldiers,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct Resource {
     pub amount: i32,
     pub production: i32,
