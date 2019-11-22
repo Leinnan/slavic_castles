@@ -39,6 +39,7 @@ impl MyGame {
         self.game_ended = false;
         self.ui.reset_game();
         self.ui.enable_ui_deck(self.is_human_playing());
+        self.ui.update_deck(&self.players[&PlayerNumer::First]);
     }
 
     pub fn other_player(&self) -> PlayerNumer {
@@ -72,6 +73,7 @@ impl MyGame {
 
         self.ui
             .send_message(format!("[{0}]Card used: {1}", self.active_player, card).as_str());
+        self.ui.card_used(card);
         self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
     }
 
@@ -89,6 +91,8 @@ impl MyGame {
             .get_mut(&self.active_player)
             .unwrap()
             .start_new_turn();
+
+        self.ui.update_deck(&self.players[&PlayerNumer::First]);
         self.ui.enable_ui_deck(self.is_human_playing());
         self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
     }

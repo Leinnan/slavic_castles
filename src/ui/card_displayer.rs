@@ -2,7 +2,6 @@ use crate::card::Card;
 use crate::consts;
 use crate::resource::*;
 use crate::ui::animations;
-use nalgebra;
 use quicksilver::{
     combinators::result,
     geom::{Rectangle, Shape, Transform, Vector},
@@ -29,7 +28,7 @@ pub struct CardDisplayer {
 }
 
 impl CardDisplayer {
-    pub fn new(base_scale: f32, x: f32, y: f32) -> Result<CardDisplayer> {
+    pub fn new(base_scale: f32, x: f32, y: f32, y_offset: f32) -> Result<CardDisplayer> {
         let result = CardDisplayer {
             bg: Asset::new(Image::load("card_bg.png")),
             color: consts::SOLDIERS_COLOR,
@@ -41,8 +40,8 @@ impl CardDisplayer {
             hovered: false,
             ready: false,
             pos_x: x,
-            scale_anim: animations::AnimationFloat::new(0.9, base_scale, 0.0, 0.3),
-            pos_y_anim: animations::AnimationFloat::new(y, y + 230.0, 0.0, 0.3),
+            scale_anim: animations::AnimationFloat::new(0.9 * base_scale, base_scale, 0.0, 0.3),
+            pos_y_anim: animations::AnimationFloat::new(y, y + y_offset, 0.0, 0.3),
         };
         Ok(result)
     }
@@ -57,10 +56,12 @@ impl CardDisplayer {
     }
 
     pub fn is_pos_over(&self, x: f32, y: f32) -> bool {
-        let start_x = self.pos_x + 10.0;
-        let end_x = self.pos_x + consts::CARD_SIZE_X - 10.0 * 2.0;
-        let start_y = self.pos_y_anim.get_current_value() + 10.0;
-        let end_y = self.pos_y_anim.get_current_value() + consts::CARD_SIZE_Y - 10.0 * 2.0;
+        let pos = self.get_center_pos();
+        let scale = self.get_scale();
+        let start_x = pos[0] + 10.0 - consts::CARD_SIZE_X / 2.0 * scale[0];
+        let end_x = pos[0] - 10.0 + consts::CARD_SIZE_X / 2.0 * scale[0];
+        let start_y = pos[1] + 10.0 - consts::CARD_SIZE_X / 2.0 * scale[1];
+        let end_y = pos[1] - 10.0 + consts::CARD_SIZE_X / 2.0 * scale[1];
 
         x >= start_x && x <= end_x && y >= start_y && y <= end_y
     }
@@ -92,18 +93,8 @@ impl CardDisplayer {
             return Ok(());
         }
         let mut is_ok;
-        let pos = [
-            self.pos_x + (consts::CARD_SIZE_X / 2.0),
-            self.pos_y_anim.get_current_value() + (consts::CARD_SIZE_Y / 2.0),
-        ];
-        let scale = if !self.can_afford {
-            (0.9, 0.9)
-        } else {
-            (
-                self.scale_anim.get_current_value(),
-                self.scale_anim.get_current_value(),
-            )
-        };
+        let pos = self.get_center_pos();
+        let scale = self.get_scale();
         let color = if self.can_afford {
             self.color
         } else {
@@ -113,7 +104,7 @@ impl CardDisplayer {
             window.draw_ex(
                 &image.area().with_center((pos[0], pos[1])),
                 Blended(&image, color),
-                Transform::scale(scale),
+                Transform::scale((scale[0], scale[1])),
                 0,
             );
             Ok(())
@@ -125,7 +116,7 @@ impl CardDisplayer {
             window.draw_ex(
                 &image.area().with_center((pos[0], pos[1])),
                 Img(&image),
-                Transform::scale(scale),
+                Transform::scale((scale[0], scale[1])),
                 1,
             );
             Ok(())
@@ -141,9 +132,9 @@ impl CardDisplayer {
             window.draw_ex(
                 &text
                     .area()
-                    .with_center((pos[0] - 85.0 * scale.0, pos[1] - 130.0 * scale.1)),
+                    .with_center((pos[0] - 85.0 * scale[0], pos[1] - 130.0 * scale[1])),
                 Img(&text),
-                Transform::scale(scale),
+                Transform::scale((scale[0], scale[1])),
                 2,
             );
             Ok(())
@@ -157,14 +148,32 @@ impl CardDisplayer {
             let style = FontStyle::new(23.0, Color::WHITE);
             let text = f.render(&result, &style)?;
             window.draw_ex(
-                &text.area().with_center((pos[0], pos[1] + 50.0 * scale.1)),
+                &text.area().with_center((pos[0], pos[1] + 50.0 * scale[1])),
                 Img(&text),
-                Transform::scale(scale),
+                Transform::scale((scale[0], scale[1])),
                 2,
             );
             Ok(())
         });
 
         is_ok
+    }
+
+    fn get_center_pos(&self) -> [f32; 2] {
+        [
+            self.pos_x + (consts::CARD_SIZE_X / 2.0),
+            self.pos_y_anim.get_current_value() + (consts::CARD_SIZE_Y / 2.0),
+        ]
+    }
+
+    fn get_scale(&self) -> [f32; 2] {
+        if !self.can_afford {
+            [self.scale_anim.start_value, self.scale_anim.start_value]
+        } else {
+            [
+                self.scale_anim.get_current_value(),
+                self.scale_anim.get_current_value(),
+            ]
+        }
     }
 }

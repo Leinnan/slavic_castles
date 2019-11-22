@@ -14,7 +14,7 @@ pub struct AnimationFloat {
 impl AnimationFloat {
     pub fn new(start_value: f32, end_value: f32, delay: f64, duration: f64) -> Self {
         AnimationFloat {
-            current_value: 0.0,
+            current_value: start_value,
             start_value: start_value,
             end_value: end_value,
             delay: delay,
@@ -48,7 +48,11 @@ impl AnimationFloat {
     }
 
     pub fn get_current_value(self) -> f32 {
-        self.current_value
+        if self.current_value > 0.0 {
+            self.current_value
+        } else {
+            0.0
+        }
     }
 
     pub fn is_ended(self) -> bool {

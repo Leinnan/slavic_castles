@@ -1,3 +1,4 @@
+use crate::card::Card;
 use crate::consts;
 use crate::player::*;
 use crate::ui::card_displayer::CardDisplayer;
@@ -5,6 +6,7 @@ use crate::ui::console::Console;
 use crate::ui::game_ended_text::GameEndedText;
 use crate::ui::help_displayer::HelpDisplayer;
 use crate::ui::player_info::PlayerInfo;
+use crate::ui::waste_cards::WasteCards;
 use nalgebra;
 use quicksilver::{
     combinators::result,
@@ -24,7 +26,7 @@ pub struct BoardUI {
     card_displayers: Vec<CardDisplayer>,
     active_player: PlayerNumer,
     help: HelpDisplayer,
-    font: Asset<Font>,
+    waste_cards: WasteCards,
     deck_text_enabled: bool,
     deck_ui_enabled: bool,
     game_ended: bool,
@@ -40,12 +42,16 @@ impl BoardUI {
             PlayerInfo::new("Human".to_string(), false, "avatar.png".to_string(), true)?;
         let (w, h) = (1280, 720);
         let mut card_displayers = Vec::new();
-        let base_x_pos = (w as f32 - consts::CARDS_IN_DECK as f32 * consts::CARD_SIZE_X) / 2.0;
+        let card_scale = 0.8;
+        let base_x_pos = (w as f32
+            - (consts::CARDS_IN_DECK as f32 * consts::CARD_SIZE_X * card_scale / 0.9))
+            / 2.0;
         for i in 0..consts::CARDS_IN_DECK as usize {
-            let mut card_displayer = CardDisplayer::new(
-                1.0,
-                base_x_pos + i as f32 * consts::CARD_SIZE_X,
-                h as f32 - consts::CARD_SIZE_Y + 20.0,
+            let card_displayer = CardDisplayer::new(
+                card_scale,
+                base_x_pos + i as f32 * (consts::CARD_SIZE_X * card_scale),
+                h as f32 - (consts::CARD_SIZE_Y * card_scale + 30.0),
+                230.0 * card_scale,
             )?;
             card_displayers.push(card_displayer);
         }
@@ -57,7 +63,7 @@ impl BoardUI {
             player_info_right: player_info_right,
             card_displayers: card_displayers,
             active_player: PlayerNumer::First,
-            font: Asset::new(Font::load("coolvetica.ttf")),
+            waste_cards: WasteCards::new(0.7, -20.0, 170.0)?,
             help: HelpDisplayer::new()?,
             deck_text_enabled: false,
             deck_ui_enabled: true,
@@ -95,6 +101,7 @@ impl BoardUI {
     pub fn set_winner(&mut self, name: String) {
         self.game_ended_text.set_player_name(name);
         self.game_ended_text.enable(true);
+        self.waste_cards.game_ended();
     }
 
     pub fn card_index_on_pos(&mut self, x: f32, y: f32) -> Option<usize> {
@@ -126,6 +133,18 @@ impl BoardUI {
         }
     }
 
+    pub fn card_used(&mut self, card: &Card) {
+        self.waste_cards.card_used(card);
+    }
+
+    pub fn update_deck(&mut self, player: &Player) {
+        for i in 0..consts::CARDS_IN_DECK as usize {
+            let card = player.deck.cards[i];
+            let can_afford = card.can_aford(&player.resources);
+            self.card_displayers[i].update_info(&card, can_afford);
+        }
+    }
+
     pub fn update(
         &mut self,
         game_ended: bool,
@@ -134,9 +153,6 @@ impl BoardUI {
         delta_time: f64,
     ) {
         for i in 0..consts::CARDS_IN_DECK as usize {
-            let card = players[&PlayerNumer::First].deck.cards[i];
-            let can_afford = card.can_aford(&players[&PlayerNumer::First].resources);
-            self.card_displayers[i].update_info(&card, can_afford);
             self.card_displayers[i].update(delta_time);
         }
         let player_left_is_active = active_player == PlayerNumer::First;
@@ -178,6 +194,10 @@ impl BoardUI {
             return is_ok;
         }
         is_ok = self.help.draw(window);
+        if !is_ok.is_ok() {
+            return is_ok;
+        }
+        is_ok = self.waste_cards.draw(window);
         if !is_ok.is_ok() {
             return is_ok;
         }
