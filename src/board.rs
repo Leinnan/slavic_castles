@@ -5,7 +5,7 @@ use crate::ui::board_ui::BoardUI;
 use quicksilver::{
     input::{ButtonState, Key, MouseButton},
     lifecycle::{run, Event, Settings, State, Window},
-    saving::{load,save},
+    saving::{load, save},
     Result,
 };
 use serde::{Deserialize, Serialize};
@@ -24,13 +24,13 @@ pub struct Board {
 
 impl Board {
     pub fn has_save() -> bool {
-        let result = load::<Self>("slavic_castles","board");
+        let result = load::<Self>("slavic_castles", "board");
 
         result.is_ok()
     }
 
     pub fn load_board() -> Self {
-        let mut result = load::<Self>("slavic_castles","board").expect("Could not load Board");
+        let mut result = load::<Self>("slavic_castles", "board").expect("Could not load Board");
         result.ui = Board::create_ui();
         result.prepare_ui(true);
         result
@@ -95,9 +95,7 @@ impl Board {
         let ui = self.ui.as_mut().unwrap();
         if discard {
             player.replace_card(index);
-            ui.send_message(
-                format!("[{0}]Card discarded: {1}", self.active_player, card).as_str(),
-            );
+            ui.send_message(format!("[{0}]Card discarded: {1}", self.active_player, card).as_str());
             self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
 
             return;
@@ -195,7 +193,11 @@ impl Board {
 
         self.ui.as_mut().unwrap().hide_help();
 
-        let i = self.ui.as_mut().unwrap().card_index_on_pos(mouse_pos.x, mouse_pos.y);
+        let i = self
+            .ui
+            .as_mut()
+            .unwrap()
+            .card_index_on_pos(mouse_pos.x, mouse_pos.y);
         if i.is_some() {
             let card = self.players[&self.active_player].deck.cards[i.unwrap()];
             self.try_use_card(&card, i.unwrap() as i32, rmb_pressed || shift_pressed);
@@ -215,7 +217,7 @@ impl Board {
     pub fn update(&mut self, delta: f64) {
         let game_ended = self.is_game_ended();
         self.ui.as_mut().unwrap().update(game_ended, delta);
-        
+
         if game_ended {
             return;
         }
@@ -232,12 +234,15 @@ impl Board {
             self.try_use_card(&card, i, discard)
         }
     }
-    
+
     pub fn event(&mut self, _event: &Event, window: &mut Window) -> Result<()> {
         match _event {
             Event::MouseMoved(_) => {
                 let mouse_pos = window.mouse().pos();
-                self.ui.as_mut().unwrap().update_hovered_card(mouse_pos.x, mouse_pos.y);
+                self.ui
+                    .as_mut()
+                    .unwrap()
+                    .update_hovered_card(mouse_pos.x, mouse_pos.y);
             }
             Event::MouseButton(_, _) => self.handle_mouse_input(window),
             Event::Key(_, _) => self.handle_keyboard(window),

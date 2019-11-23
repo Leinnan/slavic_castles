@@ -22,11 +22,26 @@ pub const FONT_COLOR: Color = Color {
     b: 87.0 / 255.0,
     a: 1.0,
 };
-pub const FONT_WHITE_COLOR: (f32, f32, f32, f32) = (0.95, 0.95, 0.95, 1.0);
-pub const FONT_GREY_COLOR: (f32, f32, f32, f32) = (0.65, 0.65, 0.65, 1.0);
+pub const FONT_WHITE_COLOR: Color = Color {
+    r: 0.95,
+    g: 0.95,
+    b: 0.95,
+    a: 1.0,
+};
+pub const FONT_GREY_COLOR: Color = Color {
+    r: 0.65,
+    g: 0.65,
+    b: 0.65,
+    a: 1.0,
+};
 pub const ACTIVE_FONT_COLOR: (f32, f32, f32, f32) =
     (230.0 / 255.0, 57.0 / 255.0, 70.0 / 255.0, 1.0);
-pub const BG_COLOR: (f32, f32, f32, f32) = (241.0 / 255.0, 250.0 / 255.0, 238.0 / 255.0, 1.0);
+pub const BG_COLOR: Color = Color {
+    r: 145.0 / 255.0,
+    g: 101.0 / 255.0,
+    b: 78.0 / 255.0,
+    a: 255.0,
+};
 pub const GREY: Color = Color {
     r: 0.5,
     g: 0.5,
@@ -55,10 +70,8 @@ pub const SOLDIERS_COLOR: Color = Color {
 
 pub const SCREEN_WIDTH: f32 = 1280.0;
 pub const SCREEN_HEIGHT: f32 = 720.0;
-pub const TEXT_SCALE: f32 = 1.0;
-pub const TEXT_SIZE: f32 = 26.0;
-pub const FONT_WIDTH: f32 = 5.3;
 
 pub const CARD_SIZE_X: f32 = 234.0;
 pub const CARD_SIZE_Y: f32 = 320.0;
 pub const DECK_JSON: &'static [u8] = include_bytes!("../static/deck.json");
+pub const BOARD_BG_IMG: &'static [u8] = include_bytes!("../static_not_included/ingame_bg.png");

@@ -12,17 +12,17 @@ pub struct MyGame {
 
 impl State for MyGame {
     fn new() -> Result<Self> {
-        let board = if Board::has_save() { Board::load_board() } else {
+        let board = if Board::has_save() {
+            Board::load_board()
+        } else {
             Board::new_board()
         };
 
-        Ok(MyGame {
-            board: board,
-        })
+        Ok(MyGame { board: board })
     }
 
     fn event(&mut self, _event: &Event, window: &mut Window) -> Result<()> {
-        self.board.event(_event,window)
+        self.board.event(_event, window)
     }
 
     fn update(&mut self, window: &mut Window) -> Result<()> {
@@ -32,7 +32,6 @@ impl State for MyGame {
         Ok(())
     }
     fn draw(&mut self, window: &mut Window) -> Result<()> {
-        window.clear(Color::WHITE)?;
         self.board.ui.as_mut().unwrap().draw(window)
     }
 }

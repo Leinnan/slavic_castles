@@ -10,8 +10,10 @@ use crate::ui::waste_cards::WasteCards;
 use nalgebra;
 use quicksilver::{
     combinators::result,
-    geom::{Rectangle, Shape, Vector},
-    graphics::{Background::Col, Background::Img, Color, Font, FontStyle, Image},
+    geom::{Rectangle, Shape, Transform, Vector},
+    graphics::{
+        Background::Blended, Background::Col, Background::Img, Color, Font, FontStyle, Image,
+    },
     input::{ButtonState, Key, MouseButton},
     lifecycle::{run, Asset, Settings, State, Window},
     Future, Result,
@@ -19,6 +21,7 @@ use quicksilver::{
 use std::collections::HashMap;
 
 pub struct BoardUI {
+    bg: Image,
     console: Console,
     game_ended_text: GameEndedText,
     player_info_left: PlayerInfo,
@@ -56,7 +59,9 @@ impl BoardUI {
             card_displayers.push(card_displayer);
         }
 
+        let bg = Image::from_bytes(&consts::BOARD_BG_IMG);
         let result = BoardUI {
+            bg: bg.unwrap(),
             console: Console::new()?,
             game_ended_text: GameEndedText::new(),
             player_info_left: player_info_left,
@@ -168,7 +173,17 @@ impl BoardUI {
     }
 
     pub fn draw(&mut self, window: &mut Window) -> Result<()> {
+        window.clear(consts::BG_COLOR)?;
+        let screen_center = ((self.screen_width / 2.0), (self.screen_height / 2.0));
         let mut is_ok;
+
+        window.draw_ex(
+            &self.bg.area().with_center(screen_center),
+            Img(&self.bg),
+            Transform::IDENTITY,
+            0,
+        );
+
         if !self.game_ended {
             for i in 0..consts::CARDS_IN_DECK as usize {
                 is_ok = self.card_displayers[i].draw(window);

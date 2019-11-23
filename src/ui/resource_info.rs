@@ -3,8 +3,10 @@ use crate::resource::*;
 use nalgebra;
 use quicksilver::{
     combinators::result,
-    geom::{Rectangle, Shape, Vector},
-    graphics::{Background::Col, Background::Img, Color, Font, FontStyle, Image},
+    geom::{Rectangle, Shape, Transform, Vector},
+    graphics::{
+        Background::Blended, Background::Col, Background::Img, Color, Font, FontStyle, Image,
+    },
     lifecycle::{run, Asset, Settings, State, Window},
     Future, Result,
 };
@@ -72,14 +74,16 @@ impl ResourceInfo {
             pos: base_pos.into(),
             size: Vector { x: SIZE, y: SIZE },
         };
-        window.draw(&bg, Col(self.color));
+        window.draw_ex(&bg, Col(self.color), Transform::IDENTITY, 1);
         let mut is_draw_ok;
         is_draw_ok = self.icon.execute(|image| {
-            window.draw(
+            window.draw_ex(
                 &image
                     .area()
                     .with_center((base_pos.0 + (SIZE / 2.0), base_pos.1 + (SIZE / 2.0))),
                 Img(&image),
+                Transform::IDENTITY,
+                2,
             );
             Ok(())
         });
@@ -89,11 +93,13 @@ impl ResourceInfo {
         }
 
         is_draw_ok = self.frame.execute(|image| {
-            window.draw(
+            window.draw_ex(
                 &image
                     .area()
                     .with_center((base_pos.0 + (SIZE / 2.0), base_pos.1 + (SIZE / 2.0))),
                 Img(&image),
+                Transform::IDENTITY,
+                3,
             );
             Ok(())
         });
@@ -102,17 +108,19 @@ impl ResourceInfo {
             return is_draw_ok;
         }
 
-        let style = FontStyle::new(25.0, consts::FONT_COLOR);
+        let style = FontStyle::new(25.0, consts::FONT_WHITE_COLOR);
         let amount_text = format!("{}", self.amount);
         let prod_text = format!("+{}", self.production);
 
         is_draw_ok = self.font.execute(|f| {
             let text = f.render(&amount_text, &style)?;
-            window.draw(
+            window.draw_ex(
                 &text
                     .area()
                     .with_center((base_pos.0 + 17.0, base_pos.1 + 17.0)),
                 Img(&text),
+                Transform::IDENTITY,
+                4,
             );
             Ok(())
         });
@@ -123,11 +131,13 @@ impl ResourceInfo {
 
         is_draw_ok = self.font.execute(|f| {
             let text = f.render(&prod_text, &style)?;
-            window.draw(
+            window.draw_ex(
                 &text
                     .area()
                     .with_center((base_pos.0 + 17.0, base_pos.1 + SIZE - 17.0)),
                 Img(&text),
+                Transform::IDENTITY,
+                4,
             );
             Ok(())
         });
