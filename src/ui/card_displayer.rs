@@ -132,7 +132,7 @@ impl CardDisplayer {
             consts::FONT_GREY_COLOR
         };
         is_ok = self.font.execute(|f| {
-            let style = FontStyle::new(30.0, font_color);
+            let style = FontStyle::new(23.0, font_color);
             let text = f.render(&cost_text, &style)?;
             window.draw_ex(
                 &text
@@ -150,7 +150,7 @@ impl CardDisplayer {
             return is_ok;
         }
         is_ok = self.font.execute(|f| {
-            let style = FontStyle::new(23.0, font_color);
+            let style = FontStyle::new(16.0, font_color);
             let text = f.render(&result, &style)?;
             window.draw_ex(
                 &text.area().with_center((pos[0], pos[1] + 25.0 * scale[1])),

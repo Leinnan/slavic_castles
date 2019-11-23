@@ -75,3 +75,6 @@ pub const CARD_SIZE_X: f32 = 234.0;
 pub const CARD_SIZE_Y: f32 = 320.0;
 pub const DECK_JSON: &'static [u8] = include_bytes!("../static/deck.json");
 pub const BOARD_BG_IMG: &'static [u8] = include_bytes!("../static_not_included/ingame_bg.png");
+pub const START_SCREEN_BG_IMG: &'static [u8] =
+    include_bytes!("../static_not_included/start_screen_bg.png");
+pub const LOGO_IMG: &'static [u8] = include_bytes!("../static_not_included/logo.png");

@@ -7,7 +7,6 @@ use crate::ui::game_ended_text::GameEndedText;
 use crate::ui::help_displayer::HelpDisplayer;
 use crate::ui::player_info::PlayerInfo;
 use crate::ui::waste_cards::WasteCards;
-use nalgebra;
 use quicksilver::{
     combinators::result,
     geom::{Rectangle, Shape, Transform, Vector},

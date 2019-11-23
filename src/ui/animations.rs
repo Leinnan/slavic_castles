@@ -13,7 +13,7 @@ pub struct AnimationFloat {
 
 impl AnimationFloat {
     pub fn new(start_value: f32, end_value: f32, delay: f64, duration: f64) -> Self {
-        AnimationFloat {
+        let mut new = AnimationFloat {
             current_value: start_value,
             start_value: start_value,
             end_value: end_value,
@@ -21,7 +21,9 @@ impl AnimationFloat {
             duration: duration,
             passed_time: -delay,
             is_played_back: false,
-        }
+        };
+        new.update(0.0);
+        new
     }
 
     pub fn update(&mut self, delta: f64) {
