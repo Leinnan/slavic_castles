@@ -6,6 +6,7 @@ use quicksilver::{
     graphics::Color,
     input::{ButtonState, Key, MouseButton},
     lifecycle::{run, Event, Settings, State, Window},
+    saving::{load,save},
     Result,
 };
 use serde::{Deserialize, Serialize};
@@ -25,7 +26,19 @@ pub struct Board {
 }
 
 impl Board {
-    pub fn save_board(&mut self) {}
+    pub fn has_save() -> bool {
+        let result = load::<Self>("slavic_castles","board");
+
+        result.is_ok()
+    }
+
+    pub fn load_board() -> Self {
+        let mut result = load::<Self>("slavic_castles","board").expect("Could not load Board")
+    }
+
+    pub fn save_board(&mut self) {
+        save("slavic_castles", "board", &self).expect("Could not save Board");
+    }
 
     pub fn new_board() -> Self {
         let mut players = HashMap::new();
@@ -38,7 +51,7 @@ impl Board {
             active_player: PlayerNumer::First,
             time_before_next_move: 0.0,
             game_ended: false,
-            ui: Ok(ui),
+            ui: Some(ui),
         }
     }
 
