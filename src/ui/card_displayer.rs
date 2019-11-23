@@ -148,7 +148,7 @@ impl CardDisplayer {
             let style = FontStyle::new(23.0, Color::WHITE);
             let text = f.render(&result, &style)?;
             window.draw_ex(
-                &text.area().with_center((pos[0], pos[1] + 50.0 * scale[1])),
+                &text.area().with_center((pos[0], pos[1] + 25.0 * scale[1])),
                 Img(&text),
                 Transform::scale((scale[0], scale[1])),
                 2,
