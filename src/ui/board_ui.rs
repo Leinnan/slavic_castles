@@ -133,6 +133,19 @@ impl BoardUI {
         }
     }
 
+    pub fn players_update(
+        &mut self,
+        players: &HashMap<PlayerNumer, Player>,
+        active_player: PlayerNumer,
+    ) {
+        let player_left_is_active = active_player == PlayerNumer::First;
+        self.player_info_left
+            .update_info(&players[&PlayerNumer::First], player_left_is_active);
+        self.player_info_right
+            .update_info(&players[&PlayerNumer::Second], !player_left_is_active);
+        self.active_player = active_player;
+    }
+
     pub fn card_used(&mut self, card: &Card) {
         self.waste_cards.card_used(card);
     }
@@ -145,28 +158,12 @@ impl BoardUI {
         }
     }
 
-    pub fn update(
-        &mut self,
-        game_ended: bool,
-        players: &HashMap<PlayerNumer, Player>,
-        active_player: PlayerNumer,
-        delta_time: f64,
-    ) {
+    pub fn update(&mut self, game_ended: bool, delta_time: f64) {
         for i in 0..consts::CARDS_IN_DECK as usize {
             self.card_displayers[i].update(delta_time);
         }
-        let player_left_is_active = active_player == PlayerNumer::First;
-        self.player_info_left.update_info(
-            &players[&PlayerNumer::First],
-            player_left_is_active,
-            delta_time,
-        );
-        self.player_info_right.update_info(
-            &players[&PlayerNumer::Second],
-            !player_left_is_active,
-            delta_time,
-        );
-        self.active_player = active_player;
+        self.player_info_left.update(delta_time);
+        self.player_info_right.update(delta_time);
         self.game_ended = game_ended;
     }
 

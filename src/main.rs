@@ -1,5 +1,6 @@
 extern crate quicksilver;
 
+mod board;
 mod card;
 mod card_effect;
 mod consts;

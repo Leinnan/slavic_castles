@@ -39,8 +39,8 @@ impl ResourceInfo {
         Ok(result)
     }
 
-    pub fn update_values(&mut self, resource: &Resource) {
-        if self.amount > resource.amount || self.production > resource.production {
+    pub fn update_values(&mut self, resource: &Resource, active: bool) {
+        if (self.amount > resource.amount || self.production > resource.production) && !active {
             self.shake_duration = consts::RESOURCE_SHAKE_DURATION;
         }
         self.amount = resource.amount;

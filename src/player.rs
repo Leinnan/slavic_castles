@@ -3,15 +3,17 @@ use crate::consts;
 use crate::deck::Deck;
 use crate::resource::*;
 use rand::prelude::*;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
 
-#[derive(PartialEq, Eq, Hash, Copy, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Hash, Copy, Debug, Clone)]
 pub enum PlayerNumer {
     First,
     Second,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct Player {
     human: bool,
     pub tower_hp: i32,

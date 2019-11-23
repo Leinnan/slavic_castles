@@ -61,3 +61,4 @@ pub const FONT_WIDTH: f32 = 5.3;
 
 pub const CARD_SIZE_X: f32 = 234.0;
 pub const CARD_SIZE_Y: f32 = 320.0;
+pub const DECK_JSON: &'static [u8] = include_bytes!("../static/deck.json");

@@ -73,11 +73,24 @@ impl PlayerInfo {
         self.scale_anim.reset();
     }
 
-    pub fn update_info(&mut self, player: &Player, active: bool, delta: f64) {
-        self.scale_anim.update(delta);
+    pub fn update_info(&mut self, player: &Player, active: bool) {
         if self.walls_hp > player.walls_hp || self.tower_hp > player.tower_hp {
             self.shake_duration = consts::AVATAR_SHAKE_DURATION;
         }
+        self.walls_hp = player.walls_hp;
+        self.tower_hp = player.tower_hp;
+        self.active = active;
+
+        self.tools
+            .update_values(&player.resources[&ResourceType::Tools], active);
+        self.magic
+            .update_values(&player.resources[&ResourceType::Magic], active);
+        self.soldiers
+            .update_values(&player.resources[&ResourceType::Soldiers], active);
+    }
+
+    pub fn update(&mut self, delta: f64) {
+        self.scale_anim.update(delta);
         if self.shake_duration >= 0.0 {
             self.shake_duration -= delta;
             let mut rng = thread_rng();
@@ -94,16 +107,6 @@ impl PlayerInfo {
         } else {
             self.offset = (0.0, 0.0);
         }
-        self.walls_hp = player.walls_hp;
-        self.tower_hp = player.tower_hp;
-        self.active = active;
-
-        self.tools
-            .update_values(&player.resources[&ResourceType::Tools]);
-        self.magic
-            .update_values(&player.resources[&ResourceType::Magic]);
-        self.soldiers
-            .update_values(&player.resources[&ResourceType::Soldiers]);
 
         self.tools.update(delta);
         self.magic.update(delta);
