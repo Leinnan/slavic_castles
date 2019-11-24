@@ -168,7 +168,7 @@ impl PlayerInfo {
             return is_ok;
         }
         let walls_text = format!("{}", self.walls_hp);
-        let style = FontStyle::new(26.0, consts::FONT_COLOR);
+        let style = FontStyle::new(20.0, consts::FONT_COLOR);
         is_ok = self.font.execute(|f| {
             let text = f.render(&walls_text, &style)?;
             window.draw_ex(

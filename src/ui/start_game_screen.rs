@@ -14,7 +14,8 @@ use quicksilver::{
 pub struct StartGameScreen {
     bg: Image,
     logo: Image,
-    logo_y_anim: animations::AnimationFloat,
+    logo_scale_anim: animations::AnimationFloat,
+    font: Asset<Font>,
     pub visible: bool,
 }
 
@@ -25,13 +26,14 @@ impl StartGameScreen {
         StartGameScreen {
             bg: bg.unwrap(),
             logo: logo.unwrap(),
-            logo_y_anim: animations::AnimationFloat::new(-900.0, 200.0, 1.3, 5.3),
+            logo_scale_anim: animations::AnimationFloat::new(0.0, 1.0, 1.3, 3.3),
+            font: Asset::new(Font::load("coolvetica.ttf")),
             visible: true,
         }
     }
 
     pub fn update(&mut self, delta_time: f64) {
-        self.logo_y_anim.update(delta_time);
+        self.logo_scale_anim.update(delta_time);
     }
 
     pub fn draw(&mut self, window: &mut Window) {
@@ -46,14 +48,29 @@ impl StartGameScreen {
             Transform::IDENTITY,
             0,
         );
+        let scale = (self.logo_scale_anim.get_current_value(),self.logo_scale_anim.get_current_value());
         window.draw_ex(
             &self
                 .logo
                 .area()
-                .with_center((screen_center.0, self.logo_y_anim.get_current_value())),
+                .with_center((screen_center.0, 120.0)),
             Img(&self.logo),
-            Transform::IDENTITY,
-            0,
+            Transform::scale(scale),
+            1,
         );
+
+        self.font.execute(|f| {
+            let style = FontStyle::new(45.0, consts::FONT_WHITE_COLOR);
+            let text = f.render("Press any key to start", &style)?;
+            window.draw_ex(
+                &text
+                    .area()
+                    .with_center(screen_center),
+                Img(&text),
+                Transform::scale(scale),
+                2,
+            );
+            Ok(())
+        });
     }
 }

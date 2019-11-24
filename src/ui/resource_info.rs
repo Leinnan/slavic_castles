@@ -108,7 +108,7 @@ impl ResourceInfo {
             return is_draw_ok;
         }
 
-        let style = FontStyle::new(25.0, consts::FONT_WHITE_COLOR);
+        let style = FontStyle::new(20.0, consts::FONT_WHITE_COLOR);
         let amount_text = format!("{}", self.amount);
         let prod_text = format!("+{}", self.production);
 
