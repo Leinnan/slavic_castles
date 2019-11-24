@@ -48,12 +48,12 @@ impl StartGameScreen {
             Transform::IDENTITY,
             0,
         );
-        let scale = (self.logo_scale_anim.get_current_value(),self.logo_scale_anim.get_current_value());
+        let scale = (
+            self.logo_scale_anim.get_current_value(),
+            self.logo_scale_anim.get_current_value(),
+        );
         window.draw_ex(
-            &self
-                .logo
-                .area()
-                .with_center((screen_center.0, 120.0)),
+            &self.logo.area().with_center((screen_center.0, 120.0)),
             Img(&self.logo),
             Transform::scale(scale),
             1,
@@ -63,9 +63,7 @@ impl StartGameScreen {
             let style = FontStyle::new(45.0, consts::FONT_WHITE_COLOR);
             let text = f.render("Press any key to start", &style)?;
             window.draw_ex(
-                &text
-                    .area()
-                    .with_center(screen_center),
+                &text.area().with_center(screen_center),
                 Img(&text),
                 Transform::scale(scale),
                 2,
