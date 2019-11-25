@@ -105,7 +105,7 @@ impl CardDisplayer {
                 &image.area().with_center((pos[0], pos[1])),
                 Blended(&image, color),
                 Transform::scale((scale[0], scale[1])),
-                0,
+                1,
             );
             Ok(())
         });
@@ -117,7 +117,7 @@ impl CardDisplayer {
                 &image.area().with_center((pos[0], pos[1])),
                 Img(&image),
                 Transform::scale((scale[0], scale[1])),
-                1,
+                2,
             );
             Ok(())
         });
@@ -140,7 +140,7 @@ impl CardDisplayer {
                     .with_center((pos[0] - 85.0 * scale[0], pos[1] - 130.0 * scale[1])),
                 Img(&text),
                 Transform::scale((scale[0], scale[1])),
-                2,
+                3,
             );
             Ok(())
         });
@@ -156,7 +156,7 @@ impl CardDisplayer {
                 &text.area().with_center((pos[0], pos[1] + 25.0 * scale[1])),
                 Img(&text),
                 Transform::scale((scale[0], scale[1])),
-                2,
+                3,
             );
             Ok(())
         });

@@ -28,6 +28,18 @@ pub const FONT_WHITE_COLOR: Color = Color {
     b: 0.95,
     a: 1.0,
 };
+pub const BTN_HOVERED_COLOR: Color = Color {
+    r: 0.95,
+    g: 1.0,
+    b: 0.95,
+    a: 1.0,
+};
+pub const BTN_DISABLED_COLOR: Color = Color {
+    r: 0.6,
+    g: 0.6,
+    b: 0.6,
+    a: 0.9,
+};
 pub const FONT_GREY_COLOR: Color = Color {
     r: 0.65,
     g: 0.65,
@@ -73,8 +85,11 @@ pub const SCREEN_HEIGHT: f32 = 720.0;
 
 pub const CARD_SIZE_X: f32 = 234.0;
 pub const CARD_SIZE_Y: f32 = 320.0;
+pub const BTN_SIZE_X: f32 = 256.0;
+pub const BTN_SIZE_Y: f32 = 64.0;
 pub const DECK_JSON: &'static [u8] = include_bytes!("../static/deck.json");
 pub const BOARD_BG_IMG: &'static [u8] = include_bytes!("../static_not_included/ingame_bg.png");
 pub const START_SCREEN_BG_IMG: &'static [u8] =
     include_bytes!("../static_not_included/start_screen_bg.png");
 pub const LOGO_IMG: &'static [u8] = include_bytes!("../static_not_included/logo.png");
+pub const BASE_BTN_IMG: &'static [u8] = include_bytes!("../static_not_included/base_btn.png");

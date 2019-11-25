@@ -27,12 +27,8 @@ impl State for MyGame {
     }
 
     fn event(&mut self, _event: &Event, window: &mut Window) -> Result<()> {
-        if self.start_game_screen.visible {
-            match _event {
-                Event::MouseButton(_, _) => self.start_game_screen.visible = false,
-                _ => {}
-            };
-            Ok(())
+        if self.start_game_screen.is_active() {
+            self.start_game_screen.event(_event, window)
         } else {
             self.board.event(_event, window)
         }
@@ -40,8 +36,19 @@ impl State for MyGame {
 
     fn update(&mut self, window: &mut Window) -> Result<()> {
         let delta = window.current_fps() / 1000.0;
-        if self.start_game_screen.visible {
+        if self.start_game_screen.is_active() {
             self.start_game_screen.update(delta);
+            if self.start_game_screen.is_requesting_change() {
+                match self.start_game_screen.get_current_state() {
+                    start_game_screen::StartGameState::RequestGameContinue => {
+                        self.board = Board::load_board();
+                    }
+                    _ => {
+                        self.board = Board::new_board();
+                    }
+                }
+                self.start_game_screen.disable();
+            }
         } else {
             self.board.update(delta);
         }
@@ -49,7 +56,7 @@ impl State for MyGame {
         Ok(())
     }
     fn draw(&mut self, window: &mut Window) -> Result<()> {
-        if self.start_game_screen.visible {
+        if self.start_game_screen.is_active() {
             self.start_game_screen.draw(window);
             Ok(())
         } else {

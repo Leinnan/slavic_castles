@@ -1,5 +1,6 @@
 pub mod animations;
 pub mod board_ui;
+pub mod button;
 pub mod card_displayer;
 pub mod console;
 pub mod game_ended_text;
