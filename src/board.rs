@@ -36,7 +36,7 @@ impl Board {
         result
     }
 
-    pub fn save_board(&mut self) {
+    pub fn save_board(&self) {
         save("slavic_castles", "board", &self).expect("Could not save Board");
     }
 

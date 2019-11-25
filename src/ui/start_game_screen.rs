@@ -95,7 +95,7 @@ impl StartGameScreen {
                     self.state = StartGameState::RequestNewGame;
                 }
                 if anim_ended && lmb_pressed && self.continue_game_btn.is_hovered() {
-                    self.state = StartGameState::RequestNewGame;
+                    self.state = StartGameState::RequestGameContinue;
                 }
             }
             _ => {}

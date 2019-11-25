@@ -26,11 +26,11 @@ impl State for MyGame {
         })
     }
 
-    fn event(&mut self, _event: &Event, window: &mut Window) -> Result<()> {
+    fn event(&mut self, event: &Event, window: &mut Window) -> Result<()> {
         if self.start_game_screen.is_active() {
-            self.start_game_screen.event(_event, window)
+            self.start_game_screen.event(event, window)
         } else {
-            self.board.event(_event, window)
+            self.board.event(event, window)
         }
     }
 
