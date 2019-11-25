@@ -44,7 +44,7 @@ impl BoardUI {
             PlayerInfo::new("Human".to_string(), false, "avatar.png".to_string(), true)?;
         let (w, h) = (1280, 720);
         let mut card_displayers = Vec::new();
-        let card_scale = 0.8;
+        let card_scale = 0.9;
         let base_x_pos = (w as f32
             - (consts::CARDS_IN_DECK as f32 * consts::CARD_SIZE_X * card_scale / 0.9))
             / 2.0;
@@ -52,7 +52,7 @@ impl BoardUI {
             let card_displayer = CardDisplayer::new(
                 card_scale,
                 base_x_pos + i as f32 * (consts::CARD_SIZE_X * card_scale),
-                h as f32 - (consts::CARD_SIZE_Y * card_scale + 30.0),
+                h as f32 - (consts::CARD_SIZE_Y * card_scale + 15.0),
                 230.0 * card_scale,
             )?;
             card_displayers.push(card_displayer);
@@ -67,7 +67,7 @@ impl BoardUI {
             player_info_right: player_info_right,
             card_displayers: card_displayers,
             active_player: PlayerNumer::First,
-            waste_cards: WasteCards::new(0.7, -20.0, 170.0)?,
+            waste_cards: WasteCards::new(0.7, -20.0, 160.0)?,
             help: HelpDisplayer::new()?,
             deck_text_enabled: false,
             deck_ui_enabled: true,

@@ -50,7 +50,7 @@ impl StartGameScreen {
             ),
             continue_game_btn: button::Button::new(
                 "Continue Game".to_string(),
-                false,
+                has_save,
                 ((consts::SCREEN_WIDTH / 2.0), (consts::SCREEN_HEIGHT / 2.0)),
             ),
         }
