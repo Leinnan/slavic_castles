@@ -50,7 +50,7 @@ impl HelpDisplayer {
             10,
         );
         self.font.execute(|f| {
-            let style = FontStyle::new(30.0, Color::WHITE);
+            let style = FontStyle::new(20.0, Color::WHITE);
             let text = f.render(consts::HELP_TEXT, &style)?;
             window.draw_ex(
                 &text.area().with_center(center),
