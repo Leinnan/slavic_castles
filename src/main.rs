@@ -3,6 +3,7 @@ extern crate quicksilver;
 mod board;
 mod card;
 mod card_effect;
+mod card_sounds;
 mod consts;
 mod deck;
 mod my_game;

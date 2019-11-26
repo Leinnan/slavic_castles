@@ -1,4 +1,5 @@
 use crate::card::Card;
+use crate::card_sounds::*;
 use crate::consts;
 use crate::player::*;
 use crate::ui::card_displayer::CardDisplayer;
@@ -28,6 +29,7 @@ pub struct BoardUI {
     active_player: PlayerNumer,
     help: HelpDisplayer,
     waste_cards: WasteCards,
+    card_sounds: CardSounds,
     deck_text_enabled: bool,
     deck_ui_enabled: bool,
     game_ended: bool,
@@ -67,6 +69,7 @@ impl BoardUI {
             card_displayers: card_displayers,
             active_player: PlayerNumer::First,
             waste_cards: WasteCards::new(0.7, -20.0, 160.0)?,
+            card_sounds: CardSounds::new(),
             help: HelpDisplayer::new()?,
             deck_text_enabled: false,
             deck_ui_enabled: true,
@@ -149,6 +152,7 @@ impl BoardUI {
     }
 
     pub fn card_used(&mut self, card: &Card) {
+        self.card_sounds.play_card_sound(card.cost_resource);
         self.waste_cards.card_used(card);
     }
 
