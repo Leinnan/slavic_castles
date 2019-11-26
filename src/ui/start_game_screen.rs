@@ -3,14 +3,14 @@ use crate::consts;
 use crate::ui::animations;
 use crate::ui::button;
 use quicksilver::{
-    combinators::result,
     geom::{Rectangle, Shape, Transform, Vector},
     graphics::{
         Background::Blended, Background::Col, Background::Img, Color, Font, FontStyle, Image,
     },
     input::{ButtonState, Key, MouseButton},
     lifecycle::{run, Asset, Event, Settings, State, Window},
-    Future, Result,
+    sound::Sound,
+    Result,
 };
 
 #[derive(PartialEq, Eq, Hash, Copy, Debug, Clone)]
@@ -28,6 +28,7 @@ pub struct StartGameScreen {
     new_game_btn: button::Button,
     continue_game_btn: button::Button,
     state: StartGameState,
+    start_game_sound: Asset<Sound>,
 }
 
 impl StartGameScreen {
@@ -53,6 +54,7 @@ impl StartGameScreen {
                 has_save,
                 ((consts::SCREEN_WIDTH / 2.0), (consts::SCREEN_HEIGHT / 2.0)),
             ),
+            start_game_sound: Asset::new(Sound::load("snd_start_game.mp3")),
         }
     }
 
@@ -96,6 +98,12 @@ impl StartGameScreen {
                 }
                 if anim_ended && lmb_pressed && self.continue_game_btn.is_hovered() {
                     self.state = StartGameState::RequestGameContinue;
+                }
+                if self.is_requesting_change() {
+                    self.start_game_sound.execute(|sound| {
+                        sound.play()?;
+                        Ok(())
+                    });
                 }
             }
             _ => {}

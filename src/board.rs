@@ -160,7 +160,10 @@ impl Board {
             } else {
                 PlayerNumer::Second
             };
-            self.ui.as_mut().unwrap().set_winner(id.to_string());
+            self.ui
+                .as_mut()
+                .unwrap()
+                .game_ended(self.players[&id].is_human());
             self.game_ended = true;
         } else if self.players[&PlayerNumer::First].has_max_possible_tower()
             || self.players[&PlayerNumer::Second].has_max_possible_tower()
@@ -170,7 +173,10 @@ impl Board {
             } else {
                 PlayerNumer::Second
             };
-            self.ui.as_mut().unwrap().set_winner(id.to_string());
+            self.ui
+                .as_mut()
+                .unwrap()
+                .game_ended(self.players[&id].is_human());
             self.game_ended = true;
         } else {
             self.switch_player();

@@ -8,14 +8,13 @@ use crate::ui::help_displayer::HelpDisplayer;
 use crate::ui::player_info::PlayerInfo;
 use crate::ui::waste_cards::WasteCards;
 use quicksilver::{
-    combinators::result,
     geom::{Rectangle, Shape, Transform, Vector},
     graphics::{
         Background::Blended, Background::Col, Background::Img, Color, Font, FontStyle, Image,
     },
     input::{ButtonState, Key, MouseButton},
     lifecycle::{run, Asset, Settings, State, Window},
-    Future, Result,
+    Result,
 };
 use std::collections::HashMap;
 
@@ -102,9 +101,8 @@ impl BoardUI {
         self.console.message(msg);
     }
 
-    pub fn set_winner(&mut self, name: String) {
-        self.game_ended_text.set_player_name(name);
-        self.game_ended_text.enable(true);
+    pub fn game_ended(&mut self, positive: bool) {
+        self.game_ended_text.game_ended(positive);
         self.waste_cards.game_ended();
     }
 
