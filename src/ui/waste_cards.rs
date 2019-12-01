@@ -16,8 +16,10 @@ use quicksilver::{
 
 pub struct WasteCards {
     card_back: Asset<Image>,
-    displayed_card: CardDisplayer,
+    previous_card: CardDisplayer,
+    last_card: CardDisplayer,
     pub display_card: bool,
+    cards_played: i32,
     x: f32,
     y: f32,
     scale: f32,
@@ -31,23 +33,38 @@ impl WasteCards {
             y,
             0.0,
         )?;
+        let second_card = CardDisplayer::new(
+            base_scale / 0.9,
+            x + (base_scale * consts::CARD_SIZE_X * 2.0),
+            y,
+            0.0,
+        )?;
         Ok(WasteCards {
             card_back: Asset::new(Image::load("card_back.png")),
-            displayed_card: card,
+            previous_card: card,
+            last_card: second_card,
             x: x,
             y: y,
             display_card: true,
+            cards_played: 0,
             scale: base_scale,
         })
     }
 
     pub fn card_used(&mut self, card: &Card) {
-        self.displayed_card.update_info(card, false);
-        self.display_card = true;
+        self.cards_played += 1;
+        if self.cards_played == 1 {
+            self.previous_card.update_info(card, false);
+        } else if self.cards_played == 2 {
+            self.last_card.update_info(card, false);
+        } else {
+            self.previous_card.copy_info(&self.last_card);
+            self.last_card.update_info(card, false);
+        }
     }
 
     pub fn game_ended(&mut self) {
-        self.display_card = false;
+        self.cards_played = 0;
     }
 
     pub fn draw(&mut self, window: &mut Window) -> Result<()> {
@@ -67,11 +84,15 @@ impl WasteCards {
             );
             Ok(())
         });
-        if !is_ok.is_ok() || !self.display_card {
+        if !is_ok.is_ok() || !self.cards_played == 0 {
             return is_ok;
         }
-        is_ok = self.displayed_card.draw(window);
 
+        is_ok = self.previous_card.draw(window);
+
+        if is_ok.is_ok() && self.cards_played > 1 {
+            self.last_card.draw(window);
+        }
         is_ok
     }
 }

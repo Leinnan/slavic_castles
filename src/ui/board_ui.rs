@@ -39,10 +39,8 @@ pub struct BoardUI {
 
 impl BoardUI {
     pub fn new() -> Result<BoardUI> {
-        let player_info_left =
-            PlayerInfo::new(true, false)?;
-        let player_info_right =
-            PlayerInfo::new(false, true)?;
+        let player_info_left = PlayerInfo::new(true, false)?;
+        let player_info_right = PlayerInfo::new(false, true)?;
         let (w, h) = (1280, 720);
         let mut card_displayers = Vec::new();
         let card_scale = 0.9;
@@ -68,7 +66,7 @@ impl BoardUI {
             player_info_right: player_info_right,
             card_displayers: card_displayers,
             active_player: PlayerNumer::First,
-            waste_cards: WasteCards::new(0.7, -20.0, 160.0)?,
+            waste_cards: WasteCards::new(0.7, 120.0, 60.0)?,
             card_sounds: CardSounds::new(),
             help: HelpDisplayer::new()?,
             deck_text_enabled: false,

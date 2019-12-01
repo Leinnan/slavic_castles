@@ -88,6 +88,16 @@ impl CardDisplayer {
         self.ready = true;
     }
 
+    pub fn copy_info(&mut self, card: &CardDisplayer) {
+        self.cost = card.cost;
+        self.can_afford = card.can_afford;
+        self.color = card.color;
+
+        self.description = format!("{}", card.description);
+
+        self.ready = true;
+    }
+
     pub fn draw(&mut self, window: &mut Window) -> Result<()> {
         if !self.ready {
             return Ok(());

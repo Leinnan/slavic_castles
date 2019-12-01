@@ -42,10 +42,7 @@ pub struct PlayerInfo {
 }
 
 impl PlayerInfo {
-    pub fn new(
-        active: bool,
-        align_right: bool,
-    ) -> Result<PlayerInfo> {
+    pub fn new(active: bool, align_right: bool) -> Result<PlayerInfo> {
         let tools = ResourceInfo::new("tools.png".to_string(), consts::TOOLS_COLOR.into())?;
         let magic = ResourceInfo::new("potionBlue.png".to_string(), consts::MAGIC_COLOR.into())?;
         let soldiers = ResourceInfo::new("axe.png".to_string(), consts::SOLDIERS_COLOR.into())?;
@@ -53,7 +50,7 @@ impl PlayerInfo {
         let info = PlayerInfo {
             active: active,
             align_right: align_right,
-            name: (if active { "Player" } else {"Enemy"}).to_string(),
+            name: (if active { "Player" } else { "Enemy" }).to_string(),
             tower_hp: consts::BASE_TOWER_HP,
             walls_hp: consts::BASE_WALLS_HP,
             frame: Asset::new(Image::load("player_frame_name.png")),
@@ -80,14 +77,30 @@ impl PlayerInfo {
     }
 
     pub fn update_info(&mut self, player: &Player, active: bool) {
-        self.shield_color = if self.walls_hp != player.walls_hp  {
-            if self.walls_hp > player.walls_hp { Color::RED } else { Color::GREEN }
-        } else { consts::FONT_WHITE_COLOR };
-        self.health_color = if self.tower_hp != player.tower_hp  {
-            if self.tower_hp > player.tower_hp { Color::RED } else { Color::GREEN }
-        } else { consts::FONT_WHITE_COLOR };
+        self.shield_color = if self.walls_hp != player.walls_hp {
+            if self.walls_hp > player.walls_hp {
+                Color::RED
+            } else {
+                Color::GREEN
+            }
+        } else {
+            consts::FONT_WHITE_COLOR
+        };
+        self.health_color = if self.tower_hp != player.tower_hp {
+            if self.tower_hp > player.tower_hp {
+                Color::RED
+            } else {
+                Color::GREEN
+            }
+        } else {
+            consts::FONT_WHITE_COLOR
+        };
         if self.tower_hp != player.tower_hp {
-            self.shield_color = if self.walls_hp > player.walls_hp { Color::RED } else { Color::GREEN };
+            self.shield_color = if self.walls_hp > player.walls_hp {
+                Color::RED
+            } else {
+                Color::GREEN
+            };
         }
         if self.walls_hp > player.walls_hp || self.tower_hp > player.tower_hp {
             self.shake_duration = consts::AVATAR_SHAKE_DURATION;
@@ -129,15 +142,13 @@ impl PlayerInfo {
     }
 
     pub fn draw(&mut self, window: &mut Window) -> Result<()> {
-        let base_y_pos = 110.0 + self.offset.1;
+        let base_y_pos = 15.0 + self.offset.1;
         let base_x_pos = if self.align_right {
             1280.0 as f32 - 128.0 - 10.0
         } else {
             10.0
         } + self.offset.0;
-        let center = Vector::new(
-            base_x_pos + 64.0,base_y_pos+16.0
-        );
+        let center = Vector::new(base_x_pos + 64.0, base_y_pos + 16.0);
         let scale = (
             self.scale_anim.get_current_value(),
             self.scale_anim.get_current_value(),
@@ -160,7 +171,10 @@ impl PlayerInfo {
 
         is_ok = self.frame_second.execute(|image| {
             window.draw_ex(
-                &image.area().with_center((base_x_pos + 64.0 - 3.0* scale.0,base_y_pos+16.0+36.0 * scale.1)),
+                &image.area().with_center((
+                    base_x_pos + 64.0 - 3.0 * scale.0,
+                    base_y_pos + 16.0 + 36.0 * scale.1,
+                )),
                 Img(&image),
                 Transform::scale(scale),
                 1,
@@ -178,7 +192,10 @@ impl PlayerInfo {
         let shield_color = self.shield_color;
         is_ok = self.shield_img.execute(|image| {
             window.draw_ex(
-                &image.area().with_center((base_x_pos + 64.0 - 18.0* scale.0,base_y_pos+16.0+36.0 * scale.1)),
+                &image.area().with_center((
+                    base_x_pos + 64.0 - 18.0 * scale.0,
+                    base_y_pos + 16.0 + 36.0 * scale.1,
+                )),
                 Blended(&image, shield_color),
                 Transform::scale(scale),
                 3,
@@ -193,7 +210,10 @@ impl PlayerInfo {
         let health_color = self.health_color;
         is_ok = self.health_img.execute(|image| {
             window.draw_ex(
-                &image.area().with_center((base_x_pos + 64.0 + 40.0* scale.0,base_y_pos+16.0+36.0 * scale.1)),
+                &image.area().with_center((
+                    base_x_pos + 64.0 + 40.0 * scale.0,
+                    base_y_pos + 16.0 + 36.0 * scale.1,
+                )),
                 Blended(&image, health_color),
                 Transform::scale(scale),
                 3,
@@ -205,13 +225,18 @@ impl PlayerInfo {
             return is_ok;
         }
         let name_text = format!("{}", self.name);
-        let name_style = FontStyle::new(20.0, if self.active { consts::FONT_WHITE_COLOR } else { consts::FONT_GREY_COLOR });
+        let name_style = FontStyle::new(
+            20.0,
+            if self.active {
+                consts::FONT_WHITE_COLOR
+            } else {
+                consts::FONT_GREY_COLOR
+            },
+        );
         is_ok = self.font.execute(|f| {
             let text = f.render(&name_text, &name_style)?;
             window.draw_ex(
-                &text
-                    .area()
-                    .with_center(center),
+                &text.area().with_center(center),
                 Img(&text),
                 Transform::scale(scale),
                 3,
@@ -226,9 +251,10 @@ impl PlayerInfo {
         is_ok = self.font.execute(|f| {
             let text = f.render(&walls_text, &style)?;
             window.draw_ex(
-                &text
-                    .area()
-                    .with_center((base_x_pos + 64.0 - 45.0* scale.0,base_y_pos+16.0+36.0 * scale.1)),
+                &text.area().with_center((
+                    base_x_pos + 64.0 - 45.0 * scale.0,
+                    base_y_pos + 16.0 + 36.0 * scale.1,
+                )),
                 Img(&text),
                 Transform::scale(scale),
                 3,
@@ -243,7 +269,10 @@ impl PlayerInfo {
         is_ok = self.font.execute(|f| {
             let text = f.render(&tower_text, &style)?;
             window.draw_ex(
-                &text.area().with_center((base_x_pos + 64.0 + 10.0* scale.0,base_y_pos+16.0+36.0 * scale.1)),
+                &text.area().with_center((
+                    base_x_pos + 64.0 + 10.0 * scale.0,
+                    base_y_pos + 16.0 + 36.0 * scale.1,
+                )),
                 Img(&text),
                 Transform::scale(scale),
                 3,
@@ -259,21 +288,21 @@ impl PlayerInfo {
         } else {
             base_x_pos
         };
-        let resource_offset_move = if self.align_right { -95.0 } else { 95.0 };
+        let resource_offset_move = 95.0;
 
-        is_ok = self.tools.draw(window, resources_offset, 15.0);
+        is_ok = self.tools.draw(window, resources_offset, 95.0);
         if !is_ok.is_ok() {
             return is_ok;
         }
         is_ok = self
             .magic
-            .draw(window, resources_offset + resource_offset_move, 15.0);
+            .draw(window, resources_offset, 95.0 + resource_offset_move);
         if !is_ok.is_ok() {
             return is_ok;
         }
         is_ok = self
             .soldiers
-            .draw(window, resources_offset + resource_offset_move * 2.0, 15.0);
+            .draw(window, resources_offset, 95.0 + resource_offset_move * 2.0);
         is_ok
     }
 }
