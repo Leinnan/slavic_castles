@@ -12,3 +12,7 @@ tasks:
   - build: |
       cd slavic_castles/
       cargo build
+  - build_web: |
+      cd slavic_castles/
+      cargo install cargo-web
+      cargo web build
