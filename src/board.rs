@@ -119,10 +119,10 @@ impl Board {
     fn prepare_ui(&mut self, hide_help: bool) {
         let is_human_playing = self.is_human_playing();
         let ui = self.ui.as_mut().unwrap();
-        ui.reset_game();
         ui.enable_ui_deck(is_human_playing);
         ui.update_deck(&self.players[&PlayerNumer::First]);
         ui.players_update(&self.players, self.active_player);
+        ui.reset_game();
         if hide_help {
             ui.hide_help();
         }

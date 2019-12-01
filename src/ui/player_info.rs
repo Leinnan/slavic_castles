@@ -129,7 +129,7 @@ impl PlayerInfo {
     }
 
     pub fn draw(&mut self, window: &mut Window) -> Result<()> {
-        let base_y_pos = 10.0 + self.offset.1;
+        let base_y_pos = 110.0 + self.offset.1;
         let base_x_pos = if self.align_right {
             1280.0 as f32 - 128.0 - 10.0
         } else {
@@ -255,25 +255,25 @@ impl PlayerInfo {
         }
 
         let resources_offset = if self.align_right {
-            base_x_pos - 110.0
+            base_x_pos + 40.0
         } else {
-            base_x_pos + 150.0
+            base_x_pos
         };
         let resource_offset_move = if self.align_right { -95.0 } else { 95.0 };
 
-        is_ok = self.tools.draw(window, resources_offset, 25.0);
+        is_ok = self.tools.draw(window, resources_offset, 15.0);
         if !is_ok.is_ok() {
             return is_ok;
         }
         is_ok = self
             .magic
-            .draw(window, resources_offset + resource_offset_move, 25.0);
+            .draw(window, resources_offset + resource_offset_move, 15.0);
         if !is_ok.is_ok() {
             return is_ok;
         }
         is_ok = self
             .soldiers
-            .draw(window, resources_offset + resource_offset_move * 2.0, 25.0);
+            .draw(window, resources_offset + resource_offset_move * 2.0, 15.0);
         is_ok
     }
 }
