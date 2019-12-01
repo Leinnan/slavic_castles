@@ -106,9 +106,7 @@ impl Player {
     pub fn give_damage(&mut self, amount: i32, ignore_wall: bool) {
         if ignore_wall {
             self.tower_hp -= amount;
-        }
-
-        if self.walls_hp < amount {
+        } else if self.walls_hp < amount {
             self.tower_hp -= amount - self.walls_hp;
             self.walls_hp = 0;
         } else {

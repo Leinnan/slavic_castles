@@ -79,8 +79,8 @@ impl StartGameScreen {
         self.logo_scale_anim.update(delta_time);
     }
 
-    pub fn event(&mut self, _event: &Event, window: &mut Window) -> Result<()> {
-        match _event {
+    pub fn event(&mut self, event: &Event, window: &mut Window) -> Result<()> {
+        match event {
             Event::MouseMoved(_) => {
                 let mouse_pos = window.mouse().pos();
                 let new_game_btn_hovered = self.new_game_btn.is_pos_over(mouse_pos.x, mouse_pos.y);

@@ -26,8 +26,12 @@ pub struct PlayerInfo {
     name: String,
     tower_hp: i32,
     walls_hp: i32,
-    avatar: Asset<Image>,
     frame: Asset<Image>,
+    frame_second: Asset<Image>,
+    health_img: Asset<Image>,
+    shield_img: Asset<Image>,
+    health_color: Color,
+    shield_color: Color,
     font: Asset<Font>,
     tools: ResourceInfo,
     magic: ResourceInfo,
@@ -39,13 +43,9 @@ pub struct PlayerInfo {
 
 impl PlayerInfo {
     pub fn new(
-        name: String,
         active: bool,
-        avatar_path: String,
         align_right: bool,
     ) -> Result<PlayerInfo> {
-        let avatar = Asset::new(Image::load(avatar_path));
-        let frame = Asset::new(Image::load("frame.png"));
         let tools = ResourceInfo::new("tools.png".to_string(), consts::TOOLS_COLOR.into())?;
         let magic = ResourceInfo::new("potionBlue.png".to_string(), consts::MAGIC_COLOR.into())?;
         let soldiers = ResourceInfo::new("axe.png".to_string(), consts::SOLDIERS_COLOR.into())?;
@@ -53,11 +53,15 @@ impl PlayerInfo {
         let info = PlayerInfo {
             active: active,
             align_right: align_right,
-            name: name,
+            name: (if active { "Player" } else {"Enemy"}).to_string(),
             tower_hp: consts::BASE_TOWER_HP,
             walls_hp: consts::BASE_WALLS_HP,
-            avatar: avatar,
-            frame: frame,
+            frame: Asset::new(Image::load("player_frame_name.png")),
+            frame_second: Asset::new(Image::load("player_frame_resources.png")),
+            health_img: Asset::new(Image::load("player_health.png")),
+            shield_img: Asset::new(Image::load("player_shield.png")),
+            health_color: consts::FONT_WHITE_COLOR,
+            shield_color: consts::FONT_WHITE_COLOR,
             font: Asset::new(Font::load("coolvetica.ttf")),
             tools: tools,
             magic: magic,
@@ -71,9 +75,20 @@ impl PlayerInfo {
 
     pub fn game_restarted(&mut self) {
         self.scale_anim.reset();
+        self.health_color = consts::FONT_WHITE_COLOR;
+        self.shield_color = consts::FONT_WHITE_COLOR;
     }
 
     pub fn update_info(&mut self, player: &Player, active: bool) {
+        self.shield_color = if self.walls_hp != player.walls_hp  {
+            if self.walls_hp > player.walls_hp { Color::RED } else { Color::GREEN }
+        } else { consts::FONT_WHITE_COLOR };
+        self.health_color = if self.tower_hp != player.tower_hp  {
+            if self.tower_hp > player.tower_hp { Color::RED } else { Color::GREEN }
+        } else { consts::FONT_WHITE_COLOR };
+        if self.tower_hp != player.tower_hp {
+            self.shield_color = if self.walls_hp > player.walls_hp { Color::RED } else { Color::GREEN };
+        }
         if self.walls_hp > player.walls_hp || self.tower_hp > player.tower_hp {
             self.shake_duration = consts::AVATAR_SHAKE_DURATION;
         }
@@ -116,13 +131,12 @@ impl PlayerInfo {
     pub fn draw(&mut self, window: &mut Window) -> Result<()> {
         let base_y_pos = 10.0 + self.offset.1;
         let base_x_pos = if self.align_right {
-            1280.0 as f32 - 210.0
+            1280.0 as f32 - 128.0 - 10.0
         } else {
             10.0
         } + self.offset.0;
         let center = Vector::new(
-            base_x_pos + (FRAME_SIZE / 2.0),
-            base_y_pos + (FRAME_SIZE / 2.0),
+            base_x_pos + 64.0,base_y_pos+16.0
         );
         let scale = (
             self.scale_anim.get_current_value(),
@@ -130,18 +144,12 @@ impl PlayerInfo {
         );
         let mut is_ok;
 
-        let color = if self.active {
-            Color::WHITE
-        } else {
-            Color::WHITE.multiply(consts::GREY)
-        };
-
-        is_ok = self.avatar.execute(|image| {
+        is_ok = self.frame.execute(|image| {
             window.draw_ex(
                 &image.area().with_center(center),
-                Blended(&image, color),
+                Img(&image),
                 Transform::scale(scale),
-                0,
+                2,
             );
             Ok(())
         });
@@ -150,9 +158,9 @@ impl PlayerInfo {
             return is_ok;
         }
 
-        is_ok = self.frame.execute(|image| {
+        is_ok = self.frame_second.execute(|image| {
             window.draw_ex(
-                &image.area().with_center(center),
+                &image.area().with_center((base_x_pos + 64.0 - 3.0* scale.0,base_y_pos+16.0+36.0 * scale.1)),
                 Img(&image),
                 Transform::scale(scale),
                 1,
@@ -167,17 +175,63 @@ impl PlayerInfo {
         if !self.scale_anim.is_ended() {
             return is_ok;
         }
+        let shield_color = self.shield_color;
+        is_ok = self.shield_img.execute(|image| {
+            window.draw_ex(
+                &image.area().with_center((base_x_pos + 64.0 - 18.0* scale.0,base_y_pos+16.0+36.0 * scale.1)),
+                Blended(&image, shield_color),
+                Transform::scale(scale),
+                3,
+            );
+            Ok(())
+        });
+
+        if !is_ok.is_ok() {
+            return is_ok;
+        }
+
+        let health_color = self.health_color;
+        is_ok = self.health_img.execute(|image| {
+            window.draw_ex(
+                &image.area().with_center((base_x_pos + 64.0 + 40.0* scale.0,base_y_pos+16.0+36.0 * scale.1)),
+                Blended(&image, health_color),
+                Transform::scale(scale),
+                3,
+            );
+            Ok(())
+        });
+
+        if !is_ok.is_ok() {
+            return is_ok;
+        }
+        let name_text = format!("{}", self.name);
+        let name_style = FontStyle::new(20.0, if self.active { consts::FONT_WHITE_COLOR } else { consts::FONT_GREY_COLOR });
+        is_ok = self.font.execute(|f| {
+            let text = f.render(&name_text, &name_style)?;
+            window.draw_ex(
+                &text
+                    .area()
+                    .with_center(center),
+                Img(&text),
+                Transform::scale(scale),
+                3,
+            );
+            Ok(())
+        });
+        if !is_ok.is_ok() {
+            return is_ok;
+        }
         let walls_text = format!("{}", self.walls_hp);
-        let style = FontStyle::new(20.0, consts::FONT_COLOR);
+        let style = FontStyle::new(20.0, consts::FONT_WHITE_COLOR);
         is_ok = self.font.execute(|f| {
             let text = f.render(&walls_text, &style)?;
             window.draw_ex(
                 &text
                     .area()
-                    .with_center((base_x_pos + 26.0 * scale.0, base_y_pos + 172.0 * scale.1)),
+                    .with_center((base_x_pos + 64.0 - 45.0* scale.0,base_y_pos+16.0+36.0 * scale.1)),
                 Img(&text),
                 Transform::scale(scale),
-                2,
+                3,
             );
             Ok(())
         });
@@ -189,13 +243,10 @@ impl PlayerInfo {
         is_ok = self.font.execute(|f| {
             let text = f.render(&tower_text, &style)?;
             window.draw_ex(
-                &text.area().with_center((
-                    base_x_pos + (FRAME_SIZE - 23.0) * scale.0,
-                    base_y_pos + 175.0 * scale.1,
-                )),
+                &text.area().with_center((base_x_pos + 64.0 + 10.0* scale.0,base_y_pos+16.0+36.0 * scale.1)),
                 Img(&text),
                 Transform::scale(scale),
-                2,
+                3,
             );
             Ok(())
         });
@@ -204,9 +255,9 @@ impl PlayerInfo {
         }
 
         let resources_offset = if self.align_right {
-            base_x_pos - 120.0
+            base_x_pos - 110.0
         } else {
-            base_x_pos + 220.0
+            base_x_pos + 150.0
         };
         let resource_offset_move = if self.align_right { -95.0 } else { 95.0 };
 

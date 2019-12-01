@@ -40,9 +40,9 @@ pub struct BoardUI {
 impl BoardUI {
     pub fn new() -> Result<BoardUI> {
         let player_info_left =
-            PlayerInfo::new("Human".to_string(), true, "avatar.png".to_string(), false)?;
+            PlayerInfo::new(true, false)?;
         let player_info_right =
-            PlayerInfo::new("Human".to_string(), false, "avatar.png".to_string(), true)?;
+            PlayerInfo::new(false, true)?;
         let (w, h) = (1280, 720);
         let mut card_displayers = Vec::new();
         let card_scale = 0.9;
