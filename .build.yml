@@ -1,0 +1,14 @@
+image: archlinux
+packages:
+  - rustup
+  - alsa-lib
+sources:
+  - https://github.com/Leinnan/slavic_castles
+tasks:
+  - setup: |
+      rustup toolchain install stable
+      cd slavic_castles/
+      rustup run stable cargo fetch
+  - build: |
+      cd slavic_castles/
+      cargo build
