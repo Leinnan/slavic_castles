@@ -6,6 +6,7 @@ pub const BASE_TOWER_HP: i32 = 20;
 pub const BASE_WALLS_HP: i32 = 15;
 pub const MAX_TOWER_HP: i32 = 100;
 pub const MAX_WALLS_HP: i32 = 50;
+pub const MAX_PRODUCTION: i32 = 10;
 pub const CARDS_IN_DECK: i32 = 5;
 
 pub const DELAY_BETWEEN_MOVES: f64 = 1.2;

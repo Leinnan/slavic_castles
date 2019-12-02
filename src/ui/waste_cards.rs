@@ -91,7 +91,7 @@ impl WasteCards {
         is_ok = self.previous_card.draw(window);
 
         if is_ok.is_ok() && self.cards_played > 1 {
-            self.last_card.draw(window);
+            is_ok = self.last_card.draw(window);
         }
         is_ok
     }

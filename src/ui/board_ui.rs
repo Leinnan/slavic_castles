@@ -43,7 +43,7 @@ impl BoardUI {
         let player_info_right = PlayerInfo::new(false, true)?;
         let (w, h) = (1280, 720);
         let mut card_displayers = Vec::new();
-        let card_scale = 0.9;
+        let card_scale = 0.96;
         let base_x_pos = (w as f32
             - (consts::CARDS_IN_DECK as f32 * consts::CARD_SIZE_X * card_scale / 0.9))
             / 2.0;

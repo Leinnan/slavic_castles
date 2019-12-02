@@ -43,6 +43,8 @@ impl Resource {
         self.production += diff;
         if self.production <= 0 {
             self.production = 1;
+        } else if self.production > consts::MAX_PRODUCTION {
+            self.production = consts::MAX_PRODUCTION;
         }
     }
 

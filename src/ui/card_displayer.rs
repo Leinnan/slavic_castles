@@ -159,11 +159,16 @@ impl CardDisplayer {
         if !is_ok.is_ok() {
             return is_ok;
         }
+        let desc_color = if self.can_afford {
+            self.color
+        } else {
+            consts::GREY
+        };
         is_ok = self.font.execute(|f| {
-            let style = FontStyle::new(16.0, font_color);
+            let style = FontStyle::new(20.0, desc_color);
             let text = f.render(&result, &style)?;
             window.draw_ex(
-                &text.area().with_center((pos[0], pos[1] + 25.0 * scale[1])),
+                &text.area().with_center((pos[0], pos[1] + 35.0 * scale[1])),
                 Img(&text),
                 Transform::scale((scale[0], scale[1])),
                 3,

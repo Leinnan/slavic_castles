@@ -31,7 +31,7 @@ impl fmt::Display for CardEffect {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut result: String = match self.effect_type {
             EffectType::ProductionChange(resource, amount) => {
-                let sign = if amount > 0 { '+' } else { '-' };
+                let sign = if amount > 0 { "+" } else { "" };
                 format!(
                     "{}{} {} production",
                     sign,
@@ -39,12 +39,12 @@ impl fmt::Display for CardEffect {
                     Resource::resource_name(&resource)
                 )
             }
-            EffectType::Damage(amount, ignore_wall) if ignore_wall => {
-                format!("{} damage(ignores wall)", amount)
+            EffectType::Damage(amount, ignore_wall) => {
+                let ignore_wall = if ignore_wall { "(ignores shield)" } else { "" };
+                format!("{} damage{}", amount, ignore_wall)
             }
-            EffectType::Damage(amount, _) => format!("{} damage", amount),
             EffectType::ResourceChange(resource, amount) => {
-                let sign = if amount > 0 { '+' } else { '-' };
+                let sign = if amount > 0 { "+" } else { "" };
                 format!(
                     "{}{} of {}",
                     sign,
@@ -53,20 +53,22 @@ impl fmt::Display for CardEffect {
                 )
             }
             EffectType::TowerGrowth(growth) => {
-                let start_text = if growth > 0 { "Adds" } else { "Remove" };
-                format!("{} {} HP", start_text, growth)
+                let sign = if growth > 0 { "+" } else { "-" };
+                format!("{}{} Health", sign, growth)
             }
             EffectType::WallsGrowth(growth) => {
-                let start_text = if growth > 0 { "Adds" } else { "Remove" };
-                format!("{} {} shield", start_text, growth)
+                let sign = if growth > 0 { "+" } else { "-" };
+                format!("{}{} Shield", sign, growth)
             }
             EffectType::None => String::new(),
         };
         if self.effect_type != EffectType::None {
-            if self.affects_user {
-                //result.push_str("to you");
-            } else {
-                result.push_str(" to enemy");
+            if !self.affects_user {
+                if result.len() > 13 {
+                    result.push_str("\nto enemy");
+                } else {
+                    result.push_str(" to enemy");
+                }
             }
         }
         write!(f, "{}", result)

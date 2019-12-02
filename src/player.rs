@@ -158,6 +158,8 @@ impl Player {
         if is_user {
             self.change_resource_amount(&card.cost_resource, -card.cost_amount);
         }
+        let res_change = card.resource_amount_change(is_user);
+        self.change_resource_amount(&res_change.0, res_change.1);
         let prod = card.production_change(is_user);
         self.change_resource_production(&prod.0, prod.1);
         let damage = card.damage(is_user);

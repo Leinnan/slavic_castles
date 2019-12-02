@@ -17,7 +17,7 @@ pub struct Board {
     players: HashMap<PlayerNumer, Player>,
     active_player: PlayerNumer,
     pub time_before_next_move: f64,
-    game_ended: bool,
+    pub game_ended: bool,
     #[serde(skip)]
     pub ui: Option<BoardUI>,
 }
@@ -31,6 +31,9 @@ impl Board {
 
     pub fn load_board() -> Self {
         let mut result = load::<Self>("slavic_castles", "board").expect("Could not load Board");
+        if result.game_ended {
+            result = Board::new_board();
+        }
         result.ui = Board::create_ui();
         result.prepare_ui(true);
         result

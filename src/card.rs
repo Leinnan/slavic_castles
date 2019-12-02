@@ -31,6 +31,20 @@ impl Card {
         production_change
     }
 
+    pub fn resource_amount_change(&self, is_user: bool) -> (ResourceType, i32) {
+        let mut change = (ResourceType::Magic, 0i32);
+        for el in self.effects.iter() {
+            match el.effect_type {
+                EffectType::ResourceChange(effect_type, amount) if el.affects_user == is_user => {
+                    change.0 = effect_type;
+                    change.1 += amount;
+                }
+                _ => {}
+            }
+        }
+        change
+    }
+
     pub fn damage(&self, is_user: bool) -> (i32, bool) {
         let mut damage = (0i32, false);
         for el in self.effects.iter() {
