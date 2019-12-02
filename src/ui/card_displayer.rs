@@ -1,4 +1,5 @@
 use crate::card::Card;
+use crate::card_effect::*;
 use crate::consts;
 use crate::resource::*;
 use crate::ui::animations;
@@ -82,7 +83,9 @@ impl CardDisplayer {
 
         self.description.clear();
         for el in card.effects.iter() {
-            self.description.push_str(&format!("{}\n", el));
+            if el.effect_type != EffectType::None {
+                self.description.push_str(&format!("{}\n", el));
+            }
         }
 
         self.ready = true;
