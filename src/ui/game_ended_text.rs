@@ -50,15 +50,19 @@ impl GameEndedText {
         self.enabled = enable;
     }
 
+    pub fn is_hovered(&self, pos: Vector) -> bool {
+        self.enabled && BG_AREA.contains(pos)
+    }
+
     pub fn game_ended(&mut self, positive: bool) {
         self.enable(true);
         self.result_text = if positive {
-            "You win! Press R to restart!".to_string()
+            "You win! Press to restart!".to_string()
         } else {
-            "You lose! Press R to restart!".to_string()
+            "You lose! Press to restart!".to_string()
         };
         if positive {
-            self.color = Color::GREEN;
+            self.color = Color::WHITE;
             self.positive_sound.execute(|sound| {
                 sound.play()?;
                 Ok(())

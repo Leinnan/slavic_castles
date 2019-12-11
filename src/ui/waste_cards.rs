@@ -18,6 +18,7 @@ pub struct WasteCards {
     card_back: Asset<Image>,
     previous_card: CardDisplayer,
     last_card: CardDisplayer,
+    enabled: bool,
     pub display_card: bool,
     cards_played: i32,
     x: f32,
@@ -45,6 +46,7 @@ impl WasteCards {
             last_card: second_card,
             x: x,
             y: y,
+            enabled: true,
             display_card: true,
             cards_played: 0,
             scale: base_scale,
@@ -52,6 +54,7 @@ impl WasteCards {
     }
 
     pub fn card_used(&mut self, card: &Card) {
+        self.enabled = true;
         self.cards_played += 1;
         if self.cards_played == 1 {
             self.previous_card.update_info(card, false);
@@ -64,10 +67,14 @@ impl WasteCards {
     }
 
     pub fn game_ended(&mut self) {
+        self.enabled = false;
         self.cards_played = 0;
     }
 
     pub fn draw(&mut self, window: &mut Window) -> Result<()> {
+        if !self.enabled {
+            return Ok(());
+        }
         let mut is_ok;
         let pos = [
             self.x + (consts::CARD_SIZE_X / 2.0),

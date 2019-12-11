@@ -79,6 +79,7 @@ impl BoardUI {
     }
 
     pub fn reset_game(&mut self) {
+        self.game_ended = false;
         self.console.clear();
         self.console.message("Game restarted");
         self.game_ended_text.enable(false);
@@ -89,6 +90,10 @@ impl BoardUI {
 
     pub fn hide_help(&mut self) {
         self.help.hide();
+    }
+
+    pub fn end_game_hovered(&self, pos: Vector) -> bool {
+        self.game_ended_text.is_hovered(pos)
     }
 
     pub fn enable_ui_deck(&mut self, show: bool) {
@@ -103,6 +108,7 @@ impl BoardUI {
     }
 
     pub fn game_ended(&mut self, positive: bool) {
+        self.game_ended = true;
         self.game_ended_text.game_ended(positive);
         self.waste_cards.game_ended();
     }
@@ -162,14 +168,13 @@ impl BoardUI {
         }
     }
 
-    pub fn update(&mut self, game_ended: bool, delta_time: f64) {
+    pub fn update(&mut self, delta_time: f64) {
         for i in 0..consts::CARDS_IN_DECK as usize {
             self.card_displayers[i].update(delta_time);
         }
         self.player_info_left.update(delta_time);
         self.player_info_right.update(delta_time);
         self.game_ended_text.update(delta_time);
-        self.game_ended = game_ended;
     }
 
     pub fn draw(&mut self, window: &mut Window) -> Result<()> {

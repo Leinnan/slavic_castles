@@ -196,6 +196,11 @@ impl Board {
             return;
         }
 
+        if self.ui.as_mut().unwrap().end_game_hovered(mouse_pos) && lmb_pressed {
+            self.reset_game(shift_pressed);
+            return;
+        }
+
         if !self.is_human_playing() || self.is_game_ended() || !self.can_active_player_move() {
             return;
         }
@@ -224,10 +229,9 @@ impl Board {
     }
 
     pub fn update(&mut self, delta: f64) {
-        let game_ended = self.is_game_ended();
-        self.ui.as_mut().unwrap().update(game_ended, delta);
+        self.ui.as_mut().unwrap().update(delta);
 
-        if game_ended {
+        if self.is_game_ended() {
             return;
         }
         if !self.can_active_player_move() {

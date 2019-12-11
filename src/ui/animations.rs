@@ -1,3 +1,4 @@
+use ezing;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
@@ -34,7 +35,7 @@ impl AnimationFloat {
         let percentage = if self.passed_time < 0.0 {
             0.0
         } else {
-            self.passed_time as f32 / self.duration as f32
+            ezing::circ_inout(self.passed_time as f32 / self.duration as f32)
         };
         let start = if self.is_played_back {
             self.end_value
@@ -64,6 +65,7 @@ impl AnimationFloat {
 
     pub fn reset(&mut self) {
         self.passed_time = -self.delay;
+        self.update(0.0);
     }
 
     pub fn play(&mut self, play_back: bool, reset: bool) {
