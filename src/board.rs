@@ -18,6 +18,8 @@ pub struct Board {
     active_player: PlayerNumer,
     pub time_before_next_move: f64,
     pub game_ended: bool,
+    pub game_duration: f64,
+    pub moves_made: i32,
     #[serde(skip)]
     pub ui: Option<BoardUI>,
 }
@@ -53,6 +55,8 @@ impl Board {
             active_player: PlayerNumer::First,
             time_before_next_move: 0.0,
             game_ended: false,
+            game_duration: 0.0,
+            moves_made: 0,
             ui: Board::create_ui(),
         };
 
@@ -81,6 +85,8 @@ impl Board {
             .reset(false, false);
         self.time_before_next_move = consts::DELAY_BETWEEN_MOVES;
         self.game_ended = false;
+        self.game_duration = 0.0;
+        self.moves_made = 0;
         self.prepare_ui(false);
     }
 
@@ -140,6 +146,7 @@ impl Board {
     }
 
     fn switch_player(&mut self) {
+        self.moves_made += 1;
         self.active_player = self.other_player();
         self.players
             .get_mut(&self.active_player)
@@ -234,6 +241,12 @@ impl Board {
         if self.is_game_ended() {
             return;
         }
+
+        self.game_duration += delta;
+        self.ui
+            .as_mut()
+            .unwrap()
+            .update_game_info(self.game_duration, self.moves_made);
         if !self.can_active_player_move() {
             self.time_before_next_move -= delta;
             return;

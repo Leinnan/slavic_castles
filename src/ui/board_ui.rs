@@ -5,6 +5,7 @@ use crate::player::*;
 use crate::ui::card_displayer::CardDisplayer;
 use crate::ui::console::Console;
 use crate::ui::game_ended_text::GameEndedText;
+use crate::ui::game_info::GameInfo;
 use crate::ui::help_displayer::HelpDisplayer;
 use crate::ui::player_info::PlayerInfo;
 use crate::ui::waste_cards::WasteCards;
@@ -23,6 +24,7 @@ pub struct BoardUI {
     bg: Image,
     console: Console,
     game_ended_text: GameEndedText,
+    game_info: GameInfo,
     player_info_left: PlayerInfo,
     player_info_right: PlayerInfo,
     card_displayers: Vec<CardDisplayer>,
@@ -62,6 +64,7 @@ impl BoardUI {
             bg: bg.unwrap(),
             console: Console::new()?,
             game_ended_text: GameEndedText::new(),
+            game_info: GameInfo::new(),
             player_info_left: player_info_left,
             player_info_right: player_info_right,
             card_displayers: card_displayers,
@@ -177,6 +180,10 @@ impl BoardUI {
         self.game_ended_text.update(delta_time);
     }
 
+    pub fn update_game_info(&mut self, game_duration: f64, moves: i32) {
+        self.game_info.update_info(game_duration, moves);
+    }
+
     pub fn draw(&mut self, window: &mut Window) -> Result<()> {
         window.clear(consts::BG_COLOR)?;
         let screen_center = ((self.screen_width / 2.0), (self.screen_height / 2.0));
@@ -215,6 +222,10 @@ impl BoardUI {
             return is_ok;
         }
         is_ok = self.waste_cards.draw(window);
+        if !is_ok.is_ok() {
+            return is_ok;
+        }
+        is_ok = self.game_info.draw(window);
         if !is_ok.is_ok() {
             return is_ok;
         }

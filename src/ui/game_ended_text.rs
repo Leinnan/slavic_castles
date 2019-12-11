@@ -31,7 +31,7 @@ pub struct GameEndedText {
 }
 
 impl GameEndedText {
-    pub fn new() -> GameEndedText {
+    pub fn new() -> Self {
         GameEndedText {
             font: Asset::new(Font::load("coolvetica.ttf")),
             result_text: "".to_string(),
