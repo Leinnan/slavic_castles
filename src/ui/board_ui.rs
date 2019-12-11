@@ -168,6 +168,7 @@ impl BoardUI {
         }
         self.player_info_left.update(delta_time);
         self.player_info_right.update(delta_time);
+        self.game_ended_text.update(delta_time);
         self.game_ended = game_ended;
     }
 
