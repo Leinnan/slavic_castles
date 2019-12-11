@@ -5,17 +5,15 @@ authors = ["Piotr Siuszko <siuszko@zoho.com>"]
 edition = "2018"
 
 [dependencies]
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 quicksilver = "0.3.20"
+serde = "1.0.103"
+serde_json = "1.0.43"
+nalgebra = "0.19.0"
+ezing = "0.2.1"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 structopt = "0.3.5"
 rand = "0.7"
-serde = "1.0.103"
-serde_json = "1.0.43"
-nalgebra = "0.19.0"
 
 [target.wasm32-unknown-unknown.dependencies]
-quicksilver = "0.3.20"
 rand = { version = "0.7", features = ["stdweb"] }
-serde = "1.0.103"
-serde_json = "1.0.43"
-nalgebra = "0.19.0"
