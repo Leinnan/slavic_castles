@@ -26,6 +26,14 @@ pub struct Board {
 }
 
 impl Board {
+    pub fn get() -> Self {
+        if Board::has_save() {
+            Board::load_board()
+        } else {
+            Board::new_board()
+        }
+    }
+
     pub fn has_save() -> bool {
         let result = load::<Self>("slavic_castles", "board");
 

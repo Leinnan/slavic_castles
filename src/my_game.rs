@@ -14,14 +14,8 @@ pub struct MyGame {
 
 impl State for MyGame {
     fn new() -> Result<Self> {
-        let board = if Board::has_save() {
-            Board::load_board()
-        } else {
-            Board::new_board()
-        };
-
         Ok(MyGame {
-            board: board,
+            board: Board::get(),
             start_game_screen: start_game_screen::StartGameScreen::new(),
         })
     }
@@ -34,7 +28,7 @@ impl State for MyGame {
         }
     }
 
-    fn update(&mut self, window: &mut Window) -> Result<()> {
+    fn update(&mut self, _window: &mut Window) -> Result<()> {
         let delta = 1.0 / 60.;
         if self.start_game_screen.is_active() {
             self.start_game_screen.update(delta);
