@@ -2,6 +2,7 @@ use crate::card::Card;
 use crate::consts;
 use crate::player::*;
 use crate::ui::board_ui::BoardUI;
+use crate::stats;
 use quicksilver::{
     input::{ButtonState, Key, MouseButton},
     lifecycle::{run, Event, Settings, State, Window},
@@ -88,6 +89,7 @@ impl Board {
         self.game_duration = 0.0;
         self.moves_made = 0;
         self.prepare_ui(false);
+        stats::Stats::game_started();
     }
 
     pub fn other_player(&self) -> PlayerNumer {
@@ -175,6 +177,8 @@ impl Board {
                 .unwrap()
                 .game_ended(self.players[&id].is_human());
             self.game_ended = true;
+            stats::Stats::game_ended(self.players[&id].is_human(),self.game_duration,self.moves_made);
+
         } else if self.players[&PlayerNumer::First].has_max_possible_tower()
             || self.players[&PlayerNumer::Second].has_max_possible_tower()
         {
@@ -188,6 +192,7 @@ impl Board {
                 .unwrap()
                 .game_ended(self.players[&id].is_human());
             self.game_ended = true;
+            stats::Stats::game_ended(self.players[&id].is_human(),self.game_duration,self.moves_made);
         } else {
             self.switch_player();
         }

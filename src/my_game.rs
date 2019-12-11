@@ -35,7 +35,7 @@ impl State for MyGame {
     }
 
     fn update(&mut self, window: &mut Window) -> Result<()> {
-        let delta = window.current_fps() / 1000.0;
+        let delta = 1.0 / 60.;
         if self.start_game_screen.is_active() {
             self.start_game_screen.update(delta);
             if self.start_game_screen.is_requesting_change() {
