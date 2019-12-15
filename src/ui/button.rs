@@ -18,16 +18,52 @@ pub enum ButtonState {
     Disabled,
 }
 
+pub struct ButtonTexts {
+    pub base_text: Image,
+    pub hover_text: Image,
+    pub disabled_text: Image,
+    pub disabled_color: Color,
+    pub base_color: Color,
+    pub hover_color: Color,
+}
+impl ButtonTexts {
+    pub fn new(text: String, font: Font) -> Result<Self> {
+        let base = FontStyle::new(25.0, consts::FONT_WHITE_COLOR);
+        let disabled = FontStyle::new(25.0, consts::BTN_DISABLED_COLOR);
+        let hovered = FontStyle::new(25.0, consts::BTN_HOVERED_COLOR);
+        let base_text = font.render(&text, &base)?;
+        let hover_text = font.render(&text, &hovered)?;
+        let disabled_text = font.render(&text, &disabled)?;
+        Ok(Self {
+            base_text,
+            hover_text,
+            disabled_text,
+            base_color: consts::FONT_WHITE_COLOR,
+            hover_color: consts::BTN_HOVERED_COLOR,
+            disabled_color: consts::BTN_DISABLED_COLOR,
+        })
+    }
+    pub fn get_color(&self, state: ButtonState) -> Color {
+        match state {
+            ButtonState::Disabled => self.disabled_color,
+            ButtonState::Hovered => self.hover_color,
+            _ => self.base_color,
+        }
+    }
+    pub fn get_text(&self, state: ButtonState) -> &Image {
+        match state {
+            ButtonState::Disabled => &self.disabled_text,
+            ButtonState::Hovered => &self.hover_text,
+            _ => &self.base_text,
+        }
+    }
+}
+
 pub struct Button {
     pos_center: (f32, f32),
-    text: String,
-    bg: Image,
     state: ButtonState,
-    font: Asset<Font>,
-    base_color: Color,
-    hovered_color: Color,
+    text: Asset<(Image, ButtonTexts)>,
     // pressed_color: Color,
-    disabled_color: Color,
     // pressed_anim: animations::AnimationFloat,
 }
 
@@ -35,17 +71,15 @@ impl Button {
     pub fn new(text: String, enabled: bool, pos: (f32, f32)) -> Self {
         Button {
             pos_center: pos,
-            text: text,
-            bg: Image::from_bytes(&consts::BASE_BTN_IMG).unwrap(),
             state: if enabled {
                 ButtonState::Normal
             } else {
                 ButtonState::Disabled
             },
-            font: Asset::new(Font::load("coolvetica.ttf")),
-            base_color: consts::FONT_WHITE_COLOR,
-            disabled_color: consts::BTN_DISABLED_COLOR,
-            hovered_color: consts::BTN_HOVERED_COLOR,
+            text: Asset::new(Font::load("coolvetica.ttf").and_then(move |v| {
+                ButtonTexts::new(text, v)
+                    .map(|v| (Image::from_bytes(&consts::BASE_BTN_IMG).unwrap(), v))
+            })),
         }
     }
     pub fn is_hovered(&self) -> bool {
@@ -75,34 +109,24 @@ impl Button {
     }
 
     pub fn draw(&mut self, window: &mut Window) {
-        let color = self.get_color();
-        window.draw_ex(
-            &self.bg.area().with_center(self.pos_center),
-            Blended(&self.bg, color),
-            Transform::IDENTITY,
-            1,
-        );
-        let style = FontStyle::new(25.0, color);
-        let btn_txt = self.text.clone();
-        let pos = self.pos_center;
-
-        self.font.execute(|f| {
-            let text = f.render(&btn_txt, &style)?;
+        let pos_center = self.pos_center.clone();
+        let state = self.state;
+        self.text.execute(|(bg, texts)| {
+            let color = texts.get_color(state);
             window.draw_ex(
-                &text.area().with_center(pos),
+                &bg.area().with_center(pos_center),
+                Blended(bg, color),
+                Transform::IDENTITY,
+                1,
+            );
+            let text = texts.get_text(state);
+            window.draw_ex(
+                &text.area().with_center(pos_center),
                 Img(&text),
                 Transform::IDENTITY,
                 2,
             );
             Ok(())
         });
-    }
-
-    fn get_color(&self) -> Color {
-        match self.state {
-            ButtonState::Disabled => self.disabled_color,
-            ButtonState::Hovered => self.hovered_color,
-            _ => self.base_color,
-        }
     }
 }
