@@ -19,8 +19,7 @@ pub fn main() {
     console_error_panic_hook::set_once();
 
     let mut app = App::new();
-    app
-    .insert_resource(AssetMetaCheck::Never);
+    app.insert_resource(AssetMetaCheck::Never);
     #[cfg(not(target_arch = "wasm32"))]
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
