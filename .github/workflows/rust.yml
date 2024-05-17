@@ -1,0 +1,59 @@
+name: build
+
+on:
+  workflow_call:
+  push:
+    branches:
+      - 'main'
+      - 'master'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check-and-build:
+    concurrency:
+      group: build-${{ github.head_ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        continue-on-error: false
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-build-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-build-
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          components: clippy,rustfmt
+      - uses: extractions/setup-just@v2
+      - uses: taiki-e/cache-cargo-install-action@v2
+        with:
+          tool: wasm-bindgen-cli
+      - name: Install Linux dependencies
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        if: ${{ runner.os == 'linux' }}
+        with:
+          packages: libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+      - name: Check
+        run: just check
+      - name: Web Build
+        run: just web_build
+      - name: Push
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          SQUASH_HISTORY: true
+          REPO: self
+          BRANCH: gh-pages # The branch name where you want to push the assets
+          FOLDER: out # The directory where your assets are generated
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub will automatically add this - you don't need to bother getting a token
+          MESSAGE: "[Build]{msg} ({sha})" # The commit message
