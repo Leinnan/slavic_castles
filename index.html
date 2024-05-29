@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Slavic Castles</title>
+  <style>
+    html,
+    body {
+      text-align: center;
+      margin: auto 0;
+      background-color: #292F36;
+    }
+
+    canvas {
+      filter: drop-shadow(#2c422e 0 0 10px);
+    }
+  </style>
+</head>
+
+<body style="margin: 0 !important; padding: 0 !important;">
+  <script type="module">
+    import './restart-audio-context.js'
+    // Import and run your bevy wasm code
+    import init from './slavic_castles.js'
+    init().catch((error) => {
+      if (!error.message.startsWith("Using exceptions for control flow, don't mind me. This isn't actually an error!")) {
+        throw error;
+      }
+    });
+  </script>
+</body>
+
+</html>

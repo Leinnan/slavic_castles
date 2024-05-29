@@ -1,0 +1,160 @@
+button.regular text {
+    vertical-align: center;
+    text-align: center;
+    font: "fonts/AlteHaasGroteskBold.ttf";
+    font-size: 30px;
+    color: #FFF;
+}
+
+#deck_buttons {
+    width: 250px;
+}
+
+#deck_buttons button {
+    background-color: #2c422e;
+    padding: 15px 10px 25px;
+    justify-content: center;
+    align-items: center;
+}
+
+#deck_buttons button:none {
+    background-color: #2c422e;
+}
+
+#deck_buttons button:hover {
+    background-color: #2c422e;
+}
+
+#deck_buttons button:focus {
+    background-color: #35793a;
+}
+
+
+#deck_buttons button text {
+    vertical-align: center;
+    text-align: center;
+    font: "fonts/AlteHaasGroteskBold.ttf";
+    font-size: 30px;
+    color: #fcfd9e;
+}
+
+button.menu {
+    width: 250px;
+    height: 55px;
+    padding: 15px 10px 25px;
+    justify-content: center;
+    align-items: center;
+}
+
+button.common text {
+    color: #fcfd9e;
+}
+
+button.common:none {
+    background-color: #2c422e;
+}
+
+button.common:hover {
+    background-color: #2c422e;
+}
+
+button.common:focus {
+    background-color: #35793a;
+}
+
+#cardDescription {
+    vertical-align: center;
+    text-align: center;
+    font: "fonts/AlteHaasGroteskBold.ttf";
+    font-size: 20px;
+    margin: 5px;
+    color: #FFF;
+}
+
+.menu_background {
+    align-self: stretch;
+    position-type: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.logo {
+    width: 613.0px;
+    height: 109.0px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.popup_window {
+    justify-content: center;
+    align-items: center;
+    width: 70%;
+    height: 80%;
+    align-content: center;
+    flex-direction: column;
+    padding: 150px 50px 50px 50px;
+}
+
+.popup_window button {
+    margin: 15px 0px 0px 0px;
+    align-self: center;
+}
+
+.ribbon {
+    position-type: absolute;
+    top: 0px;
+    z-index: 2;
+    width: 30%;
+    height: 15%;
+    padding: 15px 0px 15px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.ribbon text {
+    font: "fonts/AlteHaasGroteskBold.ttf";
+    vertical-align: center;
+    text-align: center;
+    font-size: 40px;
+    color: #fcc55f;
+}
+
+#profile_edit #avatar {
+    align-self: center;
+    width: 150px;
+    height: 150px;
+    margin: auto 0px auto 0px;
+}
+
+#profile_edit #avatar button {
+    position-type: absolute;
+    width: 35px;
+    height: 35px;
+    bottom: 55px;
+}
+
+#profile_edit #avatar .next {
+    right: -40px;
+}
+
+#profile_edit #avatar .previous {
+    left: -40px;
+}
+
+#DeckNode {
+    align-self: stretch;
+    align-items: center;
+    flex-grow: 1.0;
+}
+
+#card.notSelectedCard:none {
+    margin: 25px 5px 0px 5px;
+}
+
+#card.notSelectedCard:hover {
+    margin: 20px 5px 5px 5px;
+}
+
+#card.selectedCard {
+    margin: 0px 5px 25px 5px;
+}
