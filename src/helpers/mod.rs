@@ -1,8 +1,6 @@
-use bevy::{
-    asset::AssetPath,
-    ecs::system::{Command, EntityCommands},
-    prelude::*,
-};
+use bevy::ecs::system::EntityCommands;
+use bevy::ecs::world::Command;
+use bevy::{asset::AssetPath, prelude::*};
 
 /// Command for playing a standard bevy audio asset
 pub struct AudioSpawnCommand<'a> {
@@ -54,7 +52,7 @@ pub trait AudioSpawnCommandExt {
     );
 }
 
-impl<'w, 's> AudioSpawnCommandExt for Commands<'w, 's> {
+impl AudioSpawnCommandExt for Commands<'_, '_> {
     fn play_sound(&mut self, path: impl Into<AssetPath<'static>>) {
         self.add(AudioSpawnCommand {
             path: path.into(),

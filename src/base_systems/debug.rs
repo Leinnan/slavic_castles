@@ -8,7 +8,7 @@ use bevy_egui::{egui, EguiContext, EguiPlugin};
 use bevy_inspector_egui::{
     bevy_inspector::hierarchy::SelectedEntities, DefaultInspectorConfigPlugin,
 };
-use iyes_perf_ui::prelude::*;
+// use iyes_perf_ui::prelude::*;
 
 #[derive(PartialEq, Eq, Default, Debug, Clone, Copy)]
 pub enum PanelDisplay {
@@ -66,8 +66,8 @@ impl Plugin for DebugPlugin {
         .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
-        .add_plugins(PerfUiPlugin)
-        .insert_resource(bevy_mod_picking::debug::DebugPickingMode::Normal)
+        // .add_plugins(PerfUiPlugin)
+        // .insert_resource(bevy_mod_picking::debug::DebugPickingMode::Normal)
         .add_plugins((EguiPlugin, DefaultInspectorConfigPlugin));
     }
 }

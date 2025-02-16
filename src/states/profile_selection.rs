@@ -4,7 +4,7 @@ use crate::data::profile;
 use crate::states::consts::*;
 use bevy::prelude::*;
 use bevy_button_released_plugin::ButtonReleasedEvent;
-use bevy_ecss::prelude::{Class, StyleSheet};
+// use bevy_ecss::prelude::{Class, StyleSheet};
 use bevy_pkv::PkvStore;
 use bevy_simple_text_input::{TextInputBundle, TextInputPlugin, TextInputSettings, TextInputValue};
 use bevy_tweening::{lens::TransformScaleLens, Animator, EaseFunction, Tween};
@@ -130,24 +130,23 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
             },
             ..default()
         })
-        .insert(StyleSheet::new(asset_server.load("css/base.css")))
+        // .insert(StyleSheet::new(asset_server.load("css/base.css")))
         .with_children(|parent| {
-            parent
-                .spawn(ImageBundle {
-                    z_index: ZIndex::Global(-1),
-                    image: UiImage {
-                        texture: asset_server.load("img/start_screen_bg.png"),
-                        ..default()
-                    },
+            parent.spawn(ImageBundle {
+                z_index: ZIndex::Global(-1),
+                image: UiImage {
+                    texture: asset_server.load("img/start_screen_bg.png"),
                     ..default()
-                })
-                .insert(Class::new("menu_background"));
+                },
+                ..default()
+            });
+            // .insert(Class::new("menu_background"));
 
             parent
                 .spawn((
                     ImageBundle {
                         image: asset_server.load("img/panel-004.png").into(),
-                        background_color: Color::rgb_u8(110, 116, 77).into(),
+                        background_color: Color::srgb_u8(110, 116, 77).into(),
                         ..default()
                     },
                     ImageScaleMode::Sliced(TextureSlicer {
@@ -157,7 +156,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                         max_corner_scale: 1.0,
                     }),
                     Name::new("profile_edit"),
-                    Class::new("popup_window"),
+                    // Class::new("popup_window"),
                 ))
                 .with_children(|parent| {
                     parent
@@ -166,7 +165,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                                 z_index: ZIndex::Local(50),
                                 ..default()
                             },
-                            Class::new("ribbon"),
+                            // Class::new("ribbon"),
                         ))
                         .with_children(|ribbon| {
                             ribbon.spawn(TextBundle::from_section(
@@ -192,19 +191,20 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                                 padding: UiRect::all(Val::Px(5.0)),
                                 ..default()
                             },
-                            border_color: Color::hex("fcfd9e").unwrap().into(),
-                            background_color: Color::hex("2c422e").unwrap().into(),
+                            border_color: Srgba::hex("fcfd9e").unwrap().into(),
+                            background_color: Srgba::hex("2c422e").unwrap().into(),
                             ..default()
                         },
                         TextInputBundle::default()
                             .with_text_style(TextStyle {
                                 font_size: 30.,
-                                color: Color::hex("fcfd9e").unwrap(),
+                                color: Srgba::hex("fcfd9e").unwrap().into(),
                                 ..default()
                             })
                             .with_value(get_user_name(pkv.as_ref()))
                             .with_settings(TextInputSettings {
                                 retain_on_submit: true,
+                                ..default()
                             }),
                     ));
 
@@ -236,9 +236,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                                                 ..default()
                                             },
                                             transform: Transform::from_scale(init_scale),
-                                            background_color: BackgroundColor::from(
-                                                Color::hex("7A444A").unwrap(),
-                                            ),
+                                            background_color: Srgba::hex("7A444A").unwrap().into(),
                                             ..default()
                                         },
                                         ImageScaleMode::Sliced(TextureSlicer {
@@ -255,7 +253,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                                                 end: Vec3::ONE,
                                             },
                                         )),
-                                        Class::new(format!("avatar common {}", class)),
+                                        // Class::new(format!("avatar common {}", class)),
                                         Name::new(format!("button_{}", class)),
                                         label,
                                     ))
@@ -265,7 +263,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                                             TextStyle {
                                                 font: asset_server.load(consts::LABEL_FONT),
                                                 font_size: 30.0,
-                                                color: Color::rgb(0.7, 0.7, 0.7),
+                                                color: Color::linear_rgb(0.7, 0.7, 0.7),
                                             },
                                         ));
                                     });
@@ -282,9 +280,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                                     ..default()
                                 },
                                 transform: Transform::from_scale(init_scale),
-                                background_color: BackgroundColor::from(
-                                    Color::hex("7A444A").unwrap(),
-                                ),
+                                background_color: Srgba::hex("7A444A").unwrap().into(),
                                 ..default()
                             },
                             ImageScaleMode::Sliced(TextureSlicer {
@@ -293,7 +289,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                                 sides_scale_mode: SliceScaleMode::Stretch,
                                 max_corner_scale: 1.0,
                             }),
-                            Class::new("menu common"),
+                            // Class::new("menu common"),
                             Name::new(format!("button:{}", text)),
                             label,
                             Animator::new(Tween::new(
@@ -311,7 +307,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                                 TextStyle {
                                     font: asset_server.load(consts::LABEL_FONT),
                                     font_size: 30.0,
-                                    color: Color::rgb(0.7, 0.7, 0.7),
+                                    color: Color::linear_rgb(0.7, 0.7, 0.7),
                                 },
                             ));
                         });

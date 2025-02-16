@@ -287,7 +287,8 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     let header_style = TextStyle {
         font: asset_server.load(consts::LABEL_FONT),
         font_size: 45.0,
-        color: Color::GOLD,
+        // color: Color::GOLD,
+        ..default()
     };
     commands
         .spawn(SpriteBundle {
@@ -310,7 +311,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                     align_items: AlignItems::Center,
                     ..default()
                 },
-                background_color: Color::hex("2c422e").unwrap().into(),
+                background_color: Srgba::hex("2c422e").unwrap().into(),
                 ..Default::default()
             },
             Name::new("Help display"),
@@ -324,7 +325,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                     TextStyle {
                         font: asset_server.load(consts::REGULAR_FONT),
                         font_size: 25.0,
-                        color: Color::hex("fcfd9e").unwrap(),
+                        color: Srgba::hex("fcfd9e").unwrap().into(),
                     },
                 )
                 .with_text_justify(JustifyText::Center),

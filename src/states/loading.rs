@@ -11,7 +11,6 @@ use states::consts;
 pub struct BaseAssets {
     #[asset(
         paths(
-            "css/base.css",
             "avatars/1.png",
             "avatars/2.png",
             "avatars/3.png",
@@ -108,7 +107,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                     flex_direction: FlexDirection::Row,
                     ..default()
                 },
-                background_color: Color::hex("#2c422e").unwrap().into(),
+                background_color: Srgba::hex("#2c422e").unwrap().into(),
                 ..default()
             },
             LoadingScreen,
@@ -117,7 +116,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
             let header_style = TextStyle {
                 font: asset_server.load(LABEL_FONT),
                 font_size: 45.0,
-                color: Color::hex("#fcfd9e").unwrap(),
+                color: Srgba::hex("#fcfd9e").unwrap().into(),
             };
             parent.spawn((
                 TextBundle::from_section("Loading", header_style).with_style(Style {

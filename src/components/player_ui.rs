@@ -69,12 +69,13 @@ fn setup_player_ui(
     let img_style = TextStyle {
         font: asset_server.load(consts::REGULAR_FONT),
         font_size: 25.0,
-        color: Color::rgb(0.9, 0.9, 0.9),
+        color: Color::linear_rgb(0.9, 0.9, 0.9),
     };
     let header_style = TextStyle {
         font: asset_server.load(consts::LABEL_FONT),
         font_size: 30.0,
-        color: Color::GOLD,
+        // color: Color::GOLD,
+        ..default()
     };
     for (player, style, right_align) in [
         (
@@ -195,7 +196,7 @@ fn setup_player_ui(
                         ResourceType::Magic => "#339820",
                         ResourceType::Soldiers => "#bb332a",
                     };
-                    let color = Color::hex(base_color).unwrap();
+                    let color = Srgba::hex(base_color).unwrap();
                     p.spawn(ImageBundle {
                         image: asset_server.load(format!("img/{}.png", gfx)).into(),
                         background_color: color.into(),

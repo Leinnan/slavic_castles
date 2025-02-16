@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const GIT_HASH: &str = env!("GIT_HASH");
-pub const NORMAL_BUTTON: Color = Color::rgb(1., 1., 1.);
-pub const HOVERED_BUTTON: Color = Color::rgb(0.9, 0.9, 0.9);
-pub const PRESSED_BUTTON: Color = Color::rgb(0.5, 0.5, 0.5);
+pub const NORMAL_BUTTON: Color = Color::linear_rgb(1., 1., 1.);
+pub const HOVERED_BUTTON: Color = Color::linear_rgb(0.9, 0.9, 0.9);
+pub const PRESSED_BUTTON: Color = Color::linear_rgb(0.5, 0.5, 0.5);
 pub const FULL_SIZE_PERCENT: Val = Val::Percent(100.);
 
 pub const AVATARS_AMOUNT: i32 = 13;

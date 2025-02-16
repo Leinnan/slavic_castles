@@ -111,7 +111,8 @@ fn add_cards(
             color: if res.can_afford_card(c) {
                 Color::WHITE
             } else {
-                Color::GRAY
+                Color::WHITE
+                // Color::GRAY
             },
             texture: asset_server.load(format!("cards/{}.png", c.id)).into(),
         };

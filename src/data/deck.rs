@@ -9,7 +9,7 @@ use super::card::Card;
 use super::consts::BASE_RESOURCE_AMOUNT;
 use super::consts::CARDS_IN_DECK;
 
-use crate::PlayerResources;
+use crate::data::player_resources::PlayerResources;
 
 #[derive(Serialize, Deserialize, Reflect, Component)]
 pub struct HandCards {

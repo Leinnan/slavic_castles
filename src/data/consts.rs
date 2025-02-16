@@ -1,4 +1,3 @@
-use bevy::prelude::Color;
 
 pub const CARDS_IN_DECK: i32 = 5;
 pub const BASE_RESOURCE_AMOUNT: i32 = 3;
@@ -9,12 +8,12 @@ pub const MAX_TOWER_HP: i32 = 50;
 pub const MAX_WALLS_HP: i32 = 30;
 pub const MAX_PRODUCTION: i32 = 10;
 
-pub const MY_ACCENT_COLOR: Color = Color::Rgba {
-    red: 0.901,
-    green: 0.4,
-    blue: 0.01,
-    alpha: 1.0,
-};
+// pub const MY_ACCENT_COLOR: Color = Color::RgbaLinear {
+//     red: 0.901,
+//     green: 0.4,
+//     blue: 0.01,
+//     alpha: 1.0,
+// };
 
 #[cfg(all(debug_assertions, not(target_arch = "wasm32")))]
 pub const MY_ACCENT_COLOR32: bevy_egui::egui::Color32 =

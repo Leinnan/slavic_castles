@@ -7,7 +7,7 @@ use crate::helpers::despawn_recursive_by_component;
 use crate::states::consts::*;
 use bevy::prelude::*;
 use bevy_button_released_plugin::ButtonReleasedEvent;
-use bevy_ecss::prelude::{Class, StyleSheet};
+// use bevy_ecss::prelude::{Class, StyleSheet};
 use bevy_pkv::PkvStore;
 use bevy_tweening::{lens::TransformScaleLens, Animator, Delay, EaseFunction, Tween};
 use rand::{thread_rng, Rng};
@@ -93,7 +93,7 @@ fn button_system(
                     }
                     #[cfg(not(target_arch = "wasm32"))]
                     {
-                        exit.send(bevy::app::AppExit);
+                        exit.send(bevy::app::AppExit::Success);
                     }
                 }
             }
@@ -117,52 +117,50 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
         })
         .insert(MenuObject)
         .insert(Name::new("menu-root"))
-        .insert(StyleSheet::new(asset_server.load("css/base.css")))
+        // .insert(StyleSheet::new(asset_server.load("css/base.css")))
         .with_children(|parent| {
             let init_scale = Vec3::splat(0.01);
-            parent
-                .spawn(ImageBundle {
-                    z_index: ZIndex::Global(-1),
+            parent.spawn(ImageBundle {
+                z_index: ZIndex::Global(-1),
+                image: UiImage {
+                    texture: asset_server.load("img/start_screen_bg.png"),
+                    ..default()
+                },
+                ..default()
+            });
+            // .insert(Class::new("menu_background"));
+            parent.spawn((
+                ImageBundle {
                     image: UiImage {
-                        texture: asset_server.load("img/start_screen_bg.png"),
+                        texture: asset_server.load("img/logo.png"),
+                        ..default()
+                    },
+                    transform: Transform::from_scale(init_scale),
+                    style: Style {
+                        margin: UiRect {
+                            top: Val::Percent(5.0),
+                            bottom: Val::Auto,
+                            ..default()
+                        },
                         ..default()
                     },
                     ..default()
-                })
-                .insert(Class::new("menu_background"));
-            parent
-                .spawn((
-                    ImageBundle {
-                        image: UiImage {
-                            texture: asset_server.load("img/logo.png"),
-                            ..default()
-                        },
-                        transform: Transform::from_scale(init_scale),
-                        style: Style {
-                            margin: UiRect {
-                                top: Val::Percent(5.0),
-                                bottom: Val::Auto,
-                                ..default()
-                            },
-                            ..default()
-                        },
-                        ..default()
+                },
+                Animator::new(Tween::new(
+                    EaseFunction::BounceOut,
+                    Duration::from_millis(900),
+                    TransformScaleLens {
+                        start: init_scale,
+                        end: Vec3::ONE,
                     },
-                    Animator::new(Tween::new(
-                        EaseFunction::BounceOut,
-                        Duration::from_millis(900),
-                        TransformScaleLens {
-                            start: init_scale,
-                            end: Vec3::ONE,
-                        },
-                    )),
-                ))
-                .insert(Class::new("logo"));
+                )),
+            ));
+            // .insert(Class::new("logo"));
 
             let img_style = TextStyle {
                 font: asset_server.load(consts::LABEL_FONT),
                 font_size: 30.0,
-                color: Color::rgb(0.7, 0.7, 0.7),
+                color: Color::linear_rgb(0.7, 0.7, 0.7),
             };
             let mut start_time_ms = 500;
 
@@ -223,7 +221,7 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 ..default()
                             },
                             transform: Transform::from_scale(init_scale),
-                            background_color: BackgroundColor::from(Color::hex("7A444A").unwrap()),
+                            background_color: Srgba::hex("7A444A").unwrap().into(),
                             ..default()
                         },
                         ImageScaleMode::Sliced(TextureSlicer {
@@ -232,7 +230,7 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                             sides_scale_mode: SliceScaleMode::Stretch,
                             max_corner_scale: 1.0,
                         }),
-                        Class::new("menu common"),
+                        // Class::new("menu common"),
                         Name::new(format!("button:{}", text)),
                         animator,
                         label,
