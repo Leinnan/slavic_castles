@@ -9,7 +9,7 @@ use bevy::prelude::*;
 use bevy_button_released_plugin::ButtonReleasedEvent;
 // use bevy_ecss::prelude::{Class, StyleSheet};
 use bevy_pkv::PkvStore;
-use bevy_tweening::{lens::TransformScaleLens, Animator, Delay, EaseFunction, Tween};
+use bevy_tweening::{lens::TransformScaleLens, Animator, Delay, Tween};
 use rand::{thread_rng, Rng};
 
 #[derive(Component)]
@@ -103,16 +103,13 @@ fn button_system(
 
 fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
-        .spawn(NodeBundle {
-            style: Style {
-                height: FULL_SIZE_PERCENT,
-                width: FULL_SIZE_PERCENT,
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                align_content: AlignContent::Center,
-                flex_direction: FlexDirection::Column,
-                ..default()
-            },
+        .spawn(Node {
+            height: FULL_SIZE_PERCENT,
+            width: FULL_SIZE_PERCENT,
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Center,
+            align_content: AlignContent::Center,
+            flex_direction: FlexDirection::Column,
             ..default()
         })
         .insert(MenuObject)

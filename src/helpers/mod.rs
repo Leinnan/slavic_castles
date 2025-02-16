@@ -18,7 +18,7 @@ impl Command for AudioSpawnCommand<'static> {
         let source = asset.load(&self.path);
         match self.entity {
             Some(e) => {
-                if let Some(mut entity) = world.get_entity_mut(e) {
+                if let Ok(mut entity) = world.get_entity_mut(e) {
                     entity.insert(AudioBundle {
                         source,
                         settings: self.settings,
@@ -54,7 +54,7 @@ pub trait AudioSpawnCommandExt {
 
 impl AudioSpawnCommandExt for Commands<'_, '_> {
     fn play_sound(&mut self, path: impl Into<AssetPath<'static>>) {
-        self.add(AudioSpawnCommand {
+        self.queue(AudioSpawnCommand {
             path: path.into(),
             settings: Default::default(),
             entity: None,
@@ -65,7 +65,7 @@ impl AudioSpawnCommandExt for Commands<'_, '_> {
         path: impl Into<AssetPath<'static>>,
         settings: PlaybackSettings,
     ) {
-        self.add(AudioSpawnCommand {
+        self.queue(AudioSpawnCommand {
             path: path.into().clone(),
             settings,
             entity: None,
@@ -76,7 +76,7 @@ impl AudioSpawnCommandExt for Commands<'_, '_> {
 impl AudioSpawnCommandExt for EntityCommands<'_> {
     fn play_sound(&mut self, path: impl Into<AssetPath<'static>>) {
         let entity = Some(self.id());
-        self.commands().add(AudioSpawnCommand {
+        self.commands().queue(AudioSpawnCommand {
             path: path.into(),
             settings: Default::default(),
             entity,
@@ -89,7 +89,7 @@ impl AudioSpawnCommandExt for EntityCommands<'_> {
         settings: PlaybackSettings,
     ) {
         let entity = Some(self.id());
-        self.commands().add(AudioSpawnCommand {
+        self.commands().queue(AudioSpawnCommand {
             path: path.into().clone(),
             settings,
             entity,

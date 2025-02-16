@@ -91,7 +91,7 @@ fn add_cards(
     asset_server: Res<AssetServer>,
     deck_q: Query<(&HandCards, &PlayerResources, Option<&CurrentActorToken>), With<HumanPlayer>>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     info!("ADD CARDS");
     let Ok((deck, res, token)) = deck_q.get_single() else {
@@ -105,41 +105,40 @@ fn add_cards(
 
     for (i, c) in deck.cards.iter().enumerate() {
         let offset = (inline_tweak::tweak!(200) * i) as f32;
-        let material = ColorMaterial {
-            color: if res.can_afford_card(c) {
+        let material = StandardMaterial {
+            base_color: if res.can_afford_card(c) {
                 Color::WHITE
             } else {
-                Color::WHITE
+                Color::WHITE.darker(0.2)
                 // Color::GRAY
             },
-            texture: asset_server.load(format!("cards/{}.png", c.id)).into(),
+            base_color_texture: asset_server.load(format!("cards/{}.png", c.id)).into(),
+            ..default()
         };
+        let material = materials.add(material);
         commands.spawn((
-            MaterialMesh2dBundle {
-                mesh: meshes.add(Rectangle::default()).into(),
-                transform: Transform::from_xyz(-350.0 + offset, y_pos - 300.0, i as f32 + 1.0)
-                    .with_scale(CARD_SIZE),
-                material: materials.add(material),
-                ..default()
-            },
+            Mesh3d(meshes.add(Rectangle::default()).into()),
+            MeshMaterial3d(material),
+            Transform::from_xyz(-350.0 + offset, y_pos - 300.0, i as f32 + 1.0)
+                .with_scale(CARD_SIZE),
             Name::new(format!("Card Nr {}", i)),
             IsCardDragged(false),
             CardNumber(i),
             CardDisplay(c.clone()),
             GameObject,
-            On::<Pointer<DragStart>>::target_insert(IsCardDragged(true)), // Disable picking
-            On::<Pointer<DragEnd>>::target_insert(IsCardDragged(false)),  // Re-enable picking
-            On::<Pointer<Drag>>::target_component_mut::<Transform>(|drag, transform| {
-                transform.translation.x += drag.delta.x; // Make the square follow the mouse
-                transform.translation.y -= drag.delta.y;
-                transform.translation.z = 150.0;
-                let clamped = inline_tweak::tweak!(0.35);
-                let speed = inline_tweak::tweak!(0.05);
-                let target_rotation = Quat::from_rotation_z(
-                    (drag.delta.x / inline_tweak::tweak!(-1.0)).clamp(-clamped, clamped),
-                );
-                transform.rotation = transform.rotation.lerp(target_rotation, speed);
-            }),
+            // On::<Pointer<DragStart>>::target_insert(IsCardDragged(true)), // Disable picking
+            // On::<Pointer<DragEnd>>::target_insert(IsCardDragged(false)),  // Re-enable picking
+            // On::<Pointer<Drag>>::target_component_mut::<Transform>(|drag, transform| {
+            //     transform.translation.x += drag.delta.x; // Make the square follow the mouse
+            //     transform.translation.y -= drag.delta.y;
+            //     transform.translation.z = 150.0;
+            //     let clamped = inline_tweak::tweak!(0.35);
+            //     let speed = inline_tweak::tweak!(0.05);
+            //     let target_rotation = Quat::from_rotation_z(
+            //         (drag.delta.x / inline_tweak::tweak!(-1.0)).clamp(-clamped, clamped),
+            //     );
+            //     transform.rotation = transform.rotation.lerp(target_rotation, speed);
+            // }),
             // bevy_mod_picking::focus::PickingInteraction::default(),
         ));
     }
@@ -236,7 +235,7 @@ fn cards_input_system(
     places_q: Query<(&Transform, &CardPlace), With<CardPlace>>,
 ) {
     let speed = inline_tweak::tweak!(20.0);
-    let delta = (time.delta_seconds() * speed).min(1.0);
+    let delta = (time.delta_secs() * speed).min(1.0);
 
     for (mut t, dragged, num) in cards_q.iter_mut() {
         let target_scale = if **dragged {

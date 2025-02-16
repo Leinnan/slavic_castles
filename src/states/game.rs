@@ -302,18 +302,15 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands
         .spawn((
-            NodeBundle {
-                style: Style {
-                    margin: UiRect::new(Val::Auto, Val::Auto, Val::Px(30.0), Val::Auto),
-                    padding: UiRect::all(Val::Px(15.0)),
-                    position_type: PositionType::Absolute,
-                    flex_direction: FlexDirection::Column,
-                    align_items: AlignItems::Center,
-                    ..default()
-                },
-                background_color: Srgba::hex("2c422e").unwrap().into(),
-                ..Default::default()
+            Node {
+                margin: UiRect::new(Val::Auto, Val::Auto, Val::Px(30.0), Val::Auto),
+                padding: UiRect::all(Val::Px(15.0)),
+                position_type: PositionType::Absolute,
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Center,
+                ..default()
             },
+            BackgroundColor(Srgba::hex("2c422e").unwrap().into()),
             Name::new("Help display"),
             HelpDisplay,
         ))
@@ -336,7 +333,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
 fn esc_to_menu(
     mut keys: ResMut<ButtonInput<KeyCode>>,
     mut next_state: ResMut<NextState<GameState>>,
-    mut query: Query<&mut Style, With<HelpDisplay>>,
+    mut query: Query<&mut Node, With<HelpDisplay>>,
 ) {
     if keys.just_released(KeyCode::Escape) {
         next_state.set(GameState::Menu);

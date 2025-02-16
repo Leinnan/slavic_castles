@@ -97,19 +97,16 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands
         .spawn((
-            NodeBundle {
-                style: Style {
-                    height: FULL_SIZE_PERCENT,
-                    width: FULL_SIZE_PERCENT,
-                    align_items: AlignItems::Stretch,
-                    justify_content: JustifyContent::SpaceBetween,
-                    align_content: AlignContent::Center,
-                    flex_direction: FlexDirection::Row,
-                    ..default()
-                },
-                background_color: Srgba::hex("#2c422e").unwrap().into(),
+            Node {
+                height: FULL_SIZE_PERCENT,
+                width: FULL_SIZE_PERCENT,
+                align_items: AlignItems::Stretch,
+                justify_content: JustifyContent::SpaceBetween,
+                align_content: AlignContent::Center,
+                flex_direction: FlexDirection::Row,
                 ..default()
             },
+            BackgroundColor(Srgba::hex("#2c422e").unwrap().into()),
             LoadingScreen,
         ))
         .with_children(|parent| {

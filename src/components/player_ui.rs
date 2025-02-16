@@ -1,4 +1,4 @@
-use bevy::{prelude::*, reflect::Reflect};
+use bevy::{prelude::*, reflect::Reflect, text::FontStyle};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -46,7 +46,7 @@ pub fn update_player_ui(
         else {
             continue;
         };
-        text.sections[0].value = match element {
+        **text = match element {
             PlayerUiElement::ResourceAmount(res) => resources.get(*res).amount.to_string(),
             PlayerUiElement::ResourceProduction(res) => {
                 let prod = resources.get(*res).production;
@@ -66,17 +66,23 @@ fn setup_player_ui(
     asset_server: Res<AssetServer>,
     player_query: Query<(&PlayerNumber, &AvatarId)>,
 ) {
-    let img_style = TextStyle {
-        font: asset_server.load(consts::REGULAR_FONT),
-        font_size: 25.0,
-        color: Color::linear_rgb(0.9, 0.9, 0.9),
-    };
-    let header_style = TextStyle {
-        font: asset_server.load(consts::LABEL_FONT),
-        font_size: 30.0,
-        // color: Color::GOLD,
-        ..default()
-    };
+    let img_style =
+        TextFont::from_font(asset_server.load(consts::REGULAR_FONT)).with_font_size(25.0);
+
+    // let img_style = TextStyle {
+    //     font: asset_server.load(consts::REGULAR_FONT),
+    //     font_size: 25.0,
+    //     color: Color::linear_rgb(0.9, 0.9, 0.9),
+    // };
+    let header_style =
+        TextFont::from_font(asset_server.load(consts::LABEL_FONT)).with_font_size(30.0);
+
+    // let header_style = TextStyle {
+    //     font: asset_server.load(consts::LABEL_FONT),
+    //     font_size: 30.0,
+    //     // color: Color::GOLD,
+    //     ..default()
+    // };
     for (player, style, right_align) in [
         (
             PlayerNumber::First,
@@ -107,36 +113,35 @@ fn setup_player_ui(
     ] {
         let avatar = player_query.iter().find(|e| e.0.eq(&player)).unwrap();
         commands
-            .spawn((NodeBundle { style, ..default() }, GameObject))
+            .spawn((style.clone(), GameObject))
             .insert(Name::new(format!("Ui{:?}", player)))
             .with_children(|p| {
-                p.spawn(ImageBundle {
-                    image: asset_server
-                        .load(crate::data::profile::get_avatar_path(**avatar.1))
-                        .into(),
-                    style: Node {
+                p.spawn((
+                    ImageNode {
+                        image: asset_server.load(crate::data::profile::get_avatar_path(**avatar.1)),
+                        ..default()
+                    },
+                    Node {
                         width: Val::Px(128.0),
                         height: Val::Px(128.0),
                         margin: UiRect::all(Val::Px(5.0)),
                         ..default()
                     },
-                    ..Default::default()
-                })
+                ))
                 .with_children(|p| {
-                    p.spawn(ImageBundle {
-                        image: UiImage {
-                            texture: asset_server.load("img/player_frame_name.png"),
+                    p.spawn((
+                        ImageNode {
+                            image: asset_server.load("img/player_frame_name.png"),
                             flip_x: right_align,
                             ..default()
                         },
-                        style: Node {
+                        Node {
                             padding: UiRect::all(Val::Px(8.0)),
                             position_type: PositionType::Absolute,
                             bottom: Val::Px(0.0),
                             ..default()
                         },
-                        ..default()
-                    })
+                    ))
                     .with_children(|name| {
                         name.spawn(
                             TextBundle::from_section("TEST", header_style.clone())
@@ -213,14 +218,14 @@ fn setup_player_ui(
                             ..default()
                         });
                         p.spawn(Node {
-                                position_type: PositionType::Absolute,
-                                top: Val::Px(3.0),
-                                left: Val::Px(3.0),
-                                width: Val::Px(30.0),
-                                height: Val::Px(30.0),
-                                justify_content: JustifyContent::Center,
-                                ..default()
-                            })
+                            position_type: PositionType::Absolute,
+                            top: Val::Px(3.0),
+                            left: Val::Px(3.0),
+                            width: Val::Px(30.0),
+                            height: Val::Px(30.0),
+                            justify_content: JustifyContent::Center,
+                            ..default()
+                        })
                         .with_children(|p| {
                             p.spawn(
                                 TextBundle::from_section("0", img_style.clone())
