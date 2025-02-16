@@ -2,7 +2,7 @@ use std::fmt;
 
 use crate::data::consts::*;
 use bevy::app::{App, Plugin};
-use bevy::input::common_conditions::input_just_pressed;
+// use bevy::input::common_conditions::input_just_pressed;
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext, EguiPlugin};
 use bevy_inspector_egui::{
@@ -59,10 +59,10 @@ impl Plugin for DebugPlugin {
             Update,
             inspector_ui, //.run_if(not(in_state(crate::states::MainState::Editor))),
         )
-        .add_systems(
-            Update,
-            (toggle_perf_ui).run_if(input_just_pressed(KeyCode::F2)),
-        )
+        // .add_systems(
+        //     Update,
+        //     (toggle_perf_ui).run_if(input_just_pressed(KeyCode::F2)),
+        // )
         .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
@@ -71,44 +71,44 @@ impl Plugin for DebugPlugin {
         .add_plugins((EguiPlugin, DefaultInspectorConfigPlugin));
     }
 }
-fn toggle_perf_ui(q: Query<Entity, With<PerfUiRoot>>, mut commands: Commands) {
-    let is_empty = q.is_empty();
-    if !is_empty {
-        for e in q.iter() {
-            commands.entity(e).despawn_recursive();
-        }
-        return;
-    }
-    // create a simple Perf UI with default settings
-    // and all entries provided by the crate:
-    commands.spawn((
-        PerfUiRoot::default(),
-        // when we have lots of entries, we have to group them
-        // into tuples, because of Bevy Rust syntax limitations
-        (
-            PerfUiEntryFPS::default(),
-            PerfUiEntryFPSWorst::default(),
-            PerfUiEntryFrameTime::default(),
-            PerfUiEntryFrameTimeWorst::default(),
-            PerfUiEntryFrameCount::default(),
-            PerfUiEntryEntityCount::default(),
-            PerfUiEntryCpuUsage::default(),
-            PerfUiEntryMemUsage::default(),
-        ),
-        (
-            PerfUiEntryFixedTimeStep::default(),
-            PerfUiEntryFixedOverstep::default(),
-            PerfUiEntryRunningTime::default(),
-            PerfUiEntryClock::default(),
-        ),
-        (
-            PerfUiEntryCursorPosition::default(),
-            PerfUiEntryWindowResolution::default(),
-            PerfUiEntryWindowMode::default(),
-            PerfUiEntryWindowPresentMode::default(),
-        ),
-    ));
-}
+// fn toggle_perf_ui(q: Query<Entity, With<PerfUiRoot>>, mut commands: Commands) {
+//     let is_empty = q.is_empty();
+//     if !is_empty {
+//         for e in q.iter() {
+//             commands.entity(e).despawn_recursive();
+//         }
+//         return;
+//     }
+//     // create a simple Perf UI with default settings
+//     // and all entries provided by the crate:
+//     commands.spawn((
+//         PerfUiRoot::default(),
+//         // when we have lots of entries, we have to group them
+//         // into tuples, because of Bevy Rust syntax limitations
+//         (
+//             PerfUiEntryFPS::default(),
+//             PerfUiEntryFPSWorst::default(),
+//             PerfUiEntryFrameTime::default(),
+//             PerfUiEntryFrameTimeWorst::default(),
+//             PerfUiEntryFrameCount::default(),
+//             PerfUiEntryEntityCount::default(),
+//             PerfUiEntryCpuUsage::default(),
+//             PerfUiEntryMemUsage::default(),
+//         ),
+//         (
+//             PerfUiEntryFixedTimeStep::default(),
+//             PerfUiEntryFixedOverstep::default(),
+//             PerfUiEntryRunningTime::default(),
+//             PerfUiEntryClock::default(),
+//         ),
+//         (
+//             PerfUiEntryCursorPosition::default(),
+//             PerfUiEntryWindowResolution::default(),
+//             PerfUiEntryWindowMode::default(),
+//             PerfUiEntryWindowPresentMode::default(),
+//         ),
+//     ));
+// }
 
 fn inspector_ui(
     world: &mut World,

@@ -56,7 +56,7 @@ pub fn main() {
     #[cfg(debug_assertions)]
     #[cfg(not(target_arch = "wasm32"))]
     {
-        // app.add_plugins(base_systems::debug::DebugPlugin);
+        app.add_plugins(base_systems::debug::DebugPlugin);
     }
 
     app.run();
