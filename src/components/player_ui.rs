@@ -80,7 +80,7 @@ fn setup_player_ui(
     for (player, style, right_align) in [
         (
             PlayerNumber::First,
-            Style {
+            Node {
                 position_type: PositionType::Absolute,
                 left: Val::Px(15.0),
                 margin: UiRect::all(Val::Px(5.0)),
@@ -93,7 +93,7 @@ fn setup_player_ui(
         ),
         (
             PlayerNumber::Second,
-            Style {
+            Node {
                 position_type: PositionType::Absolute,
                 right: Val::Px(15.0),
                 margin: UiRect::all(Val::Px(5.0)),
@@ -114,7 +114,7 @@ fn setup_player_ui(
                     image: asset_server
                         .load(crate::data::profile::get_avatar_path(**avatar.1))
                         .into(),
-                    style: Style {
+                    style: Node {
                         width: Val::Px(128.0),
                         height: Val::Px(128.0),
                         margin: UiRect::all(Val::Px(5.0)),
@@ -129,7 +129,7 @@ fn setup_player_ui(
                             flip_x: right_align,
                             ..default()
                         },
-                        style: Style {
+                        style: Node {
                             padding: UiRect::all(Val::Px(8.0)),
                             position_type: PositionType::Absolute,
                             bottom: Val::Px(0.0),
@@ -155,7 +155,7 @@ fn setup_player_ui(
                         texture: asset_server.load("img/player_frame_resources.png"),
                         ..default()
                     },
-                    style: Style {
+                    style: Node {
                         flex_direction: FlexDirection::Row,
                         align_content: AlignContent::SpaceAround,
                         padding: UiRect::all(Val::Px(8.0)),
@@ -200,7 +200,7 @@ fn setup_player_ui(
                     p.spawn(ImageBundle {
                         image: asset_server.load(format!("img/{}.png", gfx)).into(),
                         background_color: color.into(),
-                        style: Style {
+                        style: Node {
                             width: Val::Percent(100.0),
                             margin: UiRect::bottom(Val::Px(5.0)),
                             ..default()
@@ -212,8 +212,7 @@ fn setup_player_ui(
                             image: asset_server.load("img/resource_frame.png").into(),
                             ..default()
                         });
-                        p.spawn(NodeBundle {
-                            style: Style {
+                        p.spawn(Node {
                                 position_type: PositionType::Absolute,
                                 top: Val::Px(3.0),
                                 left: Val::Px(3.0),
@@ -221,9 +220,7 @@ fn setup_player_ui(
                                 height: Val::Px(30.0),
                                 justify_content: JustifyContent::Center,
                                 ..default()
-                            },
-                            ..default()
-                        })
+                            })
                         .with_children(|p| {
                             p.spawn(
                                 TextBundle::from_section("0", img_style.clone())
@@ -232,16 +229,13 @@ fn setup_player_ui(
                             .insert(PlayerUi(player))
                             .insert(PlayerUiElement::ResourceAmount(resource));
                         });
-                        p.spawn(NodeBundle {
-                            style: Style {
-                                position_type: PositionType::Absolute,
-                                bottom: Val::Px(3.0),
-                                left: Val::Px(3.0),
-                                width: Val::Px(30.0),
-                                height: Val::Px(30.0),
-                                justify_content: JustifyContent::Center,
-                                ..default()
-                            },
+                        p.spawn(Node {
+                            position_type: PositionType::Absolute,
+                            bottom: Val::Px(3.0),
+                            left: Val::Px(3.0),
+                            width: Val::Px(30.0),
+                            height: Val::Px(30.0),
+                            justify_content: JustifyContent::Center,
                             ..default()
                         })
                         .with_children(|p| {

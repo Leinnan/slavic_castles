@@ -6,7 +6,7 @@ use bevy::prelude::*;
 use bevy_button_released_plugin::ButtonReleasedEvent;
 // use bevy_ecss::prelude::{Class, StyleSheet};
 use bevy_pkv::PkvStore;
-use bevy_simple_text_input::{TextInputBundle, TextInputPlugin, TextInputSettings, TextInputValue};
+use bevy_simple_text_input::{TextInput, TextInputPlugin, TextInputSettings, TextInputValue};
 use bevy_tweening::{lens::TransformScaleLens, Animator, EaseFunction, Tween};
 use rand::Rng;
 use std::time::Duration;
@@ -195,17 +195,18 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                             background_color: Srgba::hex("2c422e").unwrap().into(),
                             ..default()
                         },
-                        TextInputBundle::default()
-                            .with_text_style(TextStyle {
-                                font_size: 30.,
-                                color: Srgba::hex("fcfd9e").unwrap().into(),
-                                ..default()
-                            })
-                            .with_value(get_user_name(pkv.as_ref()))
-                            .with_settings(TextInputSettings {
-                                retain_on_submit: true,
-                                ..default()
-                            }),
+                        TextInput,
+                        // TextInputBundle::default()
+                        //     .with_text_style(TextStyle {
+                        //         font_size: 30.,
+                        //         color: Srgba::hex("fcfd9e").unwrap().into(),
+                        //         ..default()
+                        //     })
+                        //     .with_value(get_user_name(pkv.as_ref()))
+                        //     .with_settings(TextInputSettings {
+                        //         retain_on_submit: true,
+                        //         ..default()
+                        //     }),
                     ));
 
                     let avatar_id = get_avatar_id(pkv.as_ref());

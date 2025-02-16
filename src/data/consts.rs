@@ -16,7 +16,7 @@ pub const MAX_PRODUCTION: i32 = 10;
 // };
 
 #[cfg(all(debug_assertions, not(target_arch = "wasm32")))]
-pub const MY_ACCENT_COLOR32: bevy_egui::egui::Color32 =
-    bevy_egui::egui::Color32::from_rgb(230, 102, 1);
+pub const MY_ACCENT_COLOR32: bevy_inspector_egui::bevy_egui::egui::Color32 =
+    bevy_inspector_egui::bevy_egui::egui::Color32::from_rgb(230, 102, 1);
 pub const GIT_HASH: &str = env!("GIT_HASH");
 pub const GIT_DATE: &str = env!("GIT_DATE");

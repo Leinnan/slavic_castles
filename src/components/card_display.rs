@@ -1,7 +1,5 @@
 use bevy::sprite::MaterialMesh2dBundle;
 use bevy::{prelude::*, reflect::Reflect};
-use bevy_mod_picking::events::{Drag, DragEnd, DragStart, Pointer};
-use bevy_mod_picking::prelude::On;
 
 use crate::base_systems::turn_based::{CurrentActorToken, GameTurnSteps};
 use crate::data::card::Card;
@@ -142,7 +140,7 @@ fn add_cards(
                 );
                 transform.rotation = transform.rotation.lerp(target_rotation, speed);
             }),
-            bevy_mod_picking::focus::PickingInteraction::default(),
+            // bevy_mod_picking::focus::PickingInteraction::default(),
         ));
     }
 }
@@ -150,7 +148,7 @@ fn add_cards(
 fn card_drag_start(
     cards_q: Query<(&Transform, Entity)>,
     mut ev: EventReader<Pointer<DragStart>>,
-    mut help_query: Query<&mut Style, With<HelpDisplay>>,
+    mut help_query: Query<&mut Node, With<HelpDisplay>>,
     mut commands: Commands,
 ) {
     for e in ev.read() {

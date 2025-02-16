@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use bevy_common_assets::json::JsonAssetPlugin;
 // use bevy_ecss::prelude::*;
-use bevy_mod_picking::DefaultPickingPlugins;
 use bevy_pkv::PkvStore;
 use data::{deck::DeckAsset, player::Player, player_resources::PlayerResources};
 use states::game::NamesAsset;
@@ -49,7 +48,6 @@ pub fn main() {
         .insert_resource(PkvStore::new("MevLyshkin", NAME))
         // .add_plugins(EcssPlugin::default())
         .add_plugins(bevy_tweening::TweeningPlugin)
-        .add_plugins(DefaultPickingPlugins)
         .add_plugins(states::game_states::GamePlugins)
         .add_systems(Update, toggle_fullscreen);
 
@@ -62,14 +60,14 @@ pub fn main() {
     app.run();
 }
 
-fn toggle_fullscreen(mut windows: Query<&mut Window>, input: Res<ButtonInput<KeyCode>>) {
+fn toggle_fullscreen(mut _windows: Query<&mut Window>, input: Res<ButtonInput<KeyCode>>) {
     if !input.just_released(KeyCode::F11) {
         return;
     }
-    let mut window = windows.single_mut();
-    let new_mode = match &window.mode {
-        bevy::window::WindowMode::Windowed => bevy::window::WindowMode::Fullscreen,
-        _ => bevy::window::WindowMode::Windowed,
-    };
-    window.mode = new_mode;
+    // let mut window = windows.single_mut();
+    // let new_mode = match &window.mode {
+    //     bevy::window::WindowMode::Windowed => bevy::window::WindowMode::Fullscreen,
+    //     _ => bevy::window::WindowMode::Windowed,
+    // };
+    // window.mode = new_mode;
 }

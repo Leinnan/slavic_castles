@@ -4,7 +4,7 @@ use crate::data::consts::*;
 use bevy::app::{App, Plugin};
 // use bevy::input::common_conditions::input_just_pressed;
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContext, EguiPlugin};
+use bevy_inspector_egui::bevy_egui::{egui, EguiContext, EguiPlugin};
 use bevy_inspector_egui::{
     bevy_inspector::hierarchy::SelectedEntities, DefaultInspectorConfigPlugin,
 };
