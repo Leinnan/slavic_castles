@@ -10,7 +10,6 @@ use crate::helpers::{despawn_recursive_by_component, AudioSpawnCommandExt};
 
 use bevy::prelude::*;
 use bevy::time::Stopwatch;
-use bevy::utils::HashMap;
 use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
 
@@ -109,7 +108,7 @@ impl Plugin for GamePlugin {
         .add_systems(
             Update,
             (
-                update_ui,
+                // update_ui,
                 update_deck_visibility,
                 update_timers,
                 card_sounds,
@@ -207,32 +206,32 @@ fn update_deck_visibility(
     }
 }
 
-fn update_ui(
-    player_query: Query<(&Player, &PlayerNumber, &PlayerResources, &Name)>,
-    mut ui: Query<(&mut Text, &PlayerNumber)>,
-) {
-    let mut player_texts = HashMap::new();
-    for (player, player_num, resources, name) in &player_query {
-        player_texts.insert(
-            *player_num,
-            (
-                name.as_str().to_owned(),
-                format!(
-                    "\nTower: {0}\nWalls: {1}\n{2}",
-                    player.tower_hp,
-                    player.walls_hp,
-                    resources.print()
-                ),
-            ),
-        );
-    }
-    for (mut text, player_num) in &mut ui {
-        if let Some(player_description) = player_texts.remove(player_num) {
-            text.sections[1].value = player_description.1;
-            text.sections[0].value = player_description.0;
-        }
-    }
-}
+// fn update_ui(
+//     player_query: Query<(&Player, &PlayerNumber, &PlayerResources, &Name)>,
+//     mut ui: Query<(&mut Text, &PlayerNumber)>,
+// ) {
+//     let mut player_texts = HashMap::new();
+//     for (player, player_num, resources, name) in &player_query {
+//         player_texts.insert(
+//             *player_num,
+//             (
+//                 name.as_str().to_owned(),
+//                 format!(
+//                     "\nTower: {0}\nWalls: {1}\n{2}",
+//                     player.tower_hp,
+//                     player.walls_hp,
+//                     resources.print()
+//                 ),
+//             ),
+//         );
+//     }
+//     for (mut text, player_num) in &mut ui {
+//         if let Some(player_description) = player_texts.remove(player_num) {
+//             text.sections[1].value = player_description.1;
+//             text.sections[0].value = player_description.0;
+//         }
+//     }
+// }
 
 pub fn init_players(
     mut commands: Commands,
@@ -267,10 +266,7 @@ pub fn init_players(
 }
 
 fn setup_music(asset_server: Res<AssetServer>, mut commands: Commands) {
-    commands.spawn(AudioBundle {
-        source: asset_server.load("snd/start_game.ogg"),
-        ..default()
-    });
+    commands.spawn(AudioPlayer::new(asset_server.load("snd/start_game.ogg")));
 }
 
 fn card_sounds(mut commands: Commands, q: Query<&ActionTaken, Added<ActionTaken>>) {
@@ -284,21 +280,23 @@ fn card_sounds(mut commands: Commands, q: Query<&ActionTaken, Added<ActionTaken>
 }
 
 fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let header_style = TextStyle {
-        font: asset_server.load(consts::LABEL_FONT),
-        font_size: 45.0,
-        // color: Color::GOLD,
-        ..default()
-    };
+    let header_style =
+        TextFont::from_font(asset_server.load(consts::LABEL_FONT)).with_font_size(45.0);
+    // let header_style = TextStyle {
+    //     font: asset_server.load(consts::LABEL_FONT),
+    //     font_size: 45.0,
+    //     // color: Color::GOLD,
+    //     ..default()
+    // };
     commands
-        .spawn(SpriteBundle {
-            texture: asset_server.load("img/ingame_bg.png"),
-            transform: Transform::from_xyz(0.0, 0.0, -1.0),
-            ..Default::default()
-        })
-        .insert(Name::new("BG"))
-        .insert(GameObject)
-        .insert(BackgroundSprite);
+        .spawn((
+            Transform::from_xyz(0.0, 0.0, -1.0),
+            Sprite::from_image(asset_server.load("img/ingame_bg.png")),
+            PickingBehavior::IGNORE,
+            BackgroundSprite,
+            GameObject,
+            Name::new("BG")
+        ));
 
     commands
         .spawn((
@@ -315,18 +313,12 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
             HelpDisplay,
         ))
         .with_children(|p| {
-            p.spawn(TextBundle::from_section("Help", header_style.clone()));
-            p.spawn(
-                TextBundle::from_section(
-                    consts::HELP_TEXT,
-                    TextStyle {
-                        font: asset_server.load(consts::REGULAR_FONT),
-                        font_size: 25.0,
-                        color: Srgba::hex("fcfd9e").unwrap().into(),
-                    },
-                )
-                .with_text_justify(JustifyText::Center),
-            );
+            p.spawn((Text::new("Help"), header_style.clone()));
+            p.spawn((
+                TextFont::from_font(asset_server.load(consts::REGULAR_FONT)).with_font_size(25.0),
+                TextColor(Srgba::hex("fcfd9e").unwrap().into()),
+                Text::new(consts::HELP_TEXT),
+            ));
         });
 }
 

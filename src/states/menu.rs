@@ -6,6 +6,7 @@ use crate::data::{deck::DeckAsset, profile};
 use crate::helpers::despawn_recursive_by_component;
 use crate::states::consts::*;
 use bevy::prelude::*;
+use bevy::ui::widget::NodeImageMode;
 use bevy_button_released_plugin::ButtonReleasedEvent;
 // use bevy_ecss::prelude::{Class, StyleSheet};
 use bevy_pkv::PkvStore;
@@ -117,28 +118,15 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
         // .insert(StyleSheet::new(asset_server.load("css/base.css")))
         .with_children(|parent| {
             let init_scale = Vec3::splat(0.01);
-            parent.spawn(ImageBundle {
-                z_index: ZIndex::Global(-1),
-                image: UiImage {
-                    texture: asset_server.load("img/start_screen_bg.png"),
-                    ..default()
-                },
-                ..default()
-            });
+            let bg = ImageNode::new(asset_server.load("img/start_screen_bg.png"));
+            parent.spawn((bg, ZIndex(-1)));
             // .insert(Class::new("menu_background"));
             parent.spawn((
-                ImageBundle {
-                    image: UiImage {
-                        texture: asset_server.load("img/logo.png"),
-                        ..default()
-                    },
-                    transform: Transform::from_scale(init_scale),
-                    style: Style {
-                        margin: UiRect {
-                            top: Val::Percent(5.0),
-                            bottom: Val::Auto,
-                            ..default()
-                        },
+                ImageNode::new(asset_server.load("img/logo.png")),
+                Node {
+                    margin: UiRect {
+                        top: Val::Percent(5.0),
+                        bottom: Val::Auto,
                         ..default()
                     },
                     ..default()
@@ -154,11 +142,12 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             ));
             // .insert(Class::new("logo"));
 
-            let img_style = TextStyle {
+            let img_style = TextFont {
                 font: asset_server.load(consts::LABEL_FONT),
                 font_size: 30.0,
-                color: Color::linear_rgb(0.7, 0.7, 0.7),
+                ..default()
             };
+            let clr = TextColor(Color::linear_rgb(0.7, 0.7, 0.7));
             let mut start_time_ms = 500;
 
             for (text, label, margin) in [
@@ -209,43 +198,50 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
 
                 parent
                     .spawn((
-                        ButtonBundle {
-                            image: asset_server.load("img/panel-006.png").into(),
-                            style: Style {
-                                margin,
-                                align_items: AlignItems::Center,
-                                justify_content: JustifyContent::Center,
-                                ..default()
-                            },
-                            transform: Transform::from_scale(init_scale),
-                            background_color: Srgba::hex("7A444A").unwrap().into(),
+                        ImageNode {
+                            image_mode: NodeImageMode::Sliced(TextureSlicer {
+                                border: BorderRect::square(29.0),
+                                center_scale_mode: SliceScaleMode::Stretch,
+                                sides_scale_mode: SliceScaleMode::Stretch,
+                                max_corner_scale: 1.0,
+                            }),
+                            image: asset_server.load("img/panel-006.png"),
+                            ..Default::default()
+                        },
+                        BackgroundColor(Srgba::hex("7A444A").unwrap().into()),
+                        Node {
+                            margin,
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::Center,
                             ..default()
                         },
-                        ImageScaleMode::Sliced(TextureSlicer {
-                            border: BorderRect::square(29.0),
-                            center_scale_mode: SliceScaleMode::Stretch,
-                            sides_scale_mode: SliceScaleMode::Stretch,
-                            max_corner_scale: 1.0,
-                        }),
+                        Button,
+                        // ButtonBundle {
+                        //     image: asset_server.load("img/panel-006.png").into(),
+                        //     style:
+                        //     transform: Transform::from_scale(init_scale),
+                        //     background_color: ,
+                        //     ..default()
+                        // },
                         // Class::new("menu common"),
                         Name::new(format!("button:{}", text)),
                         animator,
                         label,
                     ))
                     .with_children(|parent| {
-                        parent.spawn(TextBundle::from_section(text, img_style.clone()));
+                        parent.spawn((Text::new(text), img_style.clone(), clr));
                     });
             }
             parent.spawn((
-                TextBundle::from_section(
-                    format!("v.{}\n{}", VERSION, GIT_HASH),
-                    TextStyle {
-                        font: asset_server.load(REGULAR_FONT),
-                        font_size: 16.0,
-                        color: Color::WHITE,
-                    },
-                )
-                .with_style(Style {
+                TextLayout::new_with_justify(JustifyText::Right),
+                Text(format!("v.{}\n{}", VERSION, GIT_HASH)),
+                TextColor(Color::WHITE),
+                TextFont {
+                    font: asset_server.load(REGULAR_FONT),
+                    font_size: 16.0,
+                    ..default()
+                },
+                Node {
                     margin: UiRect {
                         left: Val::Auto,
                         right: Val::Px(15.0),
@@ -254,8 +250,7 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                     },
                     position_type: PositionType::Absolute,
                     ..default()
-                })
-                .with_text_justify(JustifyText::Right),
+                },
                 Interaction::None,
                 MainMenuButton::OpenRepository,
             ));

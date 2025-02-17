@@ -93,7 +93,7 @@ impl Plugin for LoadingPlugin {
 }
 
 fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2d);
 
     commands
         .spawn((
@@ -110,16 +110,19 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
             LoadingScreen,
         ))
         .with_children(|parent| {
-            let header_style = TextStyle {
+            let header_style = TextFont {
                 font: asset_server.load(LABEL_FONT),
                 font_size: 45.0,
-                color: Srgba::hex("#fcfd9e").unwrap().into(),
+                ..Default::default()
             };
             parent.spawn((
-                TextBundle::from_section("Loading", header_style).with_style(Style {
+                Node {
                     margin: UiRect::all(Val::Auto),
                     ..default()
-                }),
+                },
+                Text::new("Loading"),
+                header_style,
+                TextColor(Srgba::hex("#fcfd9e").unwrap().into()),
                 LoadingText,
             ));
         });

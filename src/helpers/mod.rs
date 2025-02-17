@@ -16,20 +16,15 @@ impl Command for AudioSpawnCommand<'static> {
     fn apply(self, world: &mut World) {
         let asset = world.get_resource::<AssetServer>().unwrap();
         let source = asset.load(&self.path);
+        let bundle = (self.settings, AudioPlayer::new(source));
         match self.entity {
             Some(e) => {
                 if let Ok(mut entity) = world.get_entity_mut(e) {
-                    entity.insert(AudioBundle {
-                        source,
-                        settings: self.settings,
-                    });
+                    entity.insert(bundle);
                 }
             }
             None => {
-                world.spawn(AudioBundle {
-                    source,
-                    settings: self.settings,
-                });
+                world.spawn(bundle);
             }
         }
     }

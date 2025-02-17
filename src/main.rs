@@ -45,7 +45,7 @@ pub fn main() {
         .register_type::<DeckAsset>()
         .register_type::<NamesAsset>()
         .register_type::<Player>()
-        .insert_resource(PkvStore::new("MevLyshkin", NAME))
+        .insert_resource(PkvStore::new("MevLysdhkin", NAME))
         // .add_plugins(EcssPlugin::default())
         .add_plugins(bevy_tweening::TweeningPlugin)
         .add_plugins(states::game_states::GamePlugins)
@@ -62,7 +62,6 @@ pub fn main() {
 
 fn toggle_fullscreen(mut _windows: Query<&mut Window>, input: Res<ButtonInput<KeyCode>>) {
     if !input.just_released(KeyCode::F11) {
-        return;
     }
     // let mut window = windows.single_mut();
     // let new_mode = match &window.mode {

@@ -1,4 +1,4 @@
-use bevy::{prelude::*, reflect::Reflect, text::FontStyle};
+use bevy::{prelude::*, reflect::Reflect};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -143,51 +143,36 @@ fn setup_player_ui(
                         },
                     ))
                     .with_children(|name| {
-                        name.spawn(
-                            TextBundle::from_section("TEST", header_style.clone())
-                                .with_text_justify(if right_align {
-                                    JustifyText::Right
-                                } else {
-                                    JustifyText::Left
-                                }),
-                        )
+                        name.spawn((
+                            Text::new("TEST"),
+                            header_style.clone(),
+                            TextLayout::new_with_justify(if right_align {
+                                JustifyText::Right
+                            } else {
+                                JustifyText::Left
+                            }),
+                        ))
                         .insert(PlayerUiElement::Name)
                         .insert(PlayerUi(player));
                     });
                 });
-                p.spawn(ImageBundle {
-                    image: UiImage {
-                        texture: asset_server.load("img/player_frame_resources.png"),
-                        ..default()
-                    },
-                    style: Node {
+                p.spawn((
+                    ImageNode::new(asset_server.load("img/player_frame_resources.png")),
+                    Node {
                         flex_direction: FlexDirection::Row,
                         align_content: AlignContent::SpaceAround,
                         padding: UiRect::all(Val::Px(8.0)),
                         margin: UiRect::bottom(Val::Px(5.0)),
                         ..default()
                     },
-                    ..default()
-                })
+                ))
                 .with_children(|res| {
-                    res.spawn(ImageBundle {
-                        image: UiImage {
-                            texture: asset_server.load("img/player_health.png"),
-                            ..default()
-                        },
-                        ..default()
-                    });
-                    res.spawn(TextBundle::from_section("TEST", img_style.clone()))
+                    res.spawn(ImageNode::new(asset_server.load("img/player_health.png")));
+                    res.spawn((Text::new("TEST"), img_style.clone()))
                         .insert(PlayerUiElement::Health)
                         .insert(PlayerUi(player));
-                    res.spawn(ImageBundle {
-                        image: UiImage {
-                            texture: asset_server.load("img/player_shield.png"),
-                            ..default()
-                        },
-                        ..default()
-                    });
-                    res.spawn(TextBundle::from_section("TEST", img_style.clone()))
+                    res.spawn(ImageNode::new(asset_server.load("img/player_shield.png")));
+                    res.spawn((Text::new("TEST"), img_style.clone()))
                         .insert(PlayerUiElement::Shield)
                         .insert(PlayerUi(player));
                 });
@@ -202,21 +187,21 @@ fn setup_player_ui(
                         ResourceType::Soldiers => "#bb332a",
                     };
                     let color = Srgba::hex(base_color).unwrap();
-                    p.spawn(ImageBundle {
-                        image: asset_server.load(format!("img/{}.png", gfx)).into(),
-                        background_color: color.into(),
-                        style: Node {
+
+                    p.spawn((
+                        ImageNode {
+                            image: asset_server.load(format!("img/{}.png", gfx)),
+                            color: color.into(),
+                            ..default()
+                        },
+                        Node {
                             width: Val::Percent(100.0),
                             margin: UiRect::bottom(Val::Px(5.0)),
                             ..default()
                         },
-                        ..default()
-                    })
+                    ))
                     .with_children(|p| {
-                        p.spawn(ImageBundle {
-                            image: asset_server.load("img/resource_frame.png").into(),
-                            ..default()
-                        });
+                        p.spawn(ImageNode::new(asset_server.load("img/resource_frame.png")));
                         p.spawn(Node {
                             position_type: PositionType::Absolute,
                             top: Val::Px(3.0),
@@ -226,14 +211,13 @@ fn setup_player_ui(
                             justify_content: JustifyContent::Center,
                             ..default()
                         })
-                        .with_children(|p| {
-                            p.spawn(
-                                TextBundle::from_section("0", img_style.clone())
-                                    .with_text_justify(JustifyText::Center),
-                            )
-                            .insert(PlayerUi(player))
-                            .insert(PlayerUiElement::ResourceAmount(resource));
-                        });
+                        .with_child((
+                            Text::new("0"),
+                            img_style.clone(),
+                            TextLayout::new_with_justify(JustifyText::Center),
+                            PlayerUi(player),
+                            PlayerUiElement::ResourceAmount(resource),
+                        ));
                         p.spawn(Node {
                             position_type: PositionType::Absolute,
                             bottom: Val::Px(3.0),
@@ -243,14 +227,13 @@ fn setup_player_ui(
                             justify_content: JustifyContent::Center,
                             ..default()
                         })
-                        .with_children(|p| {
-                            p.spawn(
-                                TextBundle::from_section("0", img_style.clone())
-                                    .with_text_justify(JustifyText::Center),
-                            )
-                            .insert(PlayerUi(player))
-                            .insert(PlayerUiElement::ResourceProduction(resource));
-                        });
+                        .with_child((
+                            Text::new("0"),
+                            img_style.clone(),
+                            TextLayout::new_with_justify(JustifyText::Center),
+                            PlayerUi(player),
+                            PlayerUiElement::ResourceProduction(resource),
+                        ));
                     });
                 }
             });
