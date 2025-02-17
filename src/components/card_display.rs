@@ -1,3 +1,4 @@
+use bevy::color::palettes::tailwind;
 use bevy::{prelude::*, reflect::Reflect};
 
 use crate::base_systems::turn_based::{CurrentActorToken, GameTurnSteps};
@@ -29,17 +30,15 @@ pub struct CardNumber(pub usize);
 pub struct DraggableCard;
 
 #[derive(Component, Reflect, Default, Clone, Copy)]
+#[require(GameObject)]
+pub struct CurrentlyDragged;
+
+#[derive(Component, Reflect, Default, Clone, Copy)]
 #[require(GameObject, DraggableCard)]
 pub struct CanUseCard;
 
 #[derive(Component, Debug, PartialEq, Clone, Reflect, Deref)]
 pub struct CardDisplay(pub Card);
-
-#[derive(Component, Reflect, Default, Deref, Clone, Copy)]
-pub struct DraggedObject {
-    #[deref]
-    pub start_pos: Vec3,
-}
 
 #[derive(Component, Reflect, Default, Clone, Copy, Debug, PartialEq)]
 pub enum ActionToPerform {
@@ -63,9 +62,9 @@ impl Plugin for CardPlugin {
         app.register_type::<CardDisplay>()
             .register_type::<CardPlace>()
             .register_type::<DraggableCard>()
+            .register_type::<CurrentlyDragged>()
             .register_type::<CardDropZone>()
             .register_type::<ActionToPerform>()
-            .register_type::<DraggedObject>()
             .register_type::<CardNumber>()
             .add_systems(
                 Update,
@@ -131,6 +130,19 @@ fn add_card_places(windows: Query<&Window>, mut commands: Commands) {
         ))
         .observe(on_drag_over_card)
         .observe(on_drag_leave_card);
+
+    commands
+        .spawn((
+            Sprite {
+                color: tailwind::RED_300.with_alpha(0.7).into(),
+                custom_size: Some(Vec2::new(300.0, 300.0)),
+                ..default()
+            },
+            Transform::from_xyz(650.0, -350.0, 0.0),
+            CardDropZone::Discard,
+        ))
+        .observe(on_drag_over_card)
+        .observe(on_drag_leave_card);
 }
 
 fn on_drag_over_card(
@@ -142,13 +154,13 @@ fn on_drag_over_card(
     let Ok(zone_type) = q.get(trigger.entity()) else {
         return;
     };
-    if zone_type.eq(&CardDropZone::Use) && !qq.get(trigger.dragged).is_ok_and(|e| e.is_some()) {
-        return;
-    }
-    info!("{zone_type:?} {:?}", trigger.event());
+    info!("{zone_type:?}");
     let v = match zone_type {
-        CardDropZone::Use => ActionToPerform::Use,
+        CardDropZone::Use if qq.get(trigger.dragged).is_ok_and(|e| e.is_some()) => {
+            ActionToPerform::Use
+        }
         CardDropZone::Discard => ActionToPerform::Discard,
+        _ => ActionToPerform::Nothing,
     };
     commands.entity(trigger.dragged).insert(v);
 }
@@ -161,8 +173,10 @@ fn on_drag_leave_card(
     let Ok(zone_type) = q.get(trigger.entity()) else {
         return;
     };
-    info!("Leave {zone_type:?} {:?}", trigger.event());
-    commands.entity(trigger.dragged).remove::<ActionToPerform>();
+    info!("Leave {zone_type:?}");
+    commands
+        .entity(trigger.dragged)
+        .insert(ActionToPerform::Nothing);
 }
 
 fn add_cards(
@@ -213,21 +227,16 @@ fn add_cards(
 
 fn start_drag(
     trigger: Trigger<Pointer<DragStart>>,
-    mut t: Query<&Transform, With<DraggableCard>>,
     mut commands: Commands,
     mut help_query: Query<&mut Node, With<HelpDisplay>>,
 ) {
-    let Ok(t) = t.get_mut(trigger.entity()) else {
-        return;
-    };
     for mut s in help_query.iter_mut() {
         s.display = Display::None;
     }
     commands
         .entity(trigger.entity())
-        .insert(DraggedObject {
-            start_pos: t.translation,
-        })
+        .insert(ActionToPerform::Nothing)
+        .insert(CurrentlyDragged)
         .insert(PickingBehavior {
             is_hoverable: true,
             should_block_lower: false,
@@ -269,26 +278,16 @@ fn update_background(
 
 fn end_drag(
     trigger: Trigger<Pointer<DragEnd>>,
-    window: Single<&Window>,
-    cards_q: Query<(
-        &Transform,
-        &DraggedObject,
-        &CardDisplay,
-        Entity,
-        Option<&CanUseCard>,
-    )>,
+    cards_q: Query<(&CardDisplay, &ActionToPerform)>,
     mut commands: Commands,
     q: Query<Entity, With<CurrentActorToken>>,
 ) {
-    let move_to_use = 0.3 * window.height();
-    let move_to_drop = -0.2 * window.height();
-    let Ok((t, start_pos, card_display, entity, can_use)) = cards_q.get(trigger.entity()) else {
+    let Ok((card_display, action)) = cards_q.get(trigger.entity()) else {
         return;
     };
-    let movement = t.translation - **start_pos;
     commands
-        .entity(entity)
-        .remove::<DraggedObject>()
+        .entity(trigger.entity())
+        .remove::<CurrentlyDragged>()
         .insert(PickingBehavior {
             is_hoverable: true,
             should_block_lower: true,
@@ -296,22 +295,23 @@ fn end_drag(
     let Ok(player_entity) = q.get_single() else {
         return;
     };
-
-    if movement.y > move_to_use && can_use.is_some() {
-        commands.entity(player_entity).insert(ActionTaken::UseCard {
+    let action_taken = match action {
+        ActionToPerform::Use => ActionTaken::UseCard {
             card: (**card_display).clone(),
-        });
-    } else if movement.y < move_to_drop {
-        commands
-            .entity(player_entity)
-            .insert(ActionTaken::DropCard {
-                card: (**card_display).clone(),
-            });
-    }
+        },
+        ActionToPerform::Discard => ActionTaken::DropCard {
+            card: (**card_display).clone(),
+        },
+        ActionToPerform::Nothing => return,
+    };
+    commands.entity(player_entity).insert(action_taken);
 }
 
 fn cards_input_system(
-    mut cards_q: Query<(&mut Transform, Option<&DraggedObject>, &CardNumber), Without<CardPlace>>,
+    mut cards_q: Query<
+        (&mut Transform, Option<&CurrentlyDragged>, &CardNumber),
+        Without<CardPlace>,
+    >,
     time: Res<Time>,
     places_q: Query<(&Transform, &CardPlace), With<CardPlace>>,
 ) {
