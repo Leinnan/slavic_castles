@@ -3,7 +3,6 @@ use std::time::Duration;
 use super::game::{OpponentInformation, PlayerInformation};
 use super::{game::NamesAsset, game_states::GameState};
 use crate::data::{deck::DeckAsset, profile};
-use crate::helpers::despawn_recursive_by_component;
 use crate::states::consts::*;
 use bevy::prelude::*;
 use bevy::ui::widget::NodeImageMode;
@@ -23,6 +22,7 @@ pub enum MainMenuButton {
 use super::consts;
 
 #[derive(Component)]
+#[require(StateScoped<GameState>(|| StateScoped(GameState::Menu)))]
 pub struct MenuObject;
 
 pub struct MenuPlugin;
@@ -30,11 +30,7 @@ pub struct MenuPlugin;
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(GameState::Menu), (check_for_profile, setup_menu))
-            .add_systems(Update, button_system.run_if(in_state(GameState::Menu)))
-            .add_systems(
-                OnExit(GameState::Menu),
-                despawn_recursive_by_component::<MenuObject>,
-            );
+            .add_systems(Update, button_system.run_if(in_state(GameState::Menu)));
     }
 }
 

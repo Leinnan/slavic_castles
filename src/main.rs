@@ -18,7 +18,6 @@ pub fn main() {
     console_error_panic_hook::set_once();
 
     let mut app = App::new();
-    // app.insert_resource(AssetMetaCheck::Never);
     #[cfg(not(target_arch = "wasm32"))]
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
@@ -40,7 +39,7 @@ pub fn main() {
         .add_plugins(crate::base_systems::turn_based::register_system)
         .add_plugins(components::player_ui::PlayerUiPlugin)
         .init_state::<states::game_states::GameState>()
-        // .add_plugins(bevy_wasm_window_resize::WindowResizePlugin)
+        .add_plugins(helpers::wasm_resize::WindowResizePlugin)
         .register_type::<PlayerResources>()
         .register_type::<DeckAsset>()
         .register_type::<NamesAsset>()
@@ -61,8 +60,7 @@ pub fn main() {
 }
 
 fn toggle_fullscreen(mut _windows: Query<&mut Window>, input: Res<ButtonInput<KeyCode>>) {
-    if !input.just_released(KeyCode::F11) {
-    }
+    if !input.just_released(KeyCode::F11) {}
     // let mut window = windows.single_mut();
     // let new_mode = match &window.mode {
     //     bevy::window::WindowMode::Windowed => bevy::window::WindowMode::Fullscreen,

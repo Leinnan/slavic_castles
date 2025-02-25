@@ -26,18 +26,17 @@ pub struct CardPlace(pub usize);
 pub struct CardNumber(pub usize);
 
 #[derive(Component, Reflect, Default, Clone, Copy)]
-#[require(GameObject)]
-pub struct DraggableCard;
+#[require(GameObject, StateScoped<GameTurnSteps>(|| StateScoped(GameTurnSteps::PerformAction)))]
+pub struct DraggableCard {
+    pub can_afford: bool,
+}
 
 #[derive(Component, Reflect, Default, Clone, Copy)]
 #[require(GameObject)]
 pub struct CurrentlyDragged;
 
-#[derive(Component, Reflect, Default, Clone, Copy)]
-#[require(GameObject, DraggableCard)]
-pub struct CanUseCard;
-
 #[derive(Component, Debug, PartialEq, Clone, Reflect, Deref)]
+#[require(ActionToPerform)]
 pub struct CardDisplay(pub Card);
 
 #[derive(Component, Reflect, Default, Clone, Copy, Debug, PartialEq)]
@@ -49,6 +48,7 @@ pub enum ActionToPerform {
 }
 
 #[derive(Component, Reflect, Default, Clone, Copy, Debug, PartialEq)]
+#[require(GameObject)]
 pub enum CardDropZone {
     Use,
     #[default]
@@ -80,8 +80,9 @@ impl Plugin for CardPlugin {
                 OnEnter(GameTurnSteps::ActionSelection),
                 (add_cards).after(game::switch_player),
             )
-            .add_observer(start_drag)
             .add_observer(drag)
+            .add_observer(card_on_action_to_perform_inserted)
+            .add_observer(start_drag)
             .add_observer(end_drag);
     }
 }
@@ -145,10 +146,26 @@ fn add_card_places(windows: Query<&Window>, mut commands: Commands) {
         .observe(on_drag_leave_card);
 }
 
+fn card_on_action_to_perform_inserted(
+    t: Trigger<OnInsert, ActionToPerform>,
+    mut q: Query<(&mut Sprite, &ActionToPerform, &DraggableCard)>,
+) {
+    let Ok((mut sprite, action, draggable)) = q.get_mut(t.entity()) else {
+        return;
+    };
+
+    sprite.color = match (action, draggable.can_afford) {
+        (ActionToPerform::Use, true) => tailwind::AMBER_300.into(),
+        (ActionToPerform::Discard, _) => Color::linear_rgb(1.0, 0.6, 0.6),
+        (_, false) => Color::WHITE.darker(0.4),
+        (_, _) => Color::linear_rgb(1.0, 1.0, 1.0),
+    };
+}
+
 fn on_drag_over_card(
     trigger: Trigger<Pointer<DragEnter>>,
     q: Query<&CardDropZone>,
-    qq: Query<Option<&CanUseCard>>,
+    qq: Query<&DraggableCard>,
     mut commands: Commands,
 ) {
     let Ok(zone_type) = q.get(trigger.entity()) else {
@@ -156,7 +173,7 @@ fn on_drag_over_card(
     };
     info!("{zone_type:?}");
     let v = match zone_type {
-        CardDropZone::Use if qq.get(trigger.dragged).is_ok_and(|e| e.is_some()) => {
+        CardDropZone::Use if qq.get(trigger.dragged).is_ok_and(|e| e.can_afford) => {
             ActionToPerform::Use
         }
         CardDropZone::Discard => ActionToPerform::Discard,
@@ -202,7 +219,7 @@ fn add_cards(
             Color::WHITE.darker(0.4)
         };
         let offset = (inline_tweak::tweak!(200) * i) as f32;
-        let mut e = commands.spawn((
+        commands.spawn((
             Sprite {
                 color,
                 image: asset_server.load(format!("cards/{}.png", c.id)),
@@ -211,7 +228,9 @@ fn add_cards(
             Transform::from_xyz(-350.0 + offset, y_pos - 300.0, i as f32 + 1.0)
                 .with_scale(CARD_SIZE),
             Name::new(format!("Card Nr {}", i)),
-            DraggableCard,
+            DraggableCard {
+                can_afford: res.can_afford_card(c),
+            },
             PickingBehavior {
                 is_hoverable: true,
                 should_block_lower: true,
@@ -219,9 +238,6 @@ fn add_cards(
             CardNumber(i),
             CardDisplay(c.clone()),
         ));
-        if res.can_afford_card(c) {
-            e.insert(CanUseCard);
-        }
     }
 }
 
@@ -260,7 +276,9 @@ fn update_background(
     mut query: Query<&mut Sprite, With<BackgroundSprite>>,
     mut query2: Query<(&mut Transform, &CardPlace)>,
 ) {
-    let window = windows.single();
+    let Ok(window) = windows.get_single() else {
+        return;
+    };
     for mut sprite in query.iter_mut() {
         sprite.custom_size = Some(Vec2::new(window.width(), window.height()));
     }

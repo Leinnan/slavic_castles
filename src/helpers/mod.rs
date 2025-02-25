@@ -1,3 +1,5 @@
+pub mod wasm_resize;
+
 use bevy::ecs::system::EntityCommands;
 use bevy::ecs::world::Command;
 use bevy::{asset::AssetPath, prelude::*};
@@ -102,8 +104,4 @@ pub fn despawn_recursive_by_component<T: bevy::prelude::Component>(
         };
         entity.despawn_recursive();
     }
-}
-
-pub fn remove_resource_by_type<T: bevy::prelude::Resource>(mut commands: Commands) {
-    commands.remove_resource::<T>();
 }

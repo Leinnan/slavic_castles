@@ -6,7 +6,7 @@ use crate::data::card::Card;
 use crate::data::deck::{DeckAsset, HandCards};
 use crate::data::player::Player;
 use crate::data::player_resources::PlayerResources;
-use crate::helpers::{despawn_recursive_by_component, AudioSpawnCommandExt};
+use crate::helpers::AudioSpawnCommandExt;
 
 use bevy::prelude::*;
 use bevy::time::Stopwatch;
@@ -27,6 +27,7 @@ pub struct HumanPlayer;
 pub struct GamePlugin;
 
 #[derive(Component)]
+#[require(GameObject)]
 pub struct HelpDisplay;
 
 #[derive(Component)]
@@ -39,6 +40,7 @@ pub struct SelectedCard {
 }
 
 #[derive(Component, Debug, Default, Copy, Clone, Reflect)]
+#[require(StateScoped<GameState>(|| StateScoped(GameState::Game)))]
 pub struct GameObject;
 
 #[derive(Component, Debug, Default, Copy, Clone, Reflect)]
@@ -85,54 +87,53 @@ pub struct AvatarId(pub i32);
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            OnEnter(GameState::Game),
-            (setup_music, init_players, setup_ui).chain(),
-        )
-        .add_systems(
-            Update,
-            perform_action.run_if(in_state(GameTurnSteps::PerformAction)),
-        )
-        .add_systems(
-            OnEnter(GameTurnSteps::ActionSelection),
-            switch_player.run_if(not(game_ended_condition)),
-        )
-        .add_systems(
-            OnEnter(GameTurnSteps::SearchForAgents),
-            (end_game).run_if(game_ended_condition),
-        )
-        .add_systems(
-            Update,
-            (handle_card_events, ai_select_card).run_if(in_state(GameTurnSteps::ActionSelection)),
-        )
-        .add_systems(
-            Update,
-            (
-                // update_ui,
-                update_deck_visibility,
-                update_timers,
-                card_sounds,
+        app.enable_state_scoped_entities::<GameState>()
+            .enable_state_scoped_entities::<GameTurnSteps>()
+            .add_systems(
+                OnEnter(GameState::Game),
+                (setup_music, init_players, setup_ui).chain(),
             )
-                .run_if(in_state(GameState::Game)),
-        )
-        .init_resource::<SelectedCard>()
-        .init_resource::<TimeSinceTurnStarted>()
-        .register_type::<GameObject>()
-        .register_type::<HandCards>()
-        .register_type::<ExitGameTimer>()
-        .register_type::<OpponentInformation>()
-        .register_type::<PlayerInformation>()
-        .register_type::<TimeSinceTurnStarted>()
-        .add_systems(
-            OnExit(GameState::Game),
-            (despawn_recursive_by_component::<GameObject>,),
-        )
-        .add_systems(
-            Update,
-            esc_to_menu
-                .run_if(not(game_ended_condition))
-                .run_if(in_state(GameState::Game)),
-        );
+            .add_systems(
+                Update,
+                perform_action.run_if(in_state(GameTurnSteps::PerformAction)),
+            )
+            .add_systems(
+                OnEnter(GameTurnSteps::ActionSelection),
+                switch_player.run_if(not(game_ended_condition)),
+            )
+            .add_systems(
+                OnEnter(GameTurnSteps::SearchForAgents),
+                (end_game).run_if(game_ended_condition),
+            )
+            .add_systems(
+                Update,
+                (handle_card_events, ai_select_card)
+                    .run_if(in_state(GameTurnSteps::ActionSelection)),
+            )
+            .add_systems(
+                Update,
+                (
+                    // update_ui,
+                    update_deck_visibility,
+                    update_timers,
+                    card_sounds,
+                )
+                    .run_if(in_state(GameState::Game)),
+            )
+            .init_resource::<SelectedCard>()
+            .init_resource::<TimeSinceTurnStarted>()
+            .register_type::<GameObject>()
+            .register_type::<HandCards>()
+            .register_type::<ExitGameTimer>()
+            .register_type::<OpponentInformation>()
+            .register_type::<PlayerInformation>()
+            .register_type::<TimeSinceTurnStarted>()
+            .add_systems(
+                Update,
+                esc_to_menu
+                    .run_if(not(game_ended_condition))
+                    .run_if(in_state(GameState::Game)),
+            );
     }
 }
 
@@ -288,15 +289,14 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     //     // color: Color::GOLD,
     //     ..default()
     // };
-    commands
-        .spawn((
-            Transform::from_xyz(0.0, 0.0, -1.0),
-            Sprite::from_image(asset_server.load("img/ingame_bg.png")),
-            PickingBehavior::IGNORE,
-            BackgroundSprite,
-            GameObject,
-            Name::new("BG")
-        ));
+    commands.spawn((
+        Transform::from_xyz(0.0, 0.0, -1.0),
+        Sprite::from_image(asset_server.load("img/ingame_bg.png")),
+        PickingBehavior::IGNORE,
+        BackgroundSprite,
+        GameObject,
+        Name::new("BG"),
+    ));
 
     commands
         .spawn((
