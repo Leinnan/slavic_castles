@@ -2,35 +2,28 @@ use std::time::Duration;
 
 use super::game::{OpponentInformation, PlayerInformation};
 use super::{game::NamesAsset, game_states::GameState};
-use crate::data::{deck::DeckAsset, profile};
+use crate::data::deck::DeckAsset;
+use crate::data::profile::ProfileProvider;
+use crate::helpers::button::ButtonReleased;
 use crate::states::consts::*;
 use bevy::prelude::*;
 use bevy::ui::widget::NodeImageMode;
-use bevy_button_released_plugin::ButtonReleasedEvent;
 // use bevy_ecss::prelude::{Class, StyleSheet};
 use bevy_pkv::PkvStore;
 use bevy_tweening::{lens::TransformScaleLens, Animator, Delay, Tween};
 use rand::{thread_rng, Rng};
 
-#[derive(Component)]
-pub enum MainMenuButton {
-    StartGame,
-    EditProfile,
-    OpenRepository,
-    Exit,
-}
 use super::consts;
 
-#[derive(Component)]
-#[require(StateScoped<GameState>(|| StateScoped(GameState::Menu)))]
-pub struct MenuObject;
 
 pub struct MenuPlugin;
 
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Menu), (check_for_profile, setup_menu))
-            .add_systems(Update, button_system.run_if(in_state(GameState::Menu)));
+        app.add_systems(
+            OnEnter(GameState::Menu),
+            (check_for_profile, setup_menu).chain(),
+        );
     }
 }
 
@@ -41,7 +34,7 @@ fn check_for_profile(
     names: Res<Assets<NamesAsset>>,
     mut commands: Commands,
 ) {
-    let Some(profile) = profile::get_profile(&pkv) else {
+    let Some(profile) = pkv.get_profile() else {
         next_state.set(GameState::ProfileEdit);
         return;
     };
@@ -67,55 +60,39 @@ fn check_for_profile(
     }));
 }
 
-fn button_system(
-    mut reader: EventReader<ButtonReleasedEvent>,
-    interaction_query: Query<&MainMenuButton>,
-    mut next_state: ResMut<NextState<GameState>>,
-    #[cfg(not(target_arch = "wasm32"))] mut exit: EventWriter<bevy::app::AppExit>,
-) {
-    for event in reader.read() {
-        if let Ok(button_type) = interaction_query.get(**event) {
-            match *button_type {
-                MainMenuButton::StartGame => {
-                    next_state.set(GameState::Game);
-                }
-                MainMenuButton::OpenRepository => {
-                    webbrowser::open(env!("CARGO_PKG_HOMEPAGE")).unwrap_or_default()
-                }
-                MainMenuButton::EditProfile => next_state.set(GameState::ProfileEdit),
-                MainMenuButton::Exit => {
-                    #[cfg(target_arch = "wasm32")]
-                    {
-                        //
-                    }
-                    #[cfg(not(target_arch = "wasm32"))]
-                    {
-                        exit.send(bevy::app::AppExit::Success);
-                    }
-                }
-            }
-        }
-    }
+fn start_game(_: Trigger<ButtonReleased>, mut next_state: ResMut<NextState<GameState>>) {
+    next_state.set(GameState::Game);
+}
+
+fn edit_profile_game(_: Trigger<ButtonReleased>, mut next_state: ResMut<NextState<GameState>>) {
+    next_state.set(GameState::ProfileEdit);
+}
+
+fn open_repo(_: Trigger<ButtonReleased>) {
+    webbrowser::open(env!("CARGO_PKG_HOMEPAGE")).unwrap_or_default();
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn exit_game(_: Trigger<ButtonReleased>, mut exit: EventWriter<bevy::app::AppExit>) {
+    exit.send(bevy::app::AppExit::Success);
 }
 
 fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
-        .spawn(Node {
-            height: FULL_SIZE_PERCENT,
-            width: FULL_SIZE_PERCENT,
-            align_items: AlignItems::Center,
-            justify_content: JustifyContent::Center,
-            align_content: AlignContent::Center,
-            flex_direction: FlexDirection::Column,
-            ..default()
-        })
-        .insert(MenuObject)
+        .spawn(super::root_node())
+        .insert(StateScoped(GameState::Menu))
         .insert(Name::new("menu-root"))
         // .insert(StyleSheet::new(asset_server.load("css/base.css")))
         .with_children(|parent| {
             let init_scale = Vec3::splat(0.01);
             let bg = ImageNode::new(asset_server.load("img/start_screen_bg.png"));
-            parent.spawn((bg, ZIndex(-1)));
+            parent.spawn((bg, ZIndex(-1),
+                         Node{
+                             position_type: PositionType::Absolute,
+                             top: Val::Px(0.0),
+                             width: Val::Vw(100.0),
+                             ..default()
+                         }));
             // .insert(Class::new("menu_background"));
             parent.spawn((
                 ImageNode::new(asset_server.load("img/logo.png")),
@@ -146,32 +123,32 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             let clr = TextColor(Color::linear_rgb(0.7, 0.7, 0.7));
             let mut start_time_ms = 500;
 
-            for (text, label, margin) in [
+            for (text, margin, observer) in [
                 (
                     "Quick Fight",
-                    MainMenuButton::StartGame,
                     UiRect {
                         top: Val::Auto,
                         bottom: Val::Px(15.0),
                         ..default()
                     },
+                    Observer::new(start_game),
                 ),
                 (
                     "Edit Profile",
-                    MainMenuButton::EditProfile,
                     UiRect {
                         bottom: Val::Px(15.0),
                         ..default()
                     },
+                    Observer::new(edit_profile_game),
                 ),
                 #[cfg(not(target_arch = "wasm32"))]
                 (
                     "Exit Game",
-                    MainMenuButton::Exit,
                     UiRect {
                         bottom: Val::Px(15.0),
                         ..default()
                     },
+                    Observer::new(exit_game),
                 ),
             ] {
                 let tween_scale = Tween::new(
@@ -192,7 +169,7 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
 
                 start_time_ms += 200;
 
-                parent
+                let id = parent
                     .spawn((
                         ImageNode {
                             image_mode: NodeImageMode::Sliced(TextureSlicer {
@@ -201,12 +178,13 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                                 sides_scale_mode: SliceScaleMode::Stretch,
                                 max_corner_scale: 1.0,
                             }),
+                            color: Srgba::hex("7A444A").unwrap().into(),
                             image: asset_server.load("img/panel-006.png"),
                             ..Default::default()
                         },
-                        BackgroundColor(Srgba::hex("7A444A").unwrap().into()),
                         Node {
                             margin,
+                            padding: UiRect::all(Val::Px(15.0)),
                             align_items: AlignItems::Center,
                             justify_content: JustifyContent::Center,
                             ..default()
@@ -222,33 +200,40 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                         // Class::new("menu common"),
                         Name::new(format!("button:{}", text)),
                         animator,
-                        label,
                     ))
                     .with_children(|parent| {
                         parent.spawn((Text::new(text), img_style.clone(), clr));
-                    });
+                    })
+                    .id();
+                let ob = observer.with_entity(id);
+                parent.spawn(ob).set_parent(id);
             }
-            parent.spawn((
-                TextLayout::new_with_justify(JustifyText::Right),
-                Text(format!("v.{}\n{}", VERSION, GIT_HASH)),
-                TextColor(Color::WHITE),
-                TextFont {
-                    font: asset_server.load(REGULAR_FONT),
-                    font_size: 16.0,
-                    ..default()
-                },
-                Node {
-                    margin: UiRect {
-                        left: Val::Auto,
-                        right: Val::Px(15.0),
-                        top: Val::Auto,
-                        bottom: Val::Px(15.0),
+            let id = parent
+                .spawn((
+                    TextLayout::new_with_justify(JustifyText::Right),
+                    Text(format!("v.{}\n{}", VERSION, GIT_HASH)),
+                    TextColor(Color::WHITE),
+                    TextFont {
+                        font: asset_server.load(REGULAR_FONT),
+                        font_size: 16.0,
+                        ..default()
                     },
-                    position_type: PositionType::Absolute,
-                    ..default()
-                },
-                Interaction::None,
-                MainMenuButton::OpenRepository,
-            ));
+                    Node {
+                        margin: UiRect {
+                            left: Val::Auto,
+                            right: Val::Px(15.0),
+                            top: Val::Auto,
+                            bottom: Val::Px(15.0),
+                        },
+                        position_type: PositionType::Absolute,
+                        ..default()
+                    },
+                    Interaction::None,
+                    Button,
+                ))
+                .id();
+            parent
+                .spawn(Observer::new(open_repo).with_entity(id))
+                .set_parent(id);
         });
 }

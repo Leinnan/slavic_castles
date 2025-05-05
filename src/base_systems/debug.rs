@@ -1,14 +1,16 @@
 use std::fmt;
-
-use crate::data::consts::*;
 use bevy::app::{App, Plugin};
-// use bevy::input::common_conditions::input_just_pressed;
 use bevy::prelude::*;
 use bevy_inspector_egui::bevy_egui::{egui, EguiContext, EguiPlugin};
 use bevy_inspector_egui::{
     bevy_inspector::hierarchy::SelectedEntities, DefaultInspectorConfigPlugin,
 };
 // use iyes_perf_ui::prelude::*;
+
+// const MY_ACCENT_COLOR32: bevy_inspector_egui::bevy_egui::egui::Color32 =
+//     bevy_inspector_egui::bevy_egui::egui::Color32::from_rgb(230, 102, 1);
+const GIT_HASH: &str = env!("GIT_HASH");
+const GIT_DATE: &str = env!("GIT_DATE");
 
 #[derive(PartialEq, Eq, Default, Debug, Clone, Copy)]
 pub enum PanelDisplay {

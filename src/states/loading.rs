@@ -73,16 +73,10 @@ pub struct BaseAssets {
 
 pub struct LoadingPlugin;
 
-#[derive(Component)]
-pub struct LoadingText;
-
-#[derive(Component)]
-pub struct LoadingScreen;
 
 impl Plugin for LoadingPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnExit(GameState::AssetsLoading), cleanup)
-            .add_loading_state(
+        app.add_loading_state(
                 LoadingState::new(GameState::AssetsLoading)
                     .continue_to_state(GameState::Menu)
                     .load_collection::<BaseAssets>(),
@@ -107,7 +101,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 ..default()
             },
             BackgroundColor(Srgba::hex("#2c422e").unwrap().into()),
-            LoadingScreen,
+            StateScoped(GameState::AssetsLoading),
         ))
         .with_children(|parent| {
             let header_style = TextFont {
@@ -123,13 +117,6 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 Text::new("Loading"),
                 header_style,
                 TextColor(Srgba::hex("#fcfd9e").unwrap().into()),
-                LoadingText,
             ));
         });
-}
-
-fn cleanup(query: Query<Entity, With<LoadingScreen>>, mut commands: Commands) {
-    for e in &query {
-        commands.entity(e).despawn_recursive();
-    }
 }

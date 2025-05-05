@@ -1,8 +1,13 @@
+pub mod button;
 pub mod wasm_resize;
 
 use bevy::ecs::system::EntityCommands;
 use bevy::ecs::world::Command;
 use bevy::{asset::AssetPath, prelude::*};
+
+pub(super) fn plugin(app: &mut App) {
+    app.add_plugins(button::plugin);
+}
 
 /// Command for playing a standard bevy audio asset
 pub struct AudioSpawnCommand<'a> {

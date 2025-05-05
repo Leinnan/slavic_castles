@@ -2,14 +2,15 @@ use bevy::color::palettes::tailwind;
 use bevy::{prelude::*, reflect::Reflect};
 
 use crate::base_systems::turn_based::{CurrentActorToken, GameTurnSteps};
-use crate::data::card::Card;
 use crate::data::deck::HandCards;
-use crate::data::player_resources::PlayerResources;
 use crate::helpers::despawn_recursive_by_component;
 use crate::states::game::{
-    self, ActionTaken, BackgroundSprite, GameObject, HelpDisplay, HumanPlayer,
+    self, ActionTaken,  GameObject, HelpDisplay, HumanPlayer,
 };
 use crate::states::game_states::GameState;
+use game_core::data::card::Card;
+use game_core::data::supply::PlayerSupply;
+use crate::visual::window_changed_or_component_added;
 
 const CARD_SIZE: Vec3 = Vec3::new(1.0, 1.0, 1.0);
 
@@ -26,7 +27,7 @@ pub struct CardPlace(pub usize);
 pub struct CardNumber(pub usize);
 
 #[derive(Component, Reflect, Default, Clone, Copy)]
-#[require(GameObject, StateScoped<GameTurnSteps>(|| StateScoped(GameTurnSteps::PerformAction)))]
+#[require(GameObject, StateScoped<GameTurnSteps>(|| StateScoped(GameTurnSteps::PerformAction)), ActionToPerform)]
 pub struct DraggableCard {
     pub can_afford: bool,
 }
@@ -36,7 +37,6 @@ pub struct DraggableCard {
 pub struct CurrentlyDragged;
 
 #[derive(Component, Debug, PartialEq, Clone, Reflect, Deref)]
-#[require(ActionToPerform)]
 pub struct CardDisplay(pub Card);
 
 #[derive(Component, Reflect, Default, Clone, Copy, Debug, PartialEq)]
@@ -66,9 +66,10 @@ impl Plugin for CardPlugin {
             .register_type::<CardDropZone>()
             .register_type::<ActionToPerform>()
             .register_type::<CardNumber>()
+            .add_systems(Update, update_card_places.run_if(window_changed_or_component_added::<CardPlace>))
             .add_systems(
                 Update,
-                (update_background, cards_input_system, sort_cards)
+                (cards_input_system, sort_cards, update_card_color)
                     .run_if(in_state(GameState::Game)),
             )
             .add_systems(
@@ -81,7 +82,6 @@ impl Plugin for CardPlugin {
                 (add_cards).after(game::switch_player),
             )
             .add_observer(drag)
-            .add_observer(card_on_action_to_perform_inserted)
             .add_observer(start_drag)
             .add_observer(end_drag);
     }
@@ -146,40 +146,39 @@ fn add_card_places(windows: Query<&Window>, mut commands: Commands) {
         .observe(on_drag_leave_card);
 }
 
-fn card_on_action_to_perform_inserted(
-    t: Trigger<OnInsert, ActionToPerform>,
-    mut q: Query<(&mut Sprite, &ActionToPerform, &DraggableCard)>,
+fn update_card_color(
+    mut q: Query<(&mut Sprite, &ActionToPerform, &DraggableCard), Or<(Added<ActionToPerform>, Changed<ActionToPerform>)>>,
 ) {
-    let Ok((mut sprite, action, draggable)) = q.get_mut(t.entity()) else {
-        return;
-    };
-
-    sprite.color = match (action, draggable.can_afford) {
-        (ActionToPerform::Use, true) => tailwind::AMBER_300.into(),
-        (ActionToPerform::Discard, _) => Color::linear_rgb(1.0, 0.6, 0.6),
-        (_, false) => Color::WHITE.darker(0.4),
-        (_, _) => Color::linear_rgb(1.0, 1.0, 1.0),
-    };
+    for (mut sprite, action, draggable) in q.iter_mut() {
+        sprite.color = match (action, draggable.can_afford) {
+            (ActionToPerform::Use, true) => tailwind::AMBER_300.into(),
+            (ActionToPerform::Discard, _) => Color::linear_rgb(1.0, 0.6, 0.6),
+            (_, false) => Color::WHITE.darker(0.4),
+            (_, _) => Color::WHITE,
+        };
+    }
 }
 
 fn on_drag_over_card(
     trigger: Trigger<Pointer<DragEnter>>,
     q: Query<&CardDropZone>,
-    qq: Query<&DraggableCard>,
-    mut commands: Commands,
+    mut qq: Query<(&mut ActionToPerform, &DraggableCard)>,
 ) {
     let Ok(zone_type) = q.get(trigger.entity()) else {
         return;
     };
     info!("{zone_type:?}");
-    let v = match zone_type {
-        CardDropZone::Use if qq.get(trigger.dragged).is_ok_and(|e| e.can_afford) => {
+    let Ok((mut action, card)) = qq.get_mut(trigger.dragged) else {
+        return;
+    };
+
+    *action = match zone_type {
+        CardDropZone::Use if card.can_afford => {
             ActionToPerform::Use
         }
         CardDropZone::Discard => ActionToPerform::Discard,
         _ => ActionToPerform::Nothing,
     };
-    commands.entity(trigger.dragged).insert(v);
 }
 
 fn on_drag_leave_card(
@@ -200,15 +199,11 @@ fn add_cards(
     windows: Query<&Window>,
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    deck_q: Query<(&HandCards, &PlayerResources, Option<&CurrentActorToken>), With<HumanPlayer>>,
+    deck_q: Query<(&HandCards, &PlayerSupply), (With<HumanPlayer>,With<CurrentActorToken>)>,
 ) {
-    info!("ADD CARDS");
-    let Ok((deck, res, token)) = deck_q.get_single() else {
+    let Ok((deck, res)) = deck_q.get_single() else {
         return;
     };
-    if token.is_none() {
-        return;
-    }
     let window = windows.single();
     let y_pos = -window.height() + inline_tweak::tweak!(-450.0);
 
@@ -271,17 +266,13 @@ fn sort_cards(
         }
     }
 }
-fn update_background(
+fn update_card_places(
     windows: Query<&Window>,
-    mut query: Query<&mut Sprite, With<BackgroundSprite>>,
     mut query2: Query<(&mut Transform, &CardPlace)>,
 ) {
     let Ok(window) = windows.get_single() else {
         return;
     };
-    for mut sprite in query.iter_mut() {
-        sprite.custom_size = Some(Vec2::new(window.width(), window.height()));
-    }
     let modifier = inline_tweak::tweak!(-30.0);
     let modifier2 = inline_tweak::tweak!(-100.0);
     let pos_modifiers = [modifier2, modifier, 0.0, modifier, modifier2];

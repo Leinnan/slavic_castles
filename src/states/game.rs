@@ -1,22 +1,25 @@
-use core::panic;
-
 use super::game_states::GameState;
 use crate::base_systems::turn_based::{ActorTurn, CurrentActorToken, GameTurnSteps};
-use crate::data::card::Card;
 use crate::data::deck::{DeckAsset, HandCards};
-use crate::data::player::Player;
-use crate::data::player_resources::PlayerResources;
+use crate::data::profile::Profile;
 use crate::helpers::AudioSpawnCommandExt;
-
+use bevy::ecs::query::{QueryData, QueryFilter};
+use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use bevy::time::Stopwatch;
+use game_core::data::card::Card;
+use game_core::data::player::PlayerHealth;
+use game_core::data::supply::PlayerSupply;
 use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
-
+use crate::visual::BackgroundSprite;
 use super::consts;
 
-#[derive(Component, Serialize, Deserialize, PartialEq, Eq, Hash, Copy, Debug, Clone, Reflect)]
+#[derive(
+    Component, Serialize, Deserialize, PartialEq, Eq, Hash, Copy, Debug, Clone, Reflect, Default,
+)]
 pub enum PlayerNumber {
+    #[default]
     First,
     Second,
 }
@@ -42,9 +45,6 @@ pub struct SelectedCard {
 #[derive(Component, Debug, Default, Copy, Clone, Reflect)]
 #[require(StateScoped<GameState>(|| StateScoped(GameState::Game)))]
 pub struct GameObject;
-
-#[derive(Component, Debug, Default, Copy, Clone, Reflect)]
-pub struct BackgroundSprite;
 
 #[derive(serde::Deserialize, bevy::asset::Asset, Deref, DerefMut, Reflect)]
 pub struct NamesAsset(pub Vec<String>);
@@ -77,13 +77,65 @@ pub struct OpponentInformation(pub PlayerInformation);
 #[reflect(Resource)]
 pub struct PlayerInformation {
     pub name: String,
-    pub start_stats: Player,
+    pub start_stats: PlayerHealth,
     pub deck: DeckAsset,
     pub avatar_id: i32,
 }
 
-#[derive(Component, Debug, Default, Reflect, Deref)]
-pub struct AvatarId(pub i32);
+#[derive(Component, Debug, Default, Reflect)]
+#[reflect(Component)]
+#[require(PlayerNumber)]
+pub struct PlayerDetailsInfo {
+    pub name: String,
+    pub avatar_id: i32,
+}
+
+impl PlayerDetailsInfo {
+    pub fn avatar_path(&self) -> String {
+        Profile::format_avatar_path(self.avatar_id)
+    }
+}
+
+impl From<&PlayerInformation> for PlayerDetailsInfo {
+    fn from(value: &PlayerInformation) -> Self {
+        Self {
+            name: value.name.clone(),
+            avatar_id: value.avatar_id,
+        }
+    }
+}
+
+#[derive(QueryData)]
+#[query_data(derive(Debug))]
+pub struct PlayerQuery {
+    pub nr: &'static PlayerNumber,
+    pub details: &'static PlayerDetailsInfo,
+    pub player: &'static PlayerHealth,
+    pub supply: &'static PlayerSupply,
+}
+
+#[derive(SystemParam, Deref)]
+pub struct Players<'w, 's>(Query<'w, 's, PlayerQuery>);
+
+impl Players<'_, '_> {
+    pub fn get_player(&self, nr: PlayerNumber) -> Option<PlayerQueryItem<'_>> {
+        self.iter().find(move |e| e.nr.eq(&nr))
+    }
+}
+
+#[derive(QueryFilter)]
+pub struct PlayersUpdatedFilter {
+    _a: Or<(Changed<PlayerHealth>, Changed<PlayerSupply>)>,
+}
+
+#[derive(SystemParam, Deref)]
+pub struct PlayersUpdated<'w, 's>(Query<'w, 's, PlayerQuery, PlayersUpdatedFilter>);
+
+impl PlayersUpdated<'_, '_> {
+    pub fn get_player(&self, nr: PlayerNumber) -> Option<PlayerQueryItem<'_>> {
+        self.iter().find(move |e| e.nr.eq(&nr))
+    }
+}
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
@@ -127,6 +179,7 @@ impl Plugin for GamePlugin {
             .register_type::<ExitGameTimer>()
             .register_type::<OpponentInformation>()
             .register_type::<PlayerInformation>()
+            .register_type::<PlayerDetailsInfo>()
             .register_type::<TimeSinceTurnStarted>()
             .add_systems(
                 Update,
@@ -137,7 +190,7 @@ impl Plugin for GamePlugin {
     }
 }
 
-fn end_game(query: Query<&Player, With<HumanPlayer>>, mut commands: Commands) {
+fn end_game(query: Query<&PlayerHealth, With<HumanPlayer>>, mut commands: Commands) {
     let Ok(player) = query.get_single() else {
         panic!("SDD");
     };
@@ -172,7 +225,7 @@ fn update_timers(
 }
 
 pub fn switch_player(
-    mut q: Query<(&Name, &mut PlayerResources), With<CurrentActorToken>>,
+    mut q: Query<(&Name, &mut PlayerSupply), With<CurrentActorToken>>,
     mut timer: ResMut<TimeSinceTurnStarted>,
 ) {
     let (player, mut resources) = q.single_mut();
@@ -244,11 +297,11 @@ pub fn init_players(
         .spawn((
             Name::new(player.name.clone()),
             player.start_stats,
+            PlayerDetailsInfo::from(&*player),
             PlayerNumber::First,
             HumanPlayer,
             ActorTurn(0),
-            AvatarId(player.avatar_id),
-            PlayerResources::default(),
+            PlayerSupply::default(),
             HandCards::generate_random(&player.deck.0),
         ))
         .insert(GameObject);
@@ -256,10 +309,10 @@ pub fn init_players(
         .spawn((
             Name::new(opponent.name.clone()),
             opponent.start_stats,
-            ActorTurn(1),
             PlayerNumber::Second,
-            AvatarId(opponent.avatar_id),
-            PlayerResources::default(),
+            ActorTurn(1),
+            PlayerDetailsInfo::from(&**opponent),
+            PlayerSupply::default(),
             HandCards::generate_random(&opponent.deck.0),
         ))
         .insert(GameObject);
@@ -267,7 +320,7 @@ pub fn init_players(
 }
 
 fn setup_music(asset_server: Res<AssetServer>, mut commands: Commands) {
-    commands.spawn(AudioPlayer::new(asset_server.load("snd/start_game.ogg")));
+    commands.spawn(AudioPlayer::new(asset_server.load("snd/start_game.ogg"))).insert(GameObject);
 }
 
 fn card_sounds(mut commands: Commands, q: Query<&ActionTaken, Added<ActionTaken>>) {
@@ -283,12 +336,6 @@ fn card_sounds(mut commands: Commands, q: Query<&ActionTaken, Added<ActionTaken>
 fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     let header_style =
         TextFont::from_font(asset_server.load(consts::LABEL_FONT)).with_font_size(45.0);
-    // let header_style = TextStyle {
-    //     font: asset_server.load(consts::LABEL_FONT),
-    //     font_size: 45.0,
-    //     // color: Color::GOLD,
-    //     ..default()
-    // };
     commands.spawn((
         Transform::from_xyz(0.0, 0.0, -1.0),
         Sprite::from_image(asset_server.load("img/ingame_bg.png")),
@@ -380,8 +427,8 @@ pub fn perform_action(
     any_action: Query<&ActionTaken>,
     mut players_q: Query<(
         Entity,
-        &mut PlayerResources,
-        &mut Player,
+        &mut PlayerSupply,
+        &mut PlayerHealth,
         &mut HandCards,
         Option<&CurrentActorToken>,
     )>,
@@ -426,7 +473,7 @@ pub fn perform_action(
     next_state.set(GameTurnSteps::SearchForAgents);
 }
 
-fn game_ended_condition(query: Query<&Player>) -> bool {
+fn game_ended_condition(query: Query<&PlayerHealth>) -> bool {
     for player in &query {
         if !player.is_alive() || player.has_max_possible_tower() {
             return true;

@@ -2,13 +2,14 @@ use bevy::prelude::*;
 use bevy_common_assets::json::JsonAssetPlugin;
 // use bevy_ecss::prelude::*;
 use bevy_pkv::PkvStore;
-use data::{deck::DeckAsset, player::Player, player_resources::PlayerResources};
+use data::deck::DeckAsset;
 use states::game::NamesAsset;
 pub mod base_systems;
 pub mod components;
 pub mod data;
 pub mod helpers;
 pub mod states;
+pub mod visual;
 
 const NAME: &str = env!("CARGO_PKG_NAME");
 
@@ -33,18 +34,18 @@ pub fn main() {
     #[cfg(target_arch = "wasm32")]
     app.add_plugins(DefaultPlugins);
 
-    app.add_plugins(bevy_button_released_plugin::ButtonsReleasedPlugin)
+    app.add_plugins(helpers::plugin)
         .add_plugins(JsonAssetPlugin::<DeckAsset>::new(&["deck.json"]))
         .add_plugins(JsonAssetPlugin::<NamesAsset>::new(&["names.json"]))
         .add_plugins(crate::base_systems::turn_based::register_system)
         .add_plugins(components::player_ui::PlayerUiPlugin)
         .init_state::<states::game_states::GameState>()
         .add_plugins(helpers::wasm_resize::WindowResizePlugin)
-        .register_type::<PlayerResources>()
         .register_type::<DeckAsset>()
         .register_type::<NamesAsset>()
-        .register_type::<Player>()
-        .insert_resource(PkvStore::new("MevLysdhkin", NAME))
+        .add_plugins(visual::plugin)
+        .add_plugins(game_core::GameCorePlugin)
+        .insert_resource(PkvStore::new("CoolGames", NAME))
         // .add_plugins(EcssPlugin::default())
         .add_plugins(bevy_tweening::TweeningPlugin)
         .add_plugins(states::game_states::GamePlugins)
