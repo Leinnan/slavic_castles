@@ -11,7 +11,6 @@ use states::consts;
 pub struct BaseAssets {
     #[asset(
         paths(
-            "css/base.css",
             "avatars/1.png",
             "avatars/2.png",
             "avatars/3.png",
@@ -74,16 +73,10 @@ pub struct BaseAssets {
 
 pub struct LoadingPlugin;
 
-#[derive(Component)]
-pub struct LoadingText;
-
-#[derive(Component)]
-pub struct LoadingScreen;
 
 impl Plugin for LoadingPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnExit(GameState::AssetsLoading), cleanup)
-            .add_loading_state(
+        app.add_loading_state(
                 LoadingState::new(GameState::AssetsLoading)
                     .continue_to_state(GameState::Menu)
                     .load_collection::<BaseAssets>(),
@@ -94,43 +87,36 @@ impl Plugin for LoadingPlugin {
 }
 
 fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2d);
 
     commands
         .spawn((
-            NodeBundle {
-                style: Style {
-                    height: FULL_SIZE_PERCENT,
-                    width: FULL_SIZE_PERCENT,
-                    align_items: AlignItems::Stretch,
-                    justify_content: JustifyContent::SpaceBetween,
-                    align_content: AlignContent::Center,
-                    flex_direction: FlexDirection::Row,
-                    ..default()
-                },
-                background_color: Color::hex("#2c422e").unwrap().into(),
+            Node {
+                height: FULL_SIZE_PERCENT,
+                width: FULL_SIZE_PERCENT,
+                align_items: AlignItems::Stretch,
+                justify_content: JustifyContent::SpaceBetween,
+                align_content: AlignContent::Center,
+                flex_direction: FlexDirection::Row,
                 ..default()
             },
-            LoadingScreen,
+            BackgroundColor(Srgba::hex("#2c422e").unwrap().into()),
+            StateScoped(GameState::AssetsLoading),
         ))
         .with_children(|parent| {
-            let header_style = TextStyle {
+            let header_style = TextFont {
                 font: asset_server.load(LABEL_FONT),
                 font_size: 45.0,
-                color: Color::hex("#fcfd9e").unwrap(),
+                ..Default::default()
             };
             parent.spawn((
-                TextBundle::from_section("Loading", header_style).with_style(Style {
+                Node {
                     margin: UiRect::all(Val::Auto),
                     ..default()
-                }),
-                LoadingText,
+                },
+                Text::new("Loading"),
+                header_style,
+                TextColor(Srgba::hex("#fcfd9e").unwrap().into()),
             ));
         });
-}
-
-fn cleanup(query: Query<Entity, With<LoadingScreen>>, mut commands: Commands) {
-    for e in &query {
-        commands.entity(e).despawn_recursive();
-    }
 }

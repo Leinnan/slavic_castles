@@ -5,6 +5,9 @@ homepage = "https://github.com/Leinnan/slavic_castles"
 version = "0.1.0"
 edition = "2021"
 
+[workspace]
+members = ["crates/*"]
+
 [profile.release]
 opt-level = 'z'
 panic = 'abort'
@@ -17,44 +20,38 @@ opt-level = 1
 [profile.dev.package."*"]
 opt-level = 2
 
-[dependencies]
-console_error_panic_hook = "0.1"
-bevy = {version = "0.13", features = [
-  "bevy_asset",
-  "bevy_audio",
-  "bevy_winit",
-  "bevy_core_pipeline",
-  "bevy_render",
-  "bevy_sprite",
-  "bevy_text",
-  "bevy_ui",
-  "multi-threaded",
-  "png",
-  "vorbis",
-  "wayland",
-  "webgl2",
-]}
-inline_tweak = "1"
-bevy_tweening = "0.10"
-serde = "1"
+[workspace.dependencies]
+bevy = {version = "0.15"}
+serde = { version =  "1", features = ["derive"] }
 serde_json = "1"
-bevy_pkv = "0.10"
+
+[dependencies]
+game_core = {path = "crates/game_core", features = ["bevy"]}
+console_error_panic_hook = "0.1"
+bevy = {workspace = true, default-features = true}
+serde = {workspace = true}
+serde_json = {workspace = true}
+inline_tweak = "1"
+bevy_tweening = "0.12"
+bevy_pkv = "0.12"
 rand = "0.8"
-bevy_asset_loader = "0.20"
+bevy_asset_loader = "0.22"
 webbrowser = "1"
-bevy_button_released_plugin = "0.5.1"
-bevy_ecss = {git = "https://github.com/afonsolage/bevy_ecss.git", rev = "ea1ef7bd5eab5fff289c7426018ecc8ab5669823"}
-bevy_common_assets = { version = "0.10", features = ["json"] }
-bevy_simple_text_input = "0.6"
-bevy_mod_picking = "0.18.2"
-bevy_wasm_window_resize = "0.3.0"
+#bevy_ecss = {git = "https://github.com/afonsolage/bevy_ecss.git", rev = "ea1ef7bd5eab5fff289c7426018ecc8ab5669823"}
+bevy_common_assets = { version = "0.12", features = ["json"] }
+bevy_simple_text_input = "0.10"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-bevy_egui = "0.27"
-bevy-inspector-egui = "0.24"
-iyes_perf_ui = "0.2"
+bevy-inspector-egui = "0.29"
+#iyes_perf_ui = "0.2"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]
+version = "0.3"
+default-features = false
+features = ["Window"]
 
 [build-dependencies]
+game_core = {path = "crates/game_core"}
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"
 usvg = "0.41"

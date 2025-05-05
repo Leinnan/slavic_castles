@@ -1,6 +1,6 @@
+use crate::helpers::button::ChangedButtonsFilter;
 use bevy::{prelude::*, ui::Interaction};
-use bevy_button_released_plugin::GameButton;
-use bevy_tweening::{lens::TransformScaleLens, Animator, EaseFunction, Tween};
+use bevy_tweening::{lens::TransformScaleLens, Animator, Tween};
 use std::time::Duration;
 
 pub struct ButtonsPlugin;
@@ -13,16 +13,11 @@ impl Plugin for ButtonsPlugin {
 
 fn button_anim_system(
     mut interaction_query: Query<
-        (
-            &Interaction,
-            &mut Animator<Transform>,
-            &Transform,
-            &GameButton,
-        ),
-        Changed<Interaction>,
+        (&Interaction, &mut Animator<Transform>, &Transform),
+        ChangedButtonsFilter,
     >,
 ) {
-    for (interaction, mut animator, transform, _) in &mut interaction_query {
+    for (interaction, mut animator, transform) in &mut interaction_query {
         let start_scale = transform.scale;
         match *interaction {
             Interaction::Pressed => {

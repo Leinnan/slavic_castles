@@ -1,9 +1,11 @@
-use crate::data::consts;
+use crate::consts;
+#[cfg(feature = "bevy")]
 use bevy::reflect::Reflect;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(PartialEq, Eq, Hash, Copy, Debug, Clone, Deserialize, Serialize, Default, Reflect)]
+#[derive(PartialEq, Eq, Hash, Copy, Debug, Clone, Deserialize, Serialize, Default)]
+#[cfg_attr(feature = "bevy", derive(Reflect))]
 pub enum ResourceType {
     #[default]
     Tools,
@@ -25,7 +27,8 @@ impl fmt::Display for ResourceType {
     }
 }
 
-#[derive(PartialEq, Eq, Reflect, Serialize, Deserialize, Copy, Debug, Hash, Clone)]
+#[derive(PartialEq, Eq, Serialize, Deserialize, Copy, Debug, Hash, Clone)]
+#[cfg_attr(feature = "bevy", derive(Reflect))]
 pub struct CastleResource {
     pub amount: i32,
     pub production: i32,

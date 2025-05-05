@@ -1,14 +1,16 @@
 use std::fmt;
-
-use crate::data::consts::*;
 use bevy::app::{App, Plugin};
-use bevy::input::common_conditions::input_just_pressed;
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContext, EguiPlugin};
+use bevy_inspector_egui::bevy_egui::{egui, EguiContext, EguiPlugin};
 use bevy_inspector_egui::{
     bevy_inspector::hierarchy::SelectedEntities, DefaultInspectorConfigPlugin,
 };
-use iyes_perf_ui::prelude::*;
+// use iyes_perf_ui::prelude::*;
+
+// const MY_ACCENT_COLOR32: bevy_inspector_egui::bevy_egui::egui::Color32 =
+//     bevy_inspector_egui::bevy_egui::egui::Color32::from_rgb(230, 102, 1);
+const GIT_HASH: &str = env!("GIT_HASH");
+const GIT_DATE: &str = env!("GIT_DATE");
 
 #[derive(PartialEq, Eq, Default, Debug, Clone, Copy)]
 pub enum PanelDisplay {
@@ -55,60 +57,61 @@ pub struct DebugPlugin;
 
 impl Plugin for DebugPlugin {
     fn build(&self, app: &mut App) {
+        app.add_systems(Startup, configure_egui);
         app.add_systems(
             Update,
             inspector_ui, //.run_if(not(in_state(crate::states::MainState::Editor))),
         )
-        .add_systems(
-            Update,
-            (toggle_perf_ui).run_if(input_just_pressed(KeyCode::F2)),
-        )
+        // .add_systems(
+        //     Update,
+        //     (toggle_perf_ui).run_if(input_just_pressed(KeyCode::F2)),
+        // )
         .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
         .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
-        .add_plugins(PerfUiPlugin)
-        .insert_resource(bevy_mod_picking::debug::DebugPickingMode::Normal)
+        // .add_plugins(PerfUiPlugin)
+        // .insert_resource(bevy_mod_picking::debug::DebugPickingMode::Normal)
         .add_plugins((EguiPlugin, DefaultInspectorConfigPlugin));
     }
 }
-fn toggle_perf_ui(q: Query<Entity, With<PerfUiRoot>>, mut commands: Commands) {
-    let is_empty = q.is_empty();
-    if !is_empty {
-        for e in q.iter() {
-            commands.entity(e).despawn_recursive();
-        }
-        return;
-    }
-    // create a simple Perf UI with default settings
-    // and all entries provided by the crate:
-    commands.spawn((
-        PerfUiRoot::default(),
-        // when we have lots of entries, we have to group them
-        // into tuples, because of Bevy Rust syntax limitations
-        (
-            PerfUiEntryFPS::default(),
-            PerfUiEntryFPSWorst::default(),
-            PerfUiEntryFrameTime::default(),
-            PerfUiEntryFrameTimeWorst::default(),
-            PerfUiEntryFrameCount::default(),
-            PerfUiEntryEntityCount::default(),
-            PerfUiEntryCpuUsage::default(),
-            PerfUiEntryMemUsage::default(),
-        ),
-        (
-            PerfUiEntryFixedTimeStep::default(),
-            PerfUiEntryFixedOverstep::default(),
-            PerfUiEntryRunningTime::default(),
-            PerfUiEntryClock::default(),
-        ),
-        (
-            PerfUiEntryCursorPosition::default(),
-            PerfUiEntryWindowResolution::default(),
-            PerfUiEntryWindowMode::default(),
-            PerfUiEntryWindowPresentMode::default(),
-        ),
-    ));
-}
+// fn toggle_perf_ui(q: Query<Entity, With<PerfUiRoot>>, mut commands: Commands) {
+//     let is_empty = q.is_empty();
+//     if !is_empty {
+//         for e in q.iter() {
+//             commands.entity(e).despawn_recursive();
+//         }
+//         return;
+//     }
+//     // create a simple Perf UI with default settings
+//     // and all entries provided by the crate:
+//     commands.spawn((
+//         PerfUiRoot::default(),
+//         // when we have lots of entries, we have to group them
+//         // into tuples, because of Bevy Rust syntax limitations
+//         (
+//             PerfUiEntryFPS::default(),
+//             PerfUiEntryFPSWorst::default(),
+//             PerfUiEntryFrameTime::default(),
+//             PerfUiEntryFrameTimeWorst::default(),
+//             PerfUiEntryFrameCount::default(),
+//             PerfUiEntryEntityCount::default(),
+//             PerfUiEntryCpuUsage::default(),
+//             PerfUiEntryMemUsage::default(),
+//         ),
+//         (
+//             PerfUiEntryFixedTimeStep::default(),
+//             PerfUiEntryFixedOverstep::default(),
+//             PerfUiEntryRunningTime::default(),
+//             PerfUiEntryClock::default(),
+//         ),
+//         (
+//             PerfUiEntryCursorPosition::default(),
+//             PerfUiEntryWindowResolution::default(),
+//             PerfUiEntryWindowMode::default(),
+//             PerfUiEntryWindowPresentMode::default(),
+//         ),
+//     ));
+// }
 
 fn inspector_ui(
     world: &mut World,
@@ -214,4 +217,73 @@ fn inspector_ui(
                 ui.allocate_space(ui.available_size());
             });
         });
+}
+
+fn configure_egui(mut contexts: bevy_inspector_egui::bevy_egui::EguiContexts) {
+    #[cfg(any(windows, target_os = "macos"))]
+    {
+        if let Some((regular, semibold)) = get_fonts() {
+            let mut fonts = egui::FontDefinitions::default();
+            fonts.font_data.insert(
+                "regular".to_owned(),
+                egui::FontData::from_owned(regular).into(),
+            );
+            fonts.font_data.insert(
+                "semibold".to_owned(),
+                egui::FontData::from_owned(semibold).into(),
+            );
+
+            // Put my font first (highest priority) for proportional text:
+            fonts
+                .families
+                .entry(egui::FontFamily::Proportional)
+                .or_default()
+                .insert(0, "regular".to_owned());
+            fonts
+                .families
+                .entry(egui::FontFamily::Name("semibold".into()))
+                .or_default()
+                .insert(0, "semibold".to_owned());
+
+            // Put my font as last fallback for monospace:
+            fonts
+                .families
+                .entry(egui::FontFamily::Monospace)
+                .or_default()
+                .push("regular".to_owned());
+
+            // Tell egui to use these fonts:
+            contexts.ctx_mut().set_fonts(fonts);
+        }
+    }
+    contexts.ctx_mut().style_mut(|style| {
+        for font_id in style.text_styles.values_mut() {
+            font_id.size *= 1.2;
+        }
+    });
+}
+
+#[cfg(target_os = "macos")]
+fn get_fonts() -> Option<(Vec<u8>, Vec<u8>)> {
+    use std::fs;
+    let font_path = std::path::Path::new("/System/Library/Fonts");
+
+    let regular = fs::read(font_path.join("SFNSRounded.ttf")).ok()?;
+    let semibold = fs::read(font_path.join("SFCompact.ttf")).ok()?;
+
+    Some((regular, semibold))
+}
+
+#[cfg(windows)]
+fn get_fonts() -> Option<(Vec<u8>, Vec<u8>)> {
+    use std::fs;
+
+    let app_data = std::env::var("APPDATA").ok()?;
+    let font_path = std::path::Path::new(&app_data);
+
+    let regular = fs::read(font_path.join("../Local/Microsoft/Windows/Fonts/aptos.ttf")).ok()?;
+    let semibold =
+        fs::read(font_path.join("../Local/Microsoft/Windows/Fonts/aptos-bold.ttf")).ok()?;
+
+    Some((regular, semibold))
 }
