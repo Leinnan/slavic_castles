@@ -2,7 +2,6 @@ pub mod button;
 pub mod wasm_resize;
 
 use bevy::ecs::system::EntityCommands;
-use bevy::ecs::world::Command;
 use bevy::{asset::AssetPath, prelude::*};
 
 pub(super) fn plugin(app: &mut App) {
@@ -104,7 +103,7 @@ pub fn despawn_recursive_by_component<T: bevy::prelude::Component>(
     mut commands: Commands,
 ) {
     for e in q.iter() {
-        let Some(entity) = commands.get_entity(e) else {
+        let Ok(mut entity) = commands.get_entity(e) else {
             continue;
         };
         entity.despawn_recursive();

@@ -52,7 +52,7 @@ fn button_system(
     mut avatar_query: Query<&mut AvatarDisplay>,
     mut pkv: ResMut<PkvStore>,
 ) {
-    let Ok(button_type) = interaction_query.get(trigger.entity()) else {
+    let Ok(button_type) = interaction_query.get(trigger.target()) else {
         return;
     };
 
@@ -132,7 +132,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                 .spawn((
                     ImageNode {
                         image_mode: bevy::ui::widget::NodeImageMode::Sliced(TextureSlicer {
-                            border: BorderRect::square(29.0),
+                            border: BorderRect::all(29.0),
                             center_scale_mode: SliceScaleMode::Stretch,
                             sides_scale_mode: SliceScaleMode::Stretch,
                             max_corner_scale: 1.0,
@@ -256,7 +256,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                             Button,
                             ImageNode::new(asset_server.load("img/panel-006.png")).with_mode(
                                 bevy::ui::widget::NodeImageMode::Sliced(TextureSlicer {
-                                    border: BorderRect::square(29.0),
+                                    border: BorderRect::all(29.0),
                                     center_scale_mode: SliceScaleMode::Stretch,
                                     sides_scale_mode: SliceScaleMode::Stretch,
                                     max_corner_scale: 1.0,

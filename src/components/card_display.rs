@@ -27,7 +27,7 @@ pub struct CardPlace(pub usize);
 pub struct CardNumber(pub usize);
 
 #[derive(Component, Reflect, Default, Clone, Copy)]
-#[require(GameObject, StateScoped<GameTurnSteps>(|| StateScoped(GameTurnSteps::PerformAction)), ActionToPerform)]
+#[require(GameObject, ActionToPerform, StateScoped::<GameTurnSteps>(GameTurnSteps::PerformAction))]
 pub struct DraggableCard {
     pub can_afford: bool,
 }
@@ -88,7 +88,7 @@ impl Plugin for CardPlugin {
 }
 
 fn drag(trigger: Trigger<Pointer<Drag>>, mut drag: Query<&mut Transform, With<DraggableCard>>) {
-    let Ok(mut transform) = drag.get_mut(trigger.entity()) else {
+    let Ok(mut transform) = drag.get_mut(trigger.target()) else {
         return;
     };
     let drag = trigger.event();
@@ -103,7 +103,7 @@ fn drag(trigger: Trigger<Pointer<Drag>>, mut drag: Query<&mut Transform, With<Dr
 }
 
 fn add_card_places(windows: Query<&Window>, mut commands: Commands) {
-    let window = windows.single();
+    let window = windows.single().expect("");
     let y_pos = -window.height() + inline_tweak::tweak!(-350.0);
     let min = inline_tweak::tweak!(0.5);
     let max = inline_tweak::tweak!(-0.5);
@@ -164,7 +164,7 @@ fn on_drag_over_card(
     q: Query<&CardDropZone>,
     mut qq: Query<(&mut ActionToPerform, &DraggableCard)>,
 ) {
-    let Ok(zone_type) = q.get(trigger.entity()) else {
+    let Ok(zone_type) = q.get(trigger.target()) else {
         return;
     };
     info!("{zone_type:?}");
@@ -186,7 +186,7 @@ fn on_drag_leave_card(
     q: Query<&CardDropZone>,
     mut commands: Commands,
 ) {
-    let Ok(zone_type) = q.get(trigger.entity()) else {
+    let Ok(zone_type) = q.get(trigger.target()) else {
         return;
     };
     info!("Leave {zone_type:?}");
@@ -204,7 +204,7 @@ fn add_cards(
     let Ok((deck, res)) = deck_q.get_single() else {
         return;
     };
-    let window = windows.single();
+    let window = windows.single().expect("NO WINDOW");
     let y_pos = -window.height() + inline_tweak::tweak!(-450.0);
 
     for (i, c) in deck.cards.iter().enumerate() {
@@ -226,7 +226,7 @@ fn add_cards(
             DraggableCard {
                 can_afford: res.can_afford_card(c),
             },
-            PickingBehavior {
+            Pickable {
                 is_hoverable: true,
                 should_block_lower: true,
             },
@@ -245,10 +245,10 @@ fn start_drag(
         s.display = Display::None;
     }
     commands
-        .entity(trigger.entity())
+        .entity(trigger.target())
         .insert(ActionToPerform::Nothing)
         .insert(CurrentlyDragged)
-        .insert(PickingBehavior {
+        .insert(Pickable {
             is_hoverable: true,
             should_block_lower: false,
         });
@@ -291,13 +291,13 @@ fn end_drag(
     mut commands: Commands,
     q: Query<Entity, With<CurrentActorToken>>,
 ) {
-    let Ok((card_display, action)) = cards_q.get(trigger.entity()) else {
+    let Ok((card_display, action)) = cards_q.get(trigger.target()) else {
         return;
     };
     commands
-        .entity(trigger.entity())
+        .entity(trigger.target())
         .remove::<CurrentlyDragged>()
-        .insert(PickingBehavior {
+        .insert(Pickable {
             is_hoverable: true,
             should_block_lower: true,
         });

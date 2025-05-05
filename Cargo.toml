@@ -21,7 +21,7 @@ opt-level = 1
 opt-level = 2
 
 [workspace.dependencies]
-bevy = {version = "0.15"}
+bevy = {version = "0.16"}
 serde = { version =  "1", features = ["derive"] }
 serde_json = "1"
 
@@ -32,17 +32,16 @@ bevy = {workspace = true, default-features = true}
 serde = {workspace = true}
 serde_json = {workspace = true}
 inline_tweak = "1"
-bevy_tweening = "0.12"
-bevy_pkv = "0.12"
+bevy_tweening = "0.13"
+bevy_pkv = "0.13"
 rand = "0.8"
-bevy_asset_loader = "0.22"
+bevy_asset_loader = "0.23.0-rc.3"
 webbrowser = "1"
-#bevy_ecss = {git = "https://github.com/afonsolage/bevy_ecss.git", rev = "ea1ef7bd5eab5fff289c7426018ecc8ab5669823"}
-bevy_common_assets = { version = "0.12", features = ["json"] }
-bevy_simple_text_input = "0.10"
+bevy_common_assets = { version = "0.13", features = ["json"] }
+bevy_simple_text_input = "0.11"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-bevy-inspector-egui = "0.29"
+bevy-inspector-egui = "0.31"
 #iyes_perf_ui = "0.2"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]

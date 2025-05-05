@@ -173,7 +173,7 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                     .spawn((
                         ImageNode {
                             image_mode: NodeImageMode::Sliced(TextureSlicer {
-                                border: BorderRect::square(29.0),
+                                border: BorderRect::all(29.0),
                                 center_scale_mode: SliceScaleMode::Stretch,
                                 sides_scale_mode: SliceScaleMode::Stretch,
                                 max_corner_scale: 1.0,

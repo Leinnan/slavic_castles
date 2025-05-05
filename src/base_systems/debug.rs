@@ -66,12 +66,12 @@ impl Plugin for DebugPlugin {
         //     Update,
         //     (toggle_perf_ui).run_if(input_just_pressed(KeyCode::F2)),
         // )
-        .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
-        .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
-        .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
+        // .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
+        // .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
+        // .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
         // .add_plugins(PerfUiPlugin)
         // .insert_resource(bevy_mod_picking::debug::DebugPickingMode::Normal)
-        .add_plugins((EguiPlugin, DefaultInspectorConfigPlugin));
+        .add_plugins((EguiPlugin{enable_multipass_for_primary_context: true}, DefaultInspectorConfigPlugin));
     }
 }
 // fn toggle_perf_ui(q: Query<Entity, With<PerfUiRoot>>, mut commands: Commands) {

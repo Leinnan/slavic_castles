@@ -43,7 +43,7 @@ pub struct SelectedCard {
 }
 
 #[derive(Component, Debug, Default, Copy, Clone, Reflect)]
-#[require(StateScoped<GameState>(|| StateScoped(GameState::Game)))]
+#[require(StateScoped::<GameState>(GameState::Game))]
 pub struct GameObject;
 
 #[derive(serde::Deserialize, bevy::asset::Asset, Deref, DerefMut, Reflect)]
@@ -228,7 +228,7 @@ pub fn switch_player(
     mut q: Query<(&Name, &mut PlayerSupply), With<CurrentActorToken>>,
     mut timer: ResMut<TimeSinceTurnStarted>,
 ) {
-    let (player, mut resources) = q.single_mut();
+    let Ok((player, mut resources)) = q.single_mut() else {return;};
     info!("Switch player: {}", player);
     resources.update_resources();
     timer.0.reset();
@@ -251,7 +251,7 @@ fn update_deck_visibility(
         return;
     };
     if cur_player_human.is_none() && *state == GameTurnSteps::ActionSelection {
-        if let Some(mut cmd_e) = commands.get_entity(e) {
+        if let Ok(mut cmd_e) = commands.get_entity(e) {
             selected_card.data = None;
             selected_card.display_entity = None;
             cmd_e.insert(Visibility::Hidden);
@@ -339,7 +339,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         Transform::from_xyz(0.0, 0.0, -1.0),
         Sprite::from_image(asset_server.load("img/ingame_bg.png")),
-        PickingBehavior::IGNORE,
+        Pickable::IGNORE,
         BackgroundSprite,
         GameObject,
         Name::new("BG"),
