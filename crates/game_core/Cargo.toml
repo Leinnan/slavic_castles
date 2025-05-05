@@ -1,0 +1,13 @@
+[package]
+name = "game_core"
+repository = "https://github.com/Leinnan/slavic_castles"
+homepage = "https://github.com/Leinnan/slavic_castles"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+bevy = ["dep:bevy"]
+
+[dependencies]
+bevy = {workspace = true, default-features = true, optional = true}
+serde = {workspace = true}

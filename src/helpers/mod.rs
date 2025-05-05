@@ -1,8 +1,13 @@
-use bevy::{
-    asset::AssetPath,
-    ecs::system::{Command, EntityCommands},
-    prelude::*,
-};
+pub mod button;
+pub mod wasm_resize;
+
+use bevy::ecs::system::EntityCommands;
+use bevy::ecs::world::Command;
+use bevy::{asset::AssetPath, prelude::*};
+
+pub(super) fn plugin(app: &mut App) {
+    app.add_plugins(button::plugin);
+}
 
 /// Command for playing a standard bevy audio asset
 pub struct AudioSpawnCommand<'a> {
@@ -18,20 +23,15 @@ impl Command for AudioSpawnCommand<'static> {
     fn apply(self, world: &mut World) {
         let asset = world.get_resource::<AssetServer>().unwrap();
         let source = asset.load(&self.path);
+        let bundle = (self.settings, AudioPlayer::new(source));
         match self.entity {
             Some(e) => {
-                if let Some(mut entity) = world.get_entity_mut(e) {
-                    entity.insert(AudioBundle {
-                        source,
-                        settings: self.settings,
-                    });
+                if let Ok(mut entity) = world.get_entity_mut(e) {
+                    entity.insert(bundle);
                 }
             }
             None => {
-                world.spawn(AudioBundle {
-                    source,
-                    settings: self.settings,
-                });
+                world.spawn(bundle);
             }
         }
     }
@@ -54,9 +54,9 @@ pub trait AudioSpawnCommandExt {
     );
 }
 
-impl<'w, 's> AudioSpawnCommandExt for Commands<'w, 's> {
+impl AudioSpawnCommandExt for Commands<'_, '_> {
     fn play_sound(&mut self, path: impl Into<AssetPath<'static>>) {
-        self.add(AudioSpawnCommand {
+        self.queue(AudioSpawnCommand {
             path: path.into(),
             settings: Default::default(),
             entity: None,
@@ -67,7 +67,7 @@ impl<'w, 's> AudioSpawnCommandExt for Commands<'w, 's> {
         path: impl Into<AssetPath<'static>>,
         settings: PlaybackSettings,
     ) {
-        self.add(AudioSpawnCommand {
+        self.queue(AudioSpawnCommand {
             path: path.into().clone(),
             settings,
             entity: None,
@@ -78,7 +78,7 @@ impl<'w, 's> AudioSpawnCommandExt for Commands<'w, 's> {
 impl AudioSpawnCommandExt for EntityCommands<'_> {
     fn play_sound(&mut self, path: impl Into<AssetPath<'static>>) {
         let entity = Some(self.id());
-        self.commands().add(AudioSpawnCommand {
+        self.commands().queue(AudioSpawnCommand {
             path: path.into(),
             settings: Default::default(),
             entity,
@@ -91,7 +91,7 @@ impl AudioSpawnCommandExt for EntityCommands<'_> {
         settings: PlaybackSettings,
     ) {
         let entity = Some(self.id());
-        self.commands().add(AudioSpawnCommand {
+        self.commands().queue(AudioSpawnCommand {
             path: path.into().clone(),
             settings,
             entity,
@@ -109,8 +109,4 @@ pub fn despawn_recursive_by_component<T: bevy::prelude::Component>(
         };
         entity.despawn_recursive();
     }
-}
-
-pub fn remove_resource_by_type<T: bevy::prelude::Resource>(mut commands: Commands) {
-    commands.remove_resource::<T>();
 }

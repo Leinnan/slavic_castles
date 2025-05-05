@@ -1,19 +1,21 @@
+#[cfg(feature = "bevy")]
 use bevy::{prelude::Component, reflect::Reflect};
 use serde::{Deserialize, Serialize};
 
-use super::{
+use crate::data::{
     card::Card,
     resource::{CastleResource, ResourceType},
 };
 
-#[derive(Component, Default, Reflect, Serialize, Deserialize)]
-pub struct PlayerResources {
+#[derive(Default, Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "bevy", derive(Component, Reflect))]
+pub struct PlayerSupply {
     pub tools: CastleResource,
     pub magic: CastleResource,
     pub soldiers: CastleResource,
 }
 
-impl PlayerResources {
+impl PlayerSupply {
     /// Call the produce method on each resource type
     pub fn update_resources(&mut self) {
         self.tools.produce();

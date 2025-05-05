@@ -9,30 +9,31 @@ pub struct Profile {
 }
 
 impl Profile {
-    pub fn get_avatar_path(self) -> String {
-        get_avatar_path(self.avatar_id)
+    pub fn get_avatar_path(&self) -> String {
+        Self::format_avatar_path(self.avatar_id)
     }
 
     pub fn save_profile(self, pkv: &mut PkvStore) {
         pkv.set("profile_info", &self)
             .expect("Failed to store profile");
     }
-}
 
-pub fn get_profile(pkv: &PkvStore) -> Option<Profile> {
-    if let Ok(profile) = pkv.get::<Profile>("profile_info") {
-        Some(profile)
-    } else {
-        None
+    pub fn format_avatar_path(id: i32) -> String {
+        format!("avatars/{}.png", id)
     }
 }
 
-pub fn has_profile(pkv: &PkvStore) -> bool {
-    get_profile(pkv).is_some()
+pub trait ProfileProvider {
+    fn get_profile(&self) -> Option<Profile>;
+    fn has_profile(&self) -> bool {
+        self.get_profile().is_some()
+    }
 }
 
-pub fn get_avatar_path(id: i32) -> String {
-    format!("avatars/{}.png", id)
+impl ProfileProvider for PkvStore {
+    fn get_profile(&self) -> Option<Profile> {
+        self.get::<Profile>("profile_info").ok()
+    }
 }
 
 impl Default for Profile {

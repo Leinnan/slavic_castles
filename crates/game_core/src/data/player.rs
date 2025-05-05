@@ -1,15 +1,16 @@
+#[cfg(feature = "bevy")]
 use bevy::{prelude::Component, reflect::Reflect};
+use crate::consts;
 use serde::{Deserialize, Serialize};
 
-use super::consts;
-
-#[derive(Component, Copy, Debug, Clone, Serialize, Deserialize, Reflect)]
-pub struct Player {
+#[derive(Copy, Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "bevy", derive(Component, Reflect))]
+pub struct PlayerHealth {
     pub tower_hp: i32,
     pub walls_hp: i32,
 }
 
-impl Default for Player {
+impl Default for PlayerHealth {
     fn default() -> Self {
         Self {
             tower_hp: consts::BASE_TOWER_HP,
@@ -18,7 +19,7 @@ impl Default for Player {
     }
 }
 
-impl Player {
+impl PlayerHealth {
     pub fn is_alive(&self) -> bool {
         self.tower_hp > 0
     }

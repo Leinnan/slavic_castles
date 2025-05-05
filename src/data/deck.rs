@@ -5,11 +5,10 @@ use serde::{Deserialize, Serialize};
 
 use std::str;
 
-use super::card::Card;
-use super::consts::BASE_RESOURCE_AMOUNT;
-use super::consts::CARDS_IN_DECK;
-
-use crate::PlayerResources;
+use game_core::consts::BASE_RESOURCE_AMOUNT;
+use game_core::consts::CARDS_IN_DECK;
+use game_core::data::card::Card;
+use game_core::data::supply::PlayerSupply;
 
 #[derive(Serialize, Deserialize, Reflect, Component)]
 pub struct HandCards {
@@ -22,7 +21,7 @@ pub struct HandCards {
 pub struct DeckAsset(pub Vec<Card>);
 
 impl HandCards {
-    pub fn replace_card(&mut self, card_nr: usize, resources: &PlayerResources, deck: &[Card]) {
+    pub fn replace_card(&mut self, card_nr: usize, resources: &PlayerSupply, deck: &[Card]) {
         let mut rng = thread_rng();
         let mut finded = false;
 
