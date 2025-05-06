@@ -187,8 +187,9 @@ fn on_drag_leave_card(
 ) -> Result {
     let zone_type = q.get(trigger.target())?;
     info!("Leave {zone_type:?}");
-    let mut action = qq.get_mut(trigger.dragged)?;
-    let _ = action.set_if_neq(ActionToPerform::Nothing);
+    if let Ok(mut action) = qq.get_mut(trigger.dragged) {
+        let _ = action.set_if_neq(ActionToPerform::Nothing);
+    }
     Ok(())
 }
 

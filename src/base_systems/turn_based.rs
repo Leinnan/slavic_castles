@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use crate::states::game_states::GameState;
 
 #[derive(Default, Debug, Reflect, Component)]
 pub struct CurrentActorToken;
@@ -6,7 +7,8 @@ pub struct CurrentActorToken;
 #[derive(Deref, DerefMut, Component, Default, Reflect)]
 pub struct ActorTurn(pub usize);
 
-#[derive(Debug, Hash, PartialEq, Eq, Default, Clone, States)]
+#[derive(Debug, Hash, PartialEq, Eq, Default, Clone, SubStates)]
+#[source(GameState = GameState::Game)]
 pub enum GameTurnSteps {
     #[default]
     SearchForAgents,
@@ -15,13 +17,17 @@ pub enum GameTurnSteps {
 }
 
 pub fn register_system(app: &mut App) {
+
     app.register_type::<ActorTurn>()
         .register_type::<CurrentActorToken>()
-        .init_state::<GameTurnSteps>()
+        .add_sub_state::<GameTurnSteps>()
         .add_systems(OnExit(GameTurnSteps::PerformAction), remove_token)
         .add_systems(
             Update,
-            search_for_actors.run_if(in_state(GameTurnSteps::SearchForAgents)),
+            search_for_actors.run_if(
+                in_state(GameTurnSteps::SearchForAgents)
+                    .and(not(crate::states::game::game_ended_condition)),
+            ),
         );
 }
 

@@ -67,6 +67,7 @@ pub enum ActionTaken {
 pub struct TimeSinceTurnStarted(pub Stopwatch);
 
 #[derive(Component, Debug, Default, Reflect)]
+#[require(GameObject)]
 struct ExitGameTimer(pub Timer);
 
 #[derive(Resource, Debug, Default, Reflect, Deref)]
@@ -167,10 +168,13 @@ impl Plugin for GamePlugin {
                 (
                     // update_ui,
                     update_deck_visibility,
-                    update_timers,
                     card_sounds,
                 )
                     .run_if(in_state(GameState::Game)),
+            )
+            .add_systems(
+                Update,
+                (update_timers).run_if(in_state(GameState::Game).and(game_ended_condition)),
             )
             .init_resource::<SelectedCard>()
             .init_resource::<TimeSinceTurnStarted>()
@@ -190,10 +194,8 @@ impl Plugin for GamePlugin {
     }
 }
 
-fn end_game(query: Query<&PlayerHealth, With<HumanPlayer>>, mut commands: Commands) {
-    let Ok(player) = query.single() else {
-        panic!("SDD");
-    };
+fn end_game(query: Query<&PlayerHealth, With<HumanPlayer>>, mut commands: Commands) -> Result {
+    let player = query.single()?;
     let player_won = player.has_max_possible_tower() || player.is_alive();
     info!("PLAYER WON? {}", player_won);
     let sound = if player_won {
@@ -206,6 +208,7 @@ fn end_game(query: Query<&PlayerHealth, With<HumanPlayer>>, mut commands: Comman
         .insert(GameObject)
         .insert(Name::new("GAME END TIMER"));
     commands.play_sound(sound);
+    Ok(())
 }
 
 fn update_timers(
@@ -218,8 +221,10 @@ fn update_timers(
     for mut t in exit_game_timer.iter_mut() {
         t.0.tick(time.delta());
         if t.0.finished() {
+            info!("Timer finished, going back to menu");
             next_state.set(GameState::Menu);
-            return;
+            t.0.reset();
+            continue;
         }
     }
 }
@@ -477,7 +482,7 @@ pub fn perform_action(
     next_state.set(GameTurnSteps::SearchForAgents);
 }
 
-fn game_ended_condition(query: Query<&PlayerHealth>) -> bool {
+pub fn game_ended_condition(query: Query<&PlayerHealth>) -> bool {
     for player in &query {
         if !player.is_alive() || player.has_max_possible_tower() {
             return true;

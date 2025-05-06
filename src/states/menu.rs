@@ -29,17 +29,13 @@ fn check_for_profile(
     deck: Res<Assets<DeckAsset>>,
     names: Res<Assets<NamesAsset>>,
     mut commands: Commands,
-) {
+) -> Result {
     let Some(profile) = pkv.get_profile() else {
         next_state.set(GameState::ProfileEdit);
-        return;
+        return Ok(());
     };
-    let Some(deck_asset) = deck.iter().next() else {
-        panic!("NO DECK ASSET");
-    };
-    let Some(name_asset) = names.iter().next() else {
-        panic!("NO NAMES ASSET");
-    };
+    let deck_asset = deck.iter().next().ok_or("Missing deck asset")?;
+    let name_asset = names.iter().next().ok_or("Missing names asset")?;
     commands.insert_resource(PlayerInformation {
         name: profile.name.clone(),
         avatar_id: profile.avatar_id,
@@ -54,6 +50,7 @@ fn check_for_profile(
         avatar_id,
         ..Default::default()
     }));
+    Ok(())
 }
 
 fn start_game(_: Trigger<ButtonReleased>, mut next_state: ResMut<NextState<GameState>>) {
