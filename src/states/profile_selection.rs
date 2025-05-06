@@ -52,7 +52,7 @@ fn button_system(
     mut avatar_query: Query<&mut AvatarDisplay>,
     mut pkv: ResMut<PkvStore>,
 ) {
-    let Ok(button_type) = interaction_query.get(trigger.entity()) else {
+    let Ok(button_type) = interaction_query.get(trigger.target()) else {
         return;
     };
 
@@ -76,10 +76,10 @@ fn button_system(
             }
         }
         ProfileEditButton::Save => {
-            let Ok(avatar) = avatar_query.get_single() else {
+            let Ok(avatar) = avatar_query.single() else {
                 return;
             };
-            let Ok(profile_name) = changed_value.get_single() else {
+            let Ok(profile_name) = changed_value.single() else {
                 return;
             };
             let mut profile = pkv.as_ref().get_profile().unwrap_or_default();
@@ -119,12 +119,12 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
             parent.spawn((
                 ImageNode::new(asset_server.load("img/start_screen_bg.png")),
                 ZIndex(-1),
-                Node{
+                Node {
                     position_type: PositionType::Absolute,
                     top: Val::Px(0.0),
                     width: Val::Vw(100.0),
                     ..default()
-                }
+                },
             ));
             // .insert(Class::new("menu_background"));
 
@@ -132,7 +132,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                 .spawn((
                     ImageNode {
                         image_mode: bevy::ui::widget::NodeImageMode::Sliced(TextureSlicer {
-                            border: BorderRect::square(29.0),
+                            border: BorderRect::all(29.0),
                             center_scale_mode: SliceScaleMode::Stretch,
                             sides_scale_mode: SliceScaleMode::Stretch,
                             max_corner_scale: 1.0,
@@ -141,7 +141,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                         color: Color::srgb_u8(110, 116, 77),
                         ..default()
                     },
-                    Node{
+                    Node {
                         padding: UiRect::all(Val::Px(20.0)),
                         flex_direction: FlexDirection::Column,
                         row_gap: Val::Px(10.0),
@@ -200,17 +200,29 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                             Name::new("avatar"),
                             Animator::new(tween_scale),
                             AvatarDisplay { id: avatar_id },
-                            Node{
+                            Node {
                                 width: Val::Px(100.0),
                                 height: Val::Px(100.0),
                                 margin: UiRect::axes(Val::Auto, Val::Px(5.0)),
                                 ..default()
-                            }
+                            },
                         ))
                         .with_children(|av_root| {
                             for (text, class, label, left, right) in [
-                                (">", "next", ProfileEditButton::NextAvatar, Val::Auto, Val::Px(0.0)),
-                                ("<", "previous", ProfileEditButton::PreviousAvatar, Val::Px(0.0), Val::Auto),
+                                (
+                                    ">",
+                                    "next",
+                                    ProfileEditButton::NextAvatar,
+                                    Val::Auto,
+                                    Val::Px(0.0),
+                                ),
+                                (
+                                    "<",
+                                    "previous",
+                                    ProfileEditButton::PreviousAvatar,
+                                    Val::Px(0.0),
+                                    Val::Auto,
+                                ),
                             ] {
                                 av_root
                                     .spawn((
@@ -254,14 +266,14 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                     parent
                         .spawn((
                             Button,
-                            ImageNode::new(asset_server.load("img/panel-006.png")).with_mode(
-                                bevy::ui::widget::NodeImageMode::Sliced(TextureSlicer {
-                                    border: BorderRect::square(29.0),
+                            ImageNode::new(asset_server.load("img/panel-006.png"))
+                                .with_mode(bevy::ui::widget::NodeImageMode::Sliced(TextureSlicer {
+                                    border: BorderRect::all(29.0),
                                     center_scale_mode: SliceScaleMode::Stretch,
                                     sides_scale_mode: SliceScaleMode::Stretch,
                                     max_corner_scale: 1.0,
-                                }),
-                            ).with_color(Srgba::hex("7A444A").unwrap().into()),
+                                }))
+                                .with_color(Srgba::hex("7A444A").unwrap().into()),
                             Node {
                                 align_items: AlignItems::Center,
                                 justify_content: JustifyContent::Center,

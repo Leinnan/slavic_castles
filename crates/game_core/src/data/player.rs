@@ -1,6 +1,6 @@
+use crate::consts;
 #[cfg(feature = "bevy")]
 use bevy::{prelude::Component, reflect::Reflect};
-use crate::consts;
 use serde::{Deserialize, Serialize};
 
 #[derive(Copy, Debug, Clone, Serialize, Deserialize)]

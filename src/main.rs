@@ -1,3 +1,4 @@
+use bevy::ecs::error::{warn, GLOBAL_ERROR_HANDLER};
 use bevy::prelude::*;
 use bevy_common_assets::json::JsonAssetPlugin;
 // use bevy_ecss::prelude::*;
@@ -15,6 +16,9 @@ const NAME: &str = env!("CARGO_PKG_NAME");
 
 #[bevy_main]
 pub fn main() {
+    GLOBAL_ERROR_HANDLER
+        .set(warn)
+        .expect("The error handler can only be set once, globally.");
     #[cfg(target_arch = "wasm32")]
     console_error_panic_hook::set_once();
 
@@ -37,7 +41,7 @@ pub fn main() {
     app.add_plugins(helpers::plugin)
         .add_plugins(JsonAssetPlugin::<DeckAsset>::new(&["deck.json"]))
         .add_plugins(JsonAssetPlugin::<NamesAsset>::new(&["names.json"]))
-        .add_plugins(crate::base_systems::turn_based::register_system)
+        .add_plugins(base_systems::turn_based::register_system)
         .add_plugins(components::player_ui::PlayerUiPlugin)
         .init_state::<states::game_states::GameState>()
         .add_plugins(helpers::wasm_resize::WindowResizePlugin)

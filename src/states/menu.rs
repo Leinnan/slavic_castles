@@ -8,13 +8,9 @@ use crate::helpers::button::ButtonReleased;
 use crate::states::consts::*;
 use bevy::prelude::*;
 use bevy::ui::widget::NodeImageMode;
-// use bevy_ecss::prelude::{Class, StyleSheet};
 use bevy_pkv::PkvStore;
 use bevy_tweening::{lens::TransformScaleLens, Animator, Delay, Tween};
 use rand::{thread_rng, Rng};
-
-use super::consts;
-
 
 pub struct MenuPlugin;
 
@@ -33,17 +29,14 @@ fn check_for_profile(
     deck: Res<Assets<DeckAsset>>,
     names: Res<Assets<NamesAsset>>,
     mut commands: Commands,
-) {
+) -> Result {
+    error!("CHECK FOR PROFILE");
     let Some(profile) = pkv.get_profile() else {
         next_state.set(GameState::ProfileEdit);
-        return;
+        return Ok(());
     };
-    let Some(deck_asset) = deck.iter().next() else {
-        panic!("NO DECK ASSET");
-    };
-    let Some(name_asset) = names.iter().next() else {
-        panic!("NO NAMES ASSET");
-    };
+    let deck_asset = deck.iter().next().ok_or("Missing deck asset")?;
+    let name_asset = names.iter().next().ok_or("Missing names asset")?;
     commands.insert_resource(PlayerInformation {
         name: profile.name.clone(),
         avatar_id: profile.avatar_id,
@@ -58,6 +51,8 @@ fn check_for_profile(
         avatar_id,
         ..Default::default()
     }));
+    error!("CHECK FOR PROFILE HANDLED");
+    Ok(())
 }
 
 fn start_game(_: Trigger<ButtonReleased>, mut next_state: ResMut<NextState<GameState>>) {
@@ -73,11 +68,13 @@ fn open_repo(_: Trigger<ButtonReleased>) {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn exit_game(_: Trigger<ButtonReleased>, mut exit: EventWriter<bevy::app::AppExit>) {
-    exit.send(bevy::app::AppExit::Success);
+fn exit_game(_: Trigger<ButtonReleased>, mut exit: EventWriter<AppExit>) {
+    error!("EXIT GAME PRESSED");
+    exit.write(AppExit::Success);
 }
 
 fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
+    error!("SETUP MENU");
     commands
         .spawn(super::root_node())
         .insert(StateScoped(GameState::Menu))
@@ -86,13 +83,16 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
         .with_children(|parent| {
             let init_scale = Vec3::splat(0.01);
             let bg = ImageNode::new(asset_server.load("img/start_screen_bg.png"));
-            parent.spawn((bg, ZIndex(-1),
-                         Node{
-                             position_type: PositionType::Absolute,
-                             top: Val::Px(0.0),
-                             width: Val::Vw(100.0),
-                             ..default()
-                         }));
+            parent.spawn((
+                bg,
+                ZIndex(-1),
+                Node {
+                    position_type: PositionType::Absolute,
+                    top: Val::Px(0.0),
+                    width: Val::Vw(100.0),
+                    ..default()
+                },
+            ));
             // .insert(Class::new("menu_background"));
             parent.spawn((
                 ImageNode::new(asset_server.load("img/logo.png")),
@@ -116,7 +116,7 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             // .insert(Class::new("logo"));
 
             let img_style = TextFont {
-                font: asset_server.load(consts::LABEL_FONT),
+                font: asset_server.load(LABEL_FONT),
                 font_size: 30.0,
                 ..default()
             };
@@ -173,7 +173,7 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                     .spawn((
                         ImageNode {
                             image_mode: NodeImageMode::Sliced(TextureSlicer {
-                                border: BorderRect::square(29.0),
+                                border: BorderRect::all(29.0),
                                 center_scale_mode: SliceScaleMode::Stretch,
                                 sides_scale_mode: SliceScaleMode::Stretch,
                                 max_corner_scale: 1.0,
@@ -206,7 +206,9 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                     })
                     .id();
                 let ob = observer.with_entity(id);
-                parent.spawn(ob).set_parent(id);
+                parent
+                    .spawn((ob, Name::new("Button observer")))
+                    .insert(ChildOf(id));
             }
             let id = parent
                 .spawn((
@@ -232,8 +234,10 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                     Button,
                 ))
                 .id();
-            parent
-                .spawn(Observer::new(open_repo).with_entity(id))
-                .set_parent(id);
+            parent.spawn((
+                Observer::new(open_repo).with_entity(id),
+                Name::new("OpenRepoObserver"),
+            ));
         });
+    error!("SETUP MENU END");
 }

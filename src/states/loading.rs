@@ -73,15 +73,14 @@ pub struct BaseAssets {
 
 pub struct LoadingPlugin;
 
-
 impl Plugin for LoadingPlugin {
     fn build(&self, app: &mut App) {
         app.add_loading_state(
-                LoadingState::new(GameState::AssetsLoading)
-                    .continue_to_state(GameState::Menu)
-                    .load_collection::<BaseAssets>(),
-            )
-            .add_systems(OnEnter(GameState::AssetsLoading), setup_ui);
+            LoadingState::new(GameState::AssetsLoading)
+                .continue_to_state(GameState::Menu)
+                .load_collection::<BaseAssets>(),
+        )
+        .add_systems(OnEnter(GameState::AssetsLoading), setup_ui);
         //            .add_system(update_progress.in_set(OnUpdate(GameState::AssetsLoading)));
     }
 }

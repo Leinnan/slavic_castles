@@ -1,8 +1,11 @@
+use super::consts;
 use super::game_states::GameState;
 use crate::base_systems::turn_based::{ActorTurn, CurrentActorToken, GameTurnSteps};
+use crate::components::ObserverExtension;
 use crate::data::deck::{DeckAsset, HandCards};
 use crate::data::profile::Profile;
 use crate::helpers::AudioSpawnCommandExt;
+use crate::visual::BackgroundSprite;
 use bevy::ecs::query::{QueryData, QueryFilter};
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
@@ -12,8 +15,6 @@ use game_core::data::player::PlayerHealth;
 use game_core::data::supply::PlayerSupply;
 use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
-use crate::visual::BackgroundSprite;
-use super::consts;
 
 #[derive(
     Component, Serialize, Deserialize, PartialEq, Eq, Hash, Copy, Debug, Clone, Reflect, Default,
@@ -30,7 +31,7 @@ pub struct HumanPlayer;
 pub struct GamePlugin;
 
 #[derive(Component)]
-#[require(GameObject)]
+#[require(GameObject, Name = Name::new("Help display"))]
 pub struct HelpDisplay;
 
 #[derive(Component)]
@@ -43,7 +44,7 @@ pub struct SelectedCard {
 }
 
 #[derive(Component, Debug, Default, Copy, Clone, Reflect)]
-#[require(StateScoped<GameState>(|| StateScoped(GameState::Game)))]
+#[require(StateScoped::<GameState>(GameState::Game))]
 pub struct GameObject;
 
 #[derive(serde::Deserialize, bevy::asset::Asset, Deref, DerefMut, Reflect)]
@@ -67,6 +68,7 @@ pub enum ActionTaken {
 pub struct TimeSinceTurnStarted(pub Stopwatch);
 
 #[derive(Component, Debug, Default, Reflect)]
+#[require(GameObject)]
 struct ExitGameTimer(pub Timer);
 
 #[derive(Resource, Debug, Default, Reflect, Deref)]
@@ -141,6 +143,7 @@ impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.enable_state_scoped_entities::<GameState>()
             .enable_state_scoped_entities::<GameTurnSteps>()
+            .add_systems(OnExit(GameState::Game), exit_game_state)
             .add_systems(
                 OnEnter(GameState::Game),
                 (setup_music, init_players, setup_ui).chain(),
@@ -166,12 +169,12 @@ impl Plugin for GamePlugin {
                 Update,
                 (
                     // update_ui,
-                    update_deck_visibility,
-                    update_timers,
+                    // update_deck_visibility,
                     card_sounds,
                 )
                     .run_if(in_state(GameState::Game)),
             )
+            .add_systems(Update, update_timers.run_if(in_state(GameState::Game)))
             .init_resource::<SelectedCard>()
             .init_resource::<TimeSinceTurnStarted>()
             .register_type::<GameObject>()
@@ -190,10 +193,12 @@ impl Plugin for GamePlugin {
     }
 }
 
-fn end_game(query: Query<&PlayerHealth, With<HumanPlayer>>, mut commands: Commands) {
-    let Ok(player) = query.get_single() else {
-        panic!("SDD");
-    };
+fn exit_game_state(s: Option<Res<State<GameTurnSteps>>>) {
+    error!("EXITING GAME STATE: {:#?}", s);
+}
+
+fn end_game(query: Query<&PlayerHealth, With<HumanPlayer>>, mut commands: Commands) -> Result {
+    let player = query.single()?;
     let player_won = player.has_max_possible_tower() || player.is_alive();
     info!("PLAYER WON? {}", player_won);
     let sound = if player_won {
@@ -206,6 +211,7 @@ fn end_game(query: Query<&PlayerHealth, With<HumanPlayer>>, mut commands: Comman
         .insert(GameObject)
         .insert(Name::new("GAME END TIMER"));
     commands.play_sound(sound);
+    Ok(())
 }
 
 fn update_timers(
@@ -218,8 +224,10 @@ fn update_timers(
     for mut t in exit_game_timer.iter_mut() {
         t.0.tick(time.delta());
         if t.0.finished() {
+            info!("Timer finished, going back to menu");
             next_state.set(GameState::Menu);
-            return;
+            t.0.reset();
+            continue;
         }
     }
 }
@@ -228,61 +236,35 @@ pub fn switch_player(
     mut q: Query<(&Name, &mut PlayerSupply), With<CurrentActorToken>>,
     mut timer: ResMut<TimeSinceTurnStarted>,
 ) {
-    let (player, mut resources) = q.single_mut();
+    let Ok((player, mut resources)) = q.single_mut() else {
+        return;
+    };
     info!("Switch player: {}", player);
     resources.update_resources();
     timer.0.reset();
 }
 
-fn update_deck_visibility(
-    q: Query<Entity, With<DeckNode>>,
-    mut commands: Commands,
-    cur_player_q: Query<Option<&HumanPlayer>, With<CurrentActorToken>>,
-    state: Res<State<GameTurnSteps>>,
-    mut selected_card: ResMut<SelectedCard>,
-) {
-    if !state.is_changed() {
-        return;
-    }
-    let Ok(cur_player_human) = cur_player_q.get_single() else {
-        return;
-    };
-    let Ok(e) = q.get_single() else {
-        return;
-    };
-    if cur_player_human.is_none() && *state == GameTurnSteps::ActionSelection {
-        if let Some(mut cmd_e) = commands.get_entity(e) {
-            selected_card.data = None;
-            selected_card.display_entity = None;
-            cmd_e.insert(Visibility::Hidden);
-            // cmd_e.despawn_recursive();
-        }
-    }
-}
-
-// fn update_ui(
-//     player_query: Query<(&Player, &PlayerNumber, &PlayerResources, &Name)>,
-//     mut ui: Query<(&mut Text, &PlayerNumber)>,
+// fn update_deck_visibility(
+//     q: Query<Entity, With<DeckNode>>,
+//     mut commands: Commands,
+//     cur_player_q: Query<Option<&HumanPlayer>, With<CurrentActorToken>>,
+//     state: Res<State<GameTurnSteps>>,
+//     mut selected_card: ResMut<SelectedCard>,
 // ) {
-//     let mut player_texts = HashMap::new();
-//     for (player, player_num, resources, name) in &player_query {
-//         player_texts.insert(
-//             *player_num,
-//             (
-//                 name.as_str().to_owned(),
-//                 format!(
-//                     "\nTower: {0}\nWalls: {1}\n{2}",
-//                     player.tower_hp,
-//                     player.walls_hp,
-//                     resources.print()
-//                 ),
-//             ),
-//         );
+//     if !state.is_changed() {
+//         return;
 //     }
-//     for (mut text, player_num) in &mut ui {
-//         if let Some(player_description) = player_texts.remove(player_num) {
-//             text.sections[1].value = player_description.1;
-//             text.sections[0].value = player_description.0;
+//     let Ok(cur_player_human) = cur_player_q.single() else {
+//         return;
+//     };
+//     let Ok(e) = q.single() else {
+//         return;
+//     };
+//     if cur_player_human.is_none() && *state == GameTurnSteps::ActionSelection {
+//         if let Ok(mut cmd_e) = commands.get_entity(e) {
+//             selected_card.data = None;
+//             selected_card.display_entity = None;
+//             cmd_e.insert(Visibility::Hidden);
 //         }
 //     }
 // }
@@ -320,7 +302,9 @@ pub fn init_players(
 }
 
 fn setup_music(asset_server: Res<AssetServer>, mut commands: Commands) {
-    commands.spawn(AudioPlayer::new(asset_server.load("snd/start_game.ogg"))).insert(GameObject);
+    commands
+        .spawn(AudioPlayer::new(asset_server.load("snd/start_game.ogg")))
+        .insert(GameObject);
 }
 
 fn card_sounds(mut commands: Commands, q: Query<&ActionTaken, Added<ActionTaken>>) {
@@ -339,7 +323,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         Transform::from_xyz(0.0, 0.0, -1.0),
         Sprite::from_image(asset_server.load("img/ingame_bg.png")),
-        PickingBehavior::IGNORE,
+        Pickable::IGNORE,
         BackgroundSprite,
         GameObject,
         Name::new("BG"),
@@ -356,9 +340,13 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 ..default()
             },
             BackgroundColor(Srgba::hex("2c422e").unwrap().into()),
-            Name::new("Help display"),
             HelpDisplay,
+            Pickable::default(),
         ))
+        .observe_in_child(|out: Trigger<Pointer<Click>>, mut node: Query<&mut Node>| {
+            let mut n = node.get_mut(out.target()).unwrap();
+            n.display = Display::None;
+        })
         .with_children(|p| {
             p.spawn((Text::new("Help"), header_style.clone()));
             p.spawn((
@@ -370,13 +358,13 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn esc_to_menu(
-    mut keys: ResMut<ButtonInput<KeyCode>>,
+    keys: Res<ButtonInput<KeyCode>>,
     mut next_state: ResMut<NextState<GameState>>,
     mut query: Query<&mut Node, With<HelpDisplay>>,
 ) {
     if keys.just_released(KeyCode::Escape) {
-        next_state.set(GameState::Menu);
-        keys.reset(KeyCode::Escape);
+        next_state.set(GameState::AssetsLoading);
+        // keys.reset(KeyCode::Escape);
     } else if keys.just_released(KeyCode::KeyH) {
         for mut style in &mut query {
             style.display = if style.display == Display::Flex {
@@ -385,7 +373,7 @@ fn esc_to_menu(
                 Display::Flex
             };
         }
-        keys.reset(KeyCode::KeyH);
+        // keys.reset(KeyCode::KeyH);
     }
 }
 
@@ -393,7 +381,7 @@ fn handle_card_events(
     any_action: Query<&ActionTaken>,
     mut next_state: ResMut<NextState<GameTurnSteps>>,
 ) {
-    let Ok(action_to_do) = any_action.get_single() else {
+    let Ok(action_to_do) = any_action.single() else {
         return;
     };
     info!("{:#?}", action_to_do);
@@ -406,7 +394,7 @@ fn ai_select_card(
     time_since: Res<TimeSinceTurnStarted>,
     mut random_wait_time: Local<f32>,
 ) {
-    let Ok((_, hand, e)) = cur_player_q.get_single() else {
+    let Ok((_, hand, e)) = cur_player_q.single() else {
         return;
     };
     if *random_wait_time < 1.0 {
@@ -416,7 +404,7 @@ fn ai_select_card(
         return;
     }
     let i = hand.rnd();
-    let random_card = hand.cards[i].clone();
+    let random_card = hand[i].clone();
 
     commands
         .entity(e)
@@ -436,7 +424,7 @@ pub fn perform_action(
     deck: Res<Assets<DeckAsset>>,
     mut commands: Commands,
 ) {
-    let Ok(action_to_do) = any_action.get_single() else {
+    let Ok(action_to_do) = any_action.single() else {
         return;
     };
     let Some(deck_asset) = deck.iter().next() else {
@@ -451,7 +439,7 @@ pub fn perform_action(
                 if is_caller.is_some() {
                     res.change_resource_amount(card.cost_resource, -card.cost_amount);
                 }
-                card_id = hand.cards.iter().position(|c| c == card);
+                card_id = hand.iter().position(|c| c == card);
                 let res_change = card.resource_amount_change(is_user);
                 res.change_resource_amount(res_change.0, res_change.1);
                 let prod = card.production_change(is_user);
@@ -461,7 +449,7 @@ pub fn perform_action(
                 player.make_tower_higher(card.tower_growth(is_user));
                 player.make_walls_higher(card.walls_growth(is_user));
             }
-            ActionTaken::DropCard { card } => card_id = hand.cards.iter().position(|c| c == card),
+            ActionTaken::DropCard { card } => card_id = hand.iter().position(|c| c == card),
         };
         if is_user {
             if let Some(id) = card_id {
@@ -473,7 +461,13 @@ pub fn perform_action(
     next_state.set(GameTurnSteps::SearchForAgents);
 }
 
-fn game_ended_condition(query: Query<&PlayerHealth>) -> bool {
+pub fn game_ended_condition(
+    state: Option<Res<State<GameState>>>,
+    query: Query<&PlayerHealth>,
+) -> bool {
+    if !state.is_some_and(|e| e.eq(&GameState::Game)) {
+        return false;
+    }
     for player in &query {
         if !player.is_alive() || player.has_max_possible_tower() {
             return true;

@@ -1,10 +1,10 @@
-use std::fmt;
 use bevy::app::{App, Plugin};
 use bevy::prelude::*;
 use bevy_inspector_egui::bevy_egui::{egui, EguiContext, EguiPlugin};
 use bevy_inspector_egui::{
     bevy_inspector::hierarchy::SelectedEntities, DefaultInspectorConfigPlugin,
 };
+use std::fmt;
 // use iyes_perf_ui::prelude::*;
 
 // const MY_ACCENT_COLOR32: bevy_inspector_egui::bevy_egui::egui::Color32 =
@@ -57,21 +57,24 @@ pub struct DebugPlugin;
 
 impl Plugin for DebugPlugin {
     fn build(&self, app: &mut App) {
+        app.add_plugins(EguiPlugin {
+            enable_multipass_for_primary_context: false,
+        });
         app.add_systems(Startup, configure_egui);
         app.add_systems(
-            Update,
+            bevy_inspector_egui::bevy_egui::EguiContextPass,
             inspector_ui, //.run_if(not(in_state(crate::states::MainState::Editor))),
         )
         // .add_systems(
         //     Update,
         //     (toggle_perf_ui).run_if(input_just_pressed(KeyCode::F2)),
         // )
-        .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
-        .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
-        .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
+        // .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
+        // .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
+        // .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
         // .add_plugins(PerfUiPlugin)
         // .insert_resource(bevy_mod_picking::debug::DebugPickingMode::Normal)
-        .add_plugins((EguiPlugin, DefaultInspectorConfigPlugin));
+        .add_plugins(DefaultInspectorConfigPlugin);
     }
 }
 // fn toggle_perf_ui(q: Query<Entity, With<PerfUiRoot>>, mut commands: Commands) {
@@ -128,7 +131,7 @@ fn inspector_ui(
     }
     let Ok(egui_context) = world
         .query_filtered::<&mut EguiContext, With<PrimaryWindow>>()
-        .get_single(world)
+        .single(world)
     else {
         return;
     };
