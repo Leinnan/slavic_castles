@@ -41,7 +41,7 @@ pub fn main() {
     app.add_plugins(helpers::plugin)
         .add_plugins(JsonAssetPlugin::<DeckAsset>::new(&["deck.json"]))
         .add_plugins(JsonAssetPlugin::<NamesAsset>::new(&["names.json"]))
-        .add_plugins(crate::base_systems::turn_based::register_system)
+        .add_plugins(base_systems::turn_based::register_system)
         .add_plugins(components::player_ui::PlayerUiPlugin)
         .init_state::<states::game_states::GameState>()
         .add_plugins(helpers::wasm_resize::WindowResizePlugin)

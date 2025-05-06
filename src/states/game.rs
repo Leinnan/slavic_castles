@@ -1,6 +1,7 @@
 use super::consts;
 use super::game_states::GameState;
 use crate::base_systems::turn_based::{ActorTurn, CurrentActorToken, GameTurnSteps};
+use crate::components::ObserverExtension;
 use crate::data::deck::{DeckAsset, HandCards};
 use crate::data::profile::Profile;
 use crate::helpers::AudioSpawnCommandExt;
@@ -30,7 +31,7 @@ pub struct HumanPlayer;
 pub struct GamePlugin;
 
 #[derive(Component)]
-#[require(GameObject)]
+#[require(GameObject, Name = Name::new("Help display"))]
 pub struct HelpDisplay;
 
 #[derive(Component)]
@@ -168,7 +169,7 @@ impl Plugin for GamePlugin {
                 Update,
                 (
                     // update_ui,
-                    update_deck_visibility,
+                    // update_deck_visibility,
                     card_sounds,
                 )
                     .run_if(in_state(GameState::Game)),
@@ -243,55 +244,27 @@ pub fn switch_player(
     timer.0.reset();
 }
 
-fn update_deck_visibility(
-    q: Query<Entity, With<DeckNode>>,
-    mut commands: Commands,
-    cur_player_q: Query<Option<&HumanPlayer>, With<CurrentActorToken>>,
-    state: Res<State<GameTurnSteps>>,
-    mut selected_card: ResMut<SelectedCard>,
-) {
-    if !state.is_changed() {
-        return;
-    }
-    let Ok(cur_player_human) = cur_player_q.single() else {
-        return;
-    };
-    let Ok(e) = q.single() else {
-        return;
-    };
-    if cur_player_human.is_none() && *state == GameTurnSteps::ActionSelection {
-        if let Ok(mut cmd_e) = commands.get_entity(e) {
-            selected_card.data = None;
-            selected_card.display_entity = None;
-            cmd_e.insert(Visibility::Hidden);
-            // cmd_e.despawn_recursive();
-        }
-    }
-}
-
-// fn update_ui(
-//     player_query: Query<(&Player, &PlayerNumber, &PlayerResources, &Name)>,
-//     mut ui: Query<(&mut Text, &PlayerNumber)>,
+// fn update_deck_visibility(
+//     q: Query<Entity, With<DeckNode>>,
+//     mut commands: Commands,
+//     cur_player_q: Query<Option<&HumanPlayer>, With<CurrentActorToken>>,
+//     state: Res<State<GameTurnSteps>>,
+//     mut selected_card: ResMut<SelectedCard>,
 // ) {
-//     let mut player_texts = HashMap::new();
-//     for (player, player_num, resources, name) in &player_query {
-//         player_texts.insert(
-//             *player_num,
-//             (
-//                 name.as_str().to_owned(),
-//                 format!(
-//                     "\nTower: {0}\nWalls: {1}\n{2}",
-//                     player.tower_hp,
-//                     player.walls_hp,
-//                     resources.print()
-//                 ),
-//             ),
-//         );
+//     if !state.is_changed() {
+//         return;
 //     }
-//     for (mut text, player_num) in &mut ui {
-//         if let Some(player_description) = player_texts.remove(player_num) {
-//             text.sections[1].value = player_description.1;
-//             text.sections[0].value = player_description.0;
+//     let Ok(cur_player_human) = cur_player_q.single() else {
+//         return;
+//     };
+//     let Ok(e) = q.single() else {
+//         return;
+//     };
+//     if cur_player_human.is_none() && *state == GameTurnSteps::ActionSelection {
+//         if let Ok(mut cmd_e) = commands.get_entity(e) {
+//             selected_card.data = None;
+//             selected_card.display_entity = None;
+//             cmd_e.insert(Visibility::Hidden);
 //         }
 //     }
 // }
@@ -340,7 +313,7 @@ fn card_sounds(mut commands: Commands, q: Query<&ActionTaken, Added<ActionTaken>
             ActionTaken::UseCard { card } => card.get_sound_asset(),
             ActionTaken::DropCard { card: _ } => "snd/card_dismiss.ogg".to_owned(),
         };
-        // commands.play_sound(sound);
+        commands.play_sound(sound);
     }
 }
 
@@ -367,9 +340,13 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 ..default()
             },
             BackgroundColor(Srgba::hex("2c422e").unwrap().into()),
-            Name::new("Help display"),
             HelpDisplay,
+            Pickable::default(),
         ))
+        .observe_in_child(|out: Trigger<Pointer<Click>>, mut node: Query<&mut Node>| {
+            let mut n = node.get_mut(out.target()).unwrap();
+            n.display = Display::None;
+        })
         .with_children(|p| {
             p.spawn((Text::new("Help"), header_style.clone()));
             p.spawn((

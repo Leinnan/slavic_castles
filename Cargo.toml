@@ -28,7 +28,7 @@ serde_json = "1"
 [dependencies]
 game_core = {path = "crates/game_core", features = ["bevy"]}
 console_error_panic_hook = "0.1"
-bevy = {workspace = true, default-features = true}
+bevy = {workspace = true, default-features = true, features = ["configurable_error_handler"]}
 serde = {workspace = true}
 serde_json = {workspace = true}
 inline_tweak = "1"

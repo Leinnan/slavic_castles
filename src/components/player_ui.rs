@@ -1,12 +1,13 @@
-use bevy::{ecs::query::QueryData, prelude::*, reflect::Reflect};
-use game_core::data::resource::ResourceType;
-use serde::{Deserialize, Serialize};
-
 use crate::states::{
     consts,
     game::{self, GameObject, PlayerNumber, PlayerQueryItem, Players, PlayersUpdated},
     game_states::GameState,
 };
+use crate::visual::animation_interface::AnimationInfo;
+use bevy::animation::AnimationTarget;
+use bevy::{color, ecs::query::QueryData, prelude::*, reflect::Reflect};
+use game_core::data::resource::ResourceType;
+use serde::{Deserialize, Serialize};
 
 #[derive(Component, Default, Reflect, Serialize, Deserialize, Debug, Copy, Clone)]
 #[require(PlayerUi, PlayerUiValue)]
@@ -23,7 +24,7 @@ trait PlayerInterfaceHelper {
         &self,
         element: PlayerTextInterface,
         player: PlayerNumber,
-    ) -> (PlayerTextInterface, PlayerUi, TextFont);
+    ) -> (PlayerTextInterface, PlayerUi, TextFont, TextColor);
 }
 
 impl PlayerInterfaceHelper for Res<'_, AssetServer> {
@@ -31,15 +32,26 @@ impl PlayerInterfaceHelper for Res<'_, AssetServer> {
         &self,
         element: PlayerTextInterface,
         player: PlayerNumber,
-    ) -> (PlayerTextInterface, PlayerUi, TextFont) {
+    ) -> (PlayerTextInterface, PlayerUi, TextFont, TextColor) {
         let text_font = TextFont::from_font(self.load(consts::REGULAR_FONT)).with_font_size(20.0);
 
-        (element, PlayerUi(player), text_font)
+        (
+            element,
+            PlayerUi(player),
+            text_font,
+            TextColor::from(color::palettes::tailwind::INDIGO_100),
+        )
     }
 }
 
 #[derive(Component, Default, Reflect, Serialize, Deserialize, Debug)]
-#[require(Text)]
+pub struct UiValueAnimator {
+    pub positive: AnimationNodeIndex,
+    pub negative: AnimationNodeIndex,
+}
+
+#[derive(Component, Default, Reflect, Serialize, Deserialize, Debug)]
+#[require(Text, UiValueAnimator)]
 pub struct PlayerUiValue(pub i32);
 
 #[derive(Hash, Ord, PartialOrd, PartialEq, Eq, Default, Debug)]
@@ -66,12 +78,15 @@ impl PlayerUiValue {
 }
 
 #[derive(QueryData)]
-#[query_data(mutable, derive(Debug))]
+#[query_data(mutable)]
 pub struct TextUiPlayerElements {
+    entity: Entity,
     target: &'static PlayerUi,
     element: &'static PlayerTextInterface,
     value: &'static mut PlayerUiValue,
     text: &'static mut Text,
+    anim_config: &'static mut UiValueAnimator,
+    anim: &'static mut AnimationPlayer,
 }
 
 impl TextUiPlayerElementsItem<'_> {
@@ -114,15 +129,40 @@ impl Plugin for PlayerUiPlugin {
 }
 
 #[derive(Component, Reflect, Serialize, Deserialize, Deref, Default, Debug)]
+#[require(AnimationPlayer)]
 pub struct PlayerUi(pub PlayerNumber);
 
 fn update_created_player_ui(
     mut ui_query: Query<TextUiPlayerElements, Added<PlayerTextInterface>>,
     player_query: Players,
+    mut animation_graphs: ResMut<Assets<AnimationGraph>>,
+    mut animation_clips: ResMut<Assets<AnimationClip>>,
+    mut commands: Commands,
 ) {
     for mut el in ui_query.iter_mut() {
         if let Some(player) = player_query.get_player(el.target.0) {
+            let AnimationInfo {
+                target_name: animation_target_name,
+                target_id: animation_target_id,
+                graph: animation_graph,
+                pos_node_index,
+                neg_node_index,
+            } = AnimationInfo::create(
+                &mut animation_graphs,
+                &mut animation_clips,
+                format!("Ui{:?}", el.element),
+            );
             el.update(&player);
+            el.anim_config.positive = pos_node_index;
+            el.anim_config.negative = neg_node_index;
+            commands.entity(el.entity).insert((
+                AnimationGraphHandle(animation_graph),
+                AnimationTarget {
+                    id: animation_target_id,
+                    player: el.entity,
+                },
+                animation_target_name,
+            ));
         }
     }
 }
@@ -133,7 +173,15 @@ pub fn update_player_ui(mut ui_query: Query<TextUiPlayerElements>, player_query:
             if !el.target.0.eq(player.nr) {
                 continue;
             }
-            el.update(&player);
+            match el.update(&player) {
+                UpdateResult::NoChange => {}
+                UpdateResult::BiggerValue => {
+                    el.anim.start(el.anim_config.positive);
+                }
+                UpdateResult::SmallerValue => {
+                    el.anim.start(el.anim_config.negative);
+                }
+            }
         }
     }
 }
@@ -222,6 +270,7 @@ fn setup_player_ui(mut commands: Commands, asset_server: Res<AssetServer>, playe
                         align_content: AlignContent::SpaceAround,
                         padding: UiRect::all(Val::Px(8.0)),
                         margin: UiRect::bottom(Val::Px(5.0)),
+                        align_items: AlignItems::Center,
                         ..default()
                     },
                 ))
@@ -259,11 +308,12 @@ fn setup_player_ui(mut commands: Commands, asset_server: Res<AssetServer>, playe
                         p.spawn(ImageNode::new(asset_server.load("img/resource_frame.png")));
                         p.spawn(Node {
                             position_type: PositionType::Absolute,
-                            top: Val::Px(3.0),
-                            left: Val::Px(3.0),
-                            width: Val::Px(30.0),
-                            height: Val::Px(30.0),
+                            top: Val::Px(0.0),
+                            left: Val::Px(0.0),
+                            width: Val::Px(34.0),
+                            height: Val::Px(34.0),
                             justify_content: JustifyContent::Center,
+                            align_items: AlignItems::Center,
                             ..default()
                         })
                         .with_child(
@@ -272,11 +322,12 @@ fn setup_player_ui(mut commands: Commands, asset_server: Res<AssetServer>, playe
                         );
                         p.spawn(Node {
                             position_type: PositionType::Absolute,
-                            bottom: Val::Px(3.0),
-                            left: Val::Px(3.0),
-                            width: Val::Px(30.0),
-                            height: Val::Px(30.0),
+                            bottom: Val::Px(0.0),
+                            left: Val::Px(0.0),
+                            width: Val::Px(34.0),
+                            height: Val::Px(34.0),
                             justify_content: JustifyContent::Center,
+                            align_items: AlignItems::Center,
                             ..default()
                         })
                         .with_child(

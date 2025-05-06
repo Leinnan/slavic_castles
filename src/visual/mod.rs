@@ -1,6 +1,8 @@
 use bevy::math::Vec2;
 use bevy::prelude::*;
 
+pub mod animation_interface;
+
 #[derive(Component, Debug, Default, Copy, Clone, Reflect)]
 pub struct BackgroundSprite;
 
@@ -11,7 +13,7 @@ pub(crate) fn plugin(app: &mut App) {
         update_background_sprites.run_if(window_changed_or_component_added::<BackgroundSprite>),
     );
 }
-
+#[allow(clippy::type_complexity)]
 pub fn window_changed_or_component_added<T: Component>(
     q: Query<(), Or<(Changed<Window>, Added<T>)>>,
 ) -> bool {
