@@ -2,17 +2,14 @@ use bevy::color::palettes::tailwind;
 use bevy::{prelude::*, reflect::Reflect};
 
 use crate::base_systems::turn_based::{CurrentActorToken, GameTurnSteps};
-use crate::data::deck::HandCards;
+use crate::data::deck::HandQueryRead;
 use crate::helpers::despawn_recursive_by_component;
-use crate::states::game::{
-    self, ActionTaken,  GameObject, HelpDisplay, HumanPlayer,
-};
+use crate::states::game::{self, ActionTaken, GameObject, HelpDisplay, HumanPlayer};
 use crate::states::game_states::GameState;
-use game_core::data::card::Card;
-use game_core::data::supply::PlayerSupply;
 use crate::visual::window_changed_or_component_added;
+use game_core::data::card::Card;
 
-const CARD_SIZE: Vec3 = Vec3::new(1.0, 1.0, 1.0);
+const CARD_SIZE: Vec3 = Vec3::splat(0.95);
 
 #[derive(Debug, Clone, Copy)]
 pub enum CardAction {
@@ -27,7 +24,7 @@ pub struct CardPlace(pub usize);
 pub struct CardNumber(pub usize);
 
 #[derive(Component, Reflect, Default, Clone, Copy)]
-#[require(GameObject, ActionToPerform, StateScoped::<GameTurnSteps>(GameTurnSteps::PerformAction))]
+#[require(GameObject, Pickable, ActionToPerform, StateScoped::<GameTurnSteps>(GameTurnSteps::PerformAction))]
 pub struct DraggableCard {
     pub can_afford: bool,
 }
@@ -48,7 +45,7 @@ pub enum ActionToPerform {
 }
 
 #[derive(Component, Reflect, Default, Clone, Copy, Debug, PartialEq)]
-#[require(GameObject)]
+#[require(GameObject, Pickable)]
 pub enum CardDropZone {
     Use,
     #[default]
@@ -66,7 +63,10 @@ impl Plugin for CardPlugin {
             .register_type::<CardDropZone>()
             .register_type::<ActionToPerform>()
             .register_type::<CardNumber>()
-            .add_systems(Update, update_card_places.run_if(window_changed_or_component_added::<CardPlace>))
+            .add_systems(
+                Update,
+                update_card_places.run_if(window_changed_or_component_added::<CardPlace>),
+            )
             .add_systems(
                 Update,
                 (cards_input_system, sort_cards, update_card_color)
@@ -122,6 +122,7 @@ fn add_card_places(windows: Query<&Window>, mut commands: Commands) {
 
     commands
         .spawn((
+            Transform::from_xyz(0.0, 100.0, 0.0),
             Sprite {
                 color: Color::WHITE.with_alpha(0.3),
                 custom_size: Some(Vec2::new(900.0, 300.0)),
@@ -147,7 +148,10 @@ fn add_card_places(windows: Query<&Window>, mut commands: Commands) {
 }
 
 fn update_card_color(
-    mut q: Query<(&mut Sprite, &ActionToPerform, &DraggableCard), Or<(Added<ActionToPerform>, Changed<ActionToPerform>)>>,
+    mut q: Query<
+        (&mut Sprite, &ActionToPerform, &DraggableCard),
+        Or<(Added<ActionToPerform>, Changed<ActionToPerform>)>,
+    >,
 ) {
     for (mut sprite, action, draggable) in q.iter_mut() {
         sprite.color = match (action, draggable.can_afford) {
@@ -163,77 +167,62 @@ fn on_drag_over_card(
     trigger: Trigger<Pointer<DragEnter>>,
     q: Query<&CardDropZone>,
     mut qq: Query<(&mut ActionToPerform, &DraggableCard)>,
-) {
-    let Ok(zone_type) = q.get(trigger.target()) else {
-        return;
-    };
+) -> Result {
+    let zone_type = q.get(trigger.target())?;
     info!("{zone_type:?}");
-    let Ok((mut action, card)) = qq.get_mut(trigger.dragged) else {
-        return;
-    };
-
-    *action = match zone_type {
-        CardDropZone::Use if card.can_afford => {
-            ActionToPerform::Use
-        }
+    let (mut action, card) = qq.get_mut(trigger.dragged)?;
+    let new_action = match zone_type {
+        CardDropZone::Use if card.can_afford => ActionToPerform::Use,
         CardDropZone::Discard => ActionToPerform::Discard,
         _ => ActionToPerform::Nothing,
     };
+    let _ = action.set_if_neq(new_action);
+    Ok(())
 }
 
 fn on_drag_leave_card(
     trigger: Trigger<Pointer<DragLeave>>,
     q: Query<&CardDropZone>,
-    mut commands: Commands,
-) {
-    let Ok(zone_type) = q.get(trigger.target()) else {
-        return;
-    };
+    mut qq: Query<&mut ActionToPerform, With<DraggableCard>>,
+) -> Result {
+    let zone_type = q.get(trigger.target())?;
     info!("Leave {zone_type:?}");
-    commands
-        .entity(trigger.dragged)
-        .insert(ActionToPerform::Nothing);
+    let mut action = qq.get_mut(trigger.dragged)?;
+    let _ = action.set_if_neq(ActionToPerform::Nothing);
+    Ok(())
 }
 
 fn add_cards(
     windows: Query<&Window>,
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    deck_q: Query<(&HandCards, &PlayerSupply), (With<HumanPlayer>,With<CurrentActorToken>)>,
-) {
-    let Ok((deck, res)) = deck_q.get_single() else {
-        return;
+    deck_q: Query<HandQueryRead, (With<HumanPlayer>, With<CurrentActorToken>)>,
+) -> Result {
+    let Ok(hand) = deck_q.single() else {
+        return Ok(());
     };
-    let window = windows.single().expect("NO WINDOW");
+    let window = windows.single()?;
     let y_pos = -window.height() + inline_tweak::tweak!(-450.0);
 
-    for (i, c) in deck.cards.iter().enumerate() {
-        let color = if res.can_afford_card(c) {
-            Color::WHITE
-        } else {
-            Color::WHITE.darker(0.4)
-        };
-        let offset = (inline_tweak::tweak!(200) * i) as f32;
+    for card_info in hand.card_info_array().iter() {
+        let offset = (inline_tweak::tweak!(200) * card_info.index) as f32;
         commands.spawn((
             Sprite {
-                color,
-                image: asset_server.load(format!("cards/{}.png", c.id)),
+                color: card_info.color(),
+                image: asset_server.load(card_info.image_path()),
                 ..default()
             },
-            Transform::from_xyz(-350.0 + offset, y_pos - 300.0, i as f32 + 1.0)
+            Transform::from_xyz(-350.0 + offset, y_pos - 300.0, card_info.index as f32 + 1.0)
                 .with_scale(CARD_SIZE),
-            Name::new(format!("Card Nr {}", i)),
+            Name::new(format!("Card Nr {}", card_info.index)),
             DraggableCard {
-                can_afford: res.can_afford_card(c),
+                can_afford: card_info.can_afford,
             },
-            Pickable {
-                is_hoverable: true,
-                should_block_lower: true,
-            },
-            CardNumber(i),
-            CardDisplay(c.clone()),
+            CardNumber(card_info.index),
+            CardDisplay(card_info.card.clone()),
         ));
     }
+    Ok(())
 }
 
 fn start_drag(
@@ -266,11 +255,8 @@ fn sort_cards(
         }
     }
 }
-fn update_card_places(
-    windows: Query<&Window>,
-    mut query2: Query<(&mut Transform, &CardPlace)>,
-) {
-    let Ok(window) = windows.get_single() else {
+fn update_card_places(windows: Query<&Window>, mut query2: Query<(&mut Transform, &CardPlace)>) {
+    let Ok(window) = windows.single() else {
         return;
     };
     let modifier = inline_tweak::tweak!(-30.0);
@@ -301,7 +287,7 @@ fn end_drag(
             is_hoverable: true,
             should_block_lower: true,
         });
-    let Ok(player_entity) = q.get_single() else {
+    let Ok(player_entity) = q.single() else {
         return;
     };
     let action_taken = match action {

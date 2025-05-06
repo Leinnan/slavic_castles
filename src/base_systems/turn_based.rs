@@ -52,7 +52,7 @@ fn remove_token(
     mut commands: Commands,
     mut query: Query<(Entity, &mut ActorTurn), With<CurrentActorToken>>,
 ) {
-    let Ok((entity, mut delay)) = query.get_single_mut() else {
+    let Ok((entity, mut delay)) = query.single_mut() else {
         return;
     };
     delay.0 = **delay + 2;

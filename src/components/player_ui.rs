@@ -19,13 +19,20 @@ pub enum PlayerTextInterface {
 }
 
 trait PlayerInterfaceHelper {
-    fn player_ui(&self, element: PlayerTextInterface, player: PlayerNumber) -> (PlayerTextInterface, PlayerUi, TextFont);
+    fn player_ui(
+        &self,
+        element: PlayerTextInterface,
+        player: PlayerNumber,
+    ) -> (PlayerTextInterface, PlayerUi, TextFont);
 }
 
 impl PlayerInterfaceHelper for Res<'_, AssetServer> {
-    fn player_ui(&self, element: PlayerTextInterface, player: PlayerNumber) -> (PlayerTextInterface, PlayerUi, TextFont) {
-        let text_font =
-            TextFont::from_font(self.load(consts::REGULAR_FONT)).with_font_size(20.0);
+    fn player_ui(
+        &self,
+        element: PlayerTextInterface,
+        player: PlayerNumber,
+    ) -> (PlayerTextInterface, PlayerUi, TextFont) {
+        let text_font = TextFont::from_font(self.load(consts::REGULAR_FONT)).with_font_size(20.0);
 
         (element, PlayerUi(player), text_font)
     }
@@ -36,11 +43,11 @@ impl PlayerInterfaceHelper for Res<'_, AssetServer> {
 pub struct PlayerUiValue(pub i32);
 
 #[derive(Hash, Ord, PartialOrd, PartialEq, Eq, Default, Debug)]
-pub enum UpdateResult{
+pub enum UpdateResult {
     #[default]
     NoChange,
     BiggerValue,
-    SmallerValue
+    SmallerValue,
 }
 
 impl PlayerUiValue {
@@ -48,7 +55,11 @@ impl PlayerUiValue {
         if new.eq(&self.0) {
             return UpdateResult::NoChange;
         }
-        let result = if new > self.0 { UpdateResult::BiggerValue } else { UpdateResult::SmallerValue };
+        let result = if new > self.0 {
+            UpdateResult::BiggerValue
+        } else {
+            UpdateResult::SmallerValue
+        };
         self.0 = new;
         result
     }
@@ -65,11 +76,8 @@ pub struct TextUiPlayerElements {
 
 impl TextUiPlayerElementsItem<'_> {
     pub fn update(&mut self, data: &PlayerQueryItem) -> UpdateResult {
-        let new_value = match &self.element
-        {
-            PlayerTextInterface::ResourceAmount(res_type) => {
-                data.supply.get(*res_type).amount
-            }
+        let new_value = match &self.element {
+            PlayerTextInterface::ResourceAmount(res_type) => data.supply.get(*res_type).amount,
             PlayerTextInterface::ResourceProduction(res_type) => {
                 data.supply.get(*res_type).production
             }
@@ -77,14 +85,14 @@ impl TextUiPlayerElementsItem<'_> {
             PlayerTextInterface::Shield => data.player.walls_hp,
         };
         let result = self.value.update(new_value);
-        if &result == &UpdateResult::NoChange {
+        if result == UpdateResult::NoChange {
             return result;
         }
         self.text.0 = match &self.element {
             PlayerTextInterface::ResourceProduction(_) if self.value.0 > 0 => {
                 format!("+{}", self.value.0)
             }
-            _ => self.value.0.to_string()
+            _ => self.value.0.to_string(),
         };
         result
     }
@@ -258,7 +266,10 @@ fn setup_player_ui(mut commands: Commands, asset_server: Res<AssetServer>, playe
                             justify_content: JustifyContent::Center,
                             ..default()
                         })
-                        .with_child(asset_server.player_ui(PlayerTextInterface::ResourceAmount(resource),player));
+                        .with_child(
+                            asset_server
+                                .player_ui(PlayerTextInterface::ResourceAmount(resource), player),
+                        );
                         p.spawn(Node {
                             position_type: PositionType::Absolute,
                             bottom: Val::Px(3.0),
@@ -268,7 +279,12 @@ fn setup_player_ui(mut commands: Commands, asset_server: Res<AssetServer>, playe
                             justify_content: JustifyContent::Center,
                             ..default()
                         })
-                        .with_child(asset_server.player_ui(PlayerTextInterface::ResourceProduction(resource),player));
+                        .with_child(
+                            asset_server.player_ui(
+                                PlayerTextInterface::ResourceProduction(resource),
+                                player,
+                            ),
+                        );
                     });
                 }
             });

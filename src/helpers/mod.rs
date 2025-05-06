@@ -106,6 +106,6 @@ pub fn despawn_recursive_by_component<T: bevy::prelude::Component>(
         let Ok(mut entity) = commands.get_entity(e) else {
             continue;
         };
-        entity.despawn_recursive();
+        entity.try_despawn();
     }
 }

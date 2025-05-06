@@ -8,13 +8,9 @@ use crate::helpers::button::ButtonReleased;
 use crate::states::consts::*;
 use bevy::prelude::*;
 use bevy::ui::widget::NodeImageMode;
-// use bevy_ecss::prelude::{Class, StyleSheet};
 use bevy_pkv::PkvStore;
 use bevy_tweening::{lens::TransformScaleLens, Animator, Delay, Tween};
 use rand::{thread_rng, Rng};
-
-use super::consts;
-
 
 pub struct MenuPlugin;
 
@@ -73,8 +69,8 @@ fn open_repo(_: Trigger<ButtonReleased>) {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn exit_game(_: Trigger<ButtonReleased>, mut exit: EventWriter<bevy::app::AppExit>) {
-    exit.send(bevy::app::AppExit::Success);
+fn exit_game(_: Trigger<ButtonReleased>, mut exit: EventWriter<AppExit>) {
+    exit.write(AppExit::Success);
 }
 
 fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -86,13 +82,16 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
         .with_children(|parent| {
             let init_scale = Vec3::splat(0.01);
             let bg = ImageNode::new(asset_server.load("img/start_screen_bg.png"));
-            parent.spawn((bg, ZIndex(-1),
-                         Node{
-                             position_type: PositionType::Absolute,
-                             top: Val::Px(0.0),
-                             width: Val::Vw(100.0),
-                             ..default()
-                         }));
+            parent.spawn((
+                bg,
+                ZIndex(-1),
+                Node {
+                    position_type: PositionType::Absolute,
+                    top: Val::Px(0.0),
+                    width: Val::Vw(100.0),
+                    ..default()
+                },
+            ));
             // .insert(Class::new("menu_background"));
             parent.spawn((
                 ImageNode::new(asset_server.load("img/logo.png")),
@@ -116,7 +115,7 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             // .insert(Class::new("logo"));
 
             let img_style = TextFont {
-                font: asset_server.load(consts::LABEL_FONT),
+                font: asset_server.load(LABEL_FONT),
                 font_size: 30.0,
                 ..default()
             };
@@ -206,7 +205,7 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                     })
                     .id();
                 let ob = observer.with_entity(id);
-                parent.spawn(ob).set_parent(id);
+                parent.spawn(ob).insert(ChildOf(id));
             }
             let id = parent
                 .spawn((
@@ -234,6 +233,6 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                 .id();
             parent
                 .spawn(Observer::new(open_repo).with_entity(id))
-                .set_parent(id);
+                .insert(ChildOf(id));
         });
 }

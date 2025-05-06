@@ -1,8 +1,10 @@
+use super::consts;
 use super::game_states::GameState;
 use crate::base_systems::turn_based::{ActorTurn, CurrentActorToken, GameTurnSteps};
 use crate::data::deck::{DeckAsset, HandCards};
 use crate::data::profile::Profile;
 use crate::helpers::AudioSpawnCommandExt;
+use crate::visual::BackgroundSprite;
 use bevy::ecs::query::{QueryData, QueryFilter};
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
@@ -12,8 +14,6 @@ use game_core::data::player::PlayerHealth;
 use game_core::data::supply::PlayerSupply;
 use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
-use crate::visual::BackgroundSprite;
-use super::consts;
 
 #[derive(
     Component, Serialize, Deserialize, PartialEq, Eq, Hash, Copy, Debug, Clone, Reflect, Default,
@@ -191,7 +191,7 @@ impl Plugin for GamePlugin {
 }
 
 fn end_game(query: Query<&PlayerHealth, With<HumanPlayer>>, mut commands: Commands) {
-    let Ok(player) = query.get_single() else {
+    let Ok(player) = query.single() else {
         panic!("SDD");
     };
     let player_won = player.has_max_possible_tower() || player.is_alive();
@@ -228,7 +228,9 @@ pub fn switch_player(
     mut q: Query<(&Name, &mut PlayerSupply), With<CurrentActorToken>>,
     mut timer: ResMut<TimeSinceTurnStarted>,
 ) {
-    let Ok((player, mut resources)) = q.single_mut() else {return;};
+    let Ok((player, mut resources)) = q.single_mut() else {
+        return;
+    };
     info!("Switch player: {}", player);
     resources.update_resources();
     timer.0.reset();
@@ -244,10 +246,10 @@ fn update_deck_visibility(
     if !state.is_changed() {
         return;
     }
-    let Ok(cur_player_human) = cur_player_q.get_single() else {
+    let Ok(cur_player_human) = cur_player_q.single() else {
         return;
     };
-    let Ok(e) = q.get_single() else {
+    let Ok(e) = q.single() else {
         return;
     };
     if cur_player_human.is_none() && *state == GameTurnSteps::ActionSelection {
@@ -320,7 +322,9 @@ pub fn init_players(
 }
 
 fn setup_music(asset_server: Res<AssetServer>, mut commands: Commands) {
-    commands.spawn(AudioPlayer::new(asset_server.load("snd/start_game.ogg"))).insert(GameObject);
+    commands
+        .spawn(AudioPlayer::new(asset_server.load("snd/start_game.ogg")))
+        .insert(GameObject);
 }
 
 fn card_sounds(mut commands: Commands, q: Query<&ActionTaken, Added<ActionTaken>>) {
@@ -393,7 +397,7 @@ fn handle_card_events(
     any_action: Query<&ActionTaken>,
     mut next_state: ResMut<NextState<GameTurnSteps>>,
 ) {
-    let Ok(action_to_do) = any_action.get_single() else {
+    let Ok(action_to_do) = any_action.single() else {
         return;
     };
     info!("{:#?}", action_to_do);
@@ -406,7 +410,7 @@ fn ai_select_card(
     time_since: Res<TimeSinceTurnStarted>,
     mut random_wait_time: Local<f32>,
 ) {
-    let Ok((_, hand, e)) = cur_player_q.get_single() else {
+    let Ok((_, hand, e)) = cur_player_q.single() else {
         return;
     };
     if *random_wait_time < 1.0 {
@@ -416,7 +420,7 @@ fn ai_select_card(
         return;
     }
     let i = hand.rnd();
-    let random_card = hand.cards[i].clone();
+    let random_card = hand[i].clone();
 
     commands
         .entity(e)
@@ -436,7 +440,7 @@ pub fn perform_action(
     deck: Res<Assets<DeckAsset>>,
     mut commands: Commands,
 ) {
-    let Ok(action_to_do) = any_action.get_single() else {
+    let Ok(action_to_do) = any_action.single() else {
         return;
     };
     let Some(deck_asset) = deck.iter().next() else {
@@ -451,7 +455,7 @@ pub fn perform_action(
                 if is_caller.is_some() {
                     res.change_resource_amount(card.cost_resource, -card.cost_amount);
                 }
-                card_id = hand.cards.iter().position(|c| c == card);
+                card_id = hand.iter().position(|c| c == card);
                 let res_change = card.resource_amount_change(is_user);
                 res.change_resource_amount(res_change.0, res_change.1);
                 let prod = card.production_change(is_user);
@@ -461,7 +465,7 @@ pub fn perform_action(
                 player.make_tower_higher(card.tower_growth(is_user));
                 player.make_walls_higher(card.walls_growth(is_user));
             }
-            ActionTaken::DropCard { card } => card_id = hand.cards.iter().position(|c| c == card),
+            ActionTaken::DropCard { card } => card_id = hand.iter().position(|c| c == card),
         };
         if is_user {
             if let Some(id) = card_id {
