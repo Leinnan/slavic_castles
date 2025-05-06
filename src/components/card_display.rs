@@ -3,7 +3,8 @@ use bevy::{prelude::*, reflect::Reflect};
 
 use crate::base_systems::turn_based::{CurrentActorToken, GameTurnSteps};
 use crate::data::deck::HandQueryRead;
-use crate::helpers::despawn_recursive_by_component;
+// use crate::helpers::despawn_recursive_by_component;
+use crate::components::ObserverExtension;
 use crate::states::game::{self, ActionTaken, GameObject, HelpDisplay, HumanPlayer};
 use crate::states::game_states::GameState;
 use crate::visual::window_changed_or_component_added;
@@ -18,9 +19,11 @@ pub enum CardAction {
     DropIt,
 }
 #[derive(Component, Reflect, Default, Deref, Clone, Copy)]
+#[require(GameObject)]
 pub struct CardPlace(pub usize);
 
 #[derive(Component, Reflect, Default, Deref, Clone, Copy)]
+#[require(GameObject)]
 pub struct CardNumber(pub usize);
 
 #[derive(Component, Reflect, Default, Clone, Copy)]
@@ -34,6 +37,7 @@ pub struct DraggableCard {
 pub struct CurrentlyDragged;
 
 #[derive(Component, Debug, PartialEq, Clone, Reflect, Deref)]
+#[require(StateScoped::<GameTurnSteps>(GameTurnSteps::ActionSelection))]
 pub struct CardDisplay(pub Card);
 
 #[derive(Component, Reflect, Default, Clone, Copy, Debug, PartialEq)]
@@ -72,10 +76,10 @@ impl Plugin for CardPlugin {
                 (cards_input_system, sort_cards, update_card_color)
                     .run_if(in_state(GameState::Game)),
             )
-            .add_systems(
-                OnEnter(GameTurnSteps::PerformAction),
-                despawn_recursive_by_component::<CardDisplay>,
-            )
+            // .add_systems(
+            //     OnEnter(GameTurnSteps::PerformAction),
+            //     despawn_recursive_by_component::<CardDisplay>,
+            // )
             .add_systems(OnEnter(GameState::Game), add_card_places)
             .add_systems(
                 OnEnter(GameTurnSteps::ActionSelection),
@@ -130,8 +134,8 @@ fn add_card_places(windows: Query<&Window>, mut commands: Commands) {
             },
             CardDropZone::Use,
         ))
-        .observe(on_drag_over_card)
-        .observe(on_drag_leave_card);
+        .observe_in_child(on_drag_over_card)
+        .observe_in_child(on_drag_leave_card);
 
     commands
         .spawn((
@@ -143,8 +147,8 @@ fn add_card_places(windows: Query<&Window>, mut commands: Commands) {
             Transform::from_xyz(650.0, -350.0, 0.0),
             CardDropZone::Discard,
         ))
-        .observe(on_drag_over_card)
-        .observe(on_drag_leave_card);
+        .observe_in_child(on_drag_over_card)
+        .observe_in_child(on_drag_leave_card);
 }
 
 fn update_card_color(
@@ -230,18 +234,18 @@ fn start_drag(
     trigger: Trigger<Pointer<DragStart>>,
     mut commands: Commands,
     mut help_query: Query<&mut Node, With<HelpDisplay>>,
-) {
+) -> Result {
     for mut s in help_query.iter_mut() {
         s.display = Display::None;
     }
-    commands
-        .entity(trigger.target())
-        .insert(ActionToPerform::Nothing)
+    let mut e = commands.get_entity(trigger.target())?;
+    e.insert(ActionToPerform::Nothing)
         .insert(CurrentlyDragged)
         .insert(Pickable {
             is_hoverable: true,
             should_block_lower: false,
         });
+    Ok(())
 }
 
 fn sort_cards(
@@ -277,19 +281,19 @@ fn end_drag(
     cards_q: Query<(&CardDisplay, &ActionToPerform)>,
     mut commands: Commands,
     q: Query<Entity, With<CurrentActorToken>>,
-) {
+) -> Result {
     let Ok((card_display, action)) = cards_q.get(trigger.target()) else {
-        return;
+        return Ok(());
     };
     commands
-        .entity(trigger.target())
+        .get_entity(trigger.target())?
         .remove::<CurrentlyDragged>()
         .insert(Pickable {
             is_hoverable: true,
             should_block_lower: true,
         });
     let Ok(player_entity) = q.single() else {
-        return;
+        return Ok(());
     };
     let action_taken = match action {
         ActionToPerform::Use => ActionTaken::UseCard {
@@ -298,9 +302,10 @@ fn end_drag(
         ActionToPerform::Discard => ActionTaken::DropCard {
             card: (**card_display).clone(),
         },
-        ActionToPerform::Nothing => return,
+        ActionToPerform::Nothing => return Ok(()),
     };
-    commands.entity(player_entity).insert(action_taken);
+    commands.get_entity(player_entity)?.insert(action_taken);
+    Ok(())
 }
 
 fn cards_input_system(

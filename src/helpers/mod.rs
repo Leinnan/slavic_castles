@@ -97,15 +97,3 @@ impl AudioSpawnCommandExt for EntityCommands<'_> {
         });
     }
 }
-
-pub fn despawn_recursive_by_component<T: bevy::prelude::Component>(
-    q: Query<Entity, With<T>>,
-    mut commands: Commands,
-) {
-    for e in q.iter() {
-        let Ok(mut entity) = commands.get_entity(e) else {
-            continue;
-        };
-        entity.try_despawn();
-    }
-}

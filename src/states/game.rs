@@ -142,6 +142,7 @@ impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.enable_state_scoped_entities::<GameState>()
             .enable_state_scoped_entities::<GameTurnSteps>()
+            .add_systems(OnExit(GameState::Game), exit_game_state)
             .add_systems(
                 OnEnter(GameState::Game),
                 (setup_music, init_players, setup_ui).chain(),
@@ -172,10 +173,7 @@ impl Plugin for GamePlugin {
                 )
                     .run_if(in_state(GameState::Game)),
             )
-            .add_systems(
-                Update,
-                (update_timers).run_if(in_state(GameState::Game).and(game_ended_condition)),
-            )
+            .add_systems(Update, update_timers.run_if(in_state(GameState::Game)))
             .init_resource::<SelectedCard>()
             .init_resource::<TimeSinceTurnStarted>()
             .register_type::<GameObject>()
@@ -192,6 +190,10 @@ impl Plugin for GamePlugin {
                     .run_if(in_state(GameState::Game)),
             );
     }
+}
+
+fn exit_game_state(s: Option<Res<State<GameTurnSteps>>>) {
+    error!("EXITING GAME STATE: {:#?}", s);
 }
 
 fn end_game(query: Query<&PlayerHealth, With<HumanPlayer>>, mut commands: Commands) -> Result {
@@ -338,7 +340,7 @@ fn card_sounds(mut commands: Commands, q: Query<&ActionTaken, Added<ActionTaken>
             ActionTaken::UseCard { card } => card.get_sound_asset(),
             ActionTaken::DropCard { card: _ } => "snd/card_dismiss.ogg".to_owned(),
         };
-        commands.play_sound(sound);
+        // commands.play_sound(sound);
     }
 }
 
@@ -379,13 +381,13 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn esc_to_menu(
-    mut keys: ResMut<ButtonInput<KeyCode>>,
+    keys: Res<ButtonInput<KeyCode>>,
     mut next_state: ResMut<NextState<GameState>>,
     mut query: Query<&mut Node, With<HelpDisplay>>,
 ) {
     if keys.just_released(KeyCode::Escape) {
-        next_state.set(GameState::Menu);
-        keys.reset(KeyCode::Escape);
+        next_state.set(GameState::AssetsLoading);
+        // keys.reset(KeyCode::Escape);
     } else if keys.just_released(KeyCode::KeyH) {
         for mut style in &mut query {
             style.display = if style.display == Display::Flex {
@@ -394,7 +396,7 @@ fn esc_to_menu(
                 Display::Flex
             };
         }
-        keys.reset(KeyCode::KeyH);
+        // keys.reset(KeyCode::KeyH);
     }
 }
 
@@ -482,7 +484,13 @@ pub fn perform_action(
     next_state.set(GameTurnSteps::SearchForAgents);
 }
 
-pub fn game_ended_condition(query: Query<&PlayerHealth>) -> bool {
+pub fn game_ended_condition(
+    state: Option<Res<State<GameState>>>,
+    query: Query<&PlayerHealth>,
+) -> bool {
+    if !state.is_some_and(|e| e.eq(&GameState::Game)) {
+        return false;
+    }
     for player in &query {
         if !player.is_alive() || player.has_max_possible_tower() {
             return true;
