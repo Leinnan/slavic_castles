@@ -1,5 +1,5 @@
 use crate::states::consts::FULL_SIZE_PERCENT;
-use bevy::prelude::{default, AlignContent, AlignItems, FlexDirection, JustifyContent, Node};
+use bevy::prelude::{AlignContent, AlignItems, FlexDirection, JustifyContent, Node, default};
 
 pub mod consts;
 pub mod game;

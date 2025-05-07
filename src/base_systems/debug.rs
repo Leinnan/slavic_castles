@@ -1,8 +1,8 @@
 use bevy::app::{App, Plugin};
 use bevy::prelude::*;
-use bevy_inspector_egui::bevy_egui::{egui, EguiContext, EguiPlugin};
+use bevy_inspector_egui::bevy_egui::{EguiContext, EguiPlugin, egui};
 use bevy_inspector_egui::{
-    bevy_inspector::hierarchy::SelectedEntities, DefaultInspectorConfigPlugin,
+    DefaultInspectorConfigPlugin, bevy_inspector::hierarchy::SelectedEntities,
 };
 use std::fmt;
 // use iyes_perf_ui::prelude::*;

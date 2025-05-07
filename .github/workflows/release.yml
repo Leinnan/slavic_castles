@@ -27,7 +27,7 @@ env:
 
   # The itch.io project to upload to in the format `user-name/project-name`.
   # There will be no upload to itch.io if this is commented out.
-  upload_to_itch: Leinnan/idle_rpg
+  upload_to_itch: mevlyshkin/idle_rpg
 
   ############
   # ADVANCED #
@@ -140,7 +140,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           lfs: ${{ env.git_lfs }}
-
+      
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -162,6 +162,9 @@ jobs:
         if: ${{ matrix.platform == 'web' }}
         uses: cargo-bins/cargo-binstall@v1.9.0
 
+      - uses: extractions/setup-just@v2
+      - name: Generate cards
+        run: just gen_cards
       - name: Install and run trunk (Web)
         if: ${{ matrix.platform == 'web' }}
         run: |

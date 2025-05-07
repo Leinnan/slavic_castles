@@ -3,7 +3,7 @@ name = "slavic_castles"
 repository = "https://github.com/Leinnan/slavic_castles"
 homepage = "https://github.com/Leinnan/slavic_castles"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [workspace]
 members = ["crates/*"]
@@ -49,12 +49,3 @@ version = "0.3"
 default-features = false
 features = ["Window"]
 
-[build-dependencies]
-game_core = {path = "crates/game_core"}
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1"
-usvg = "0.41"
-tiny-skia = "0.11.4"
-rayon = "1.10"
-resvg = "0.41"
-glob = "0.3"

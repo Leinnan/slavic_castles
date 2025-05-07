@@ -5,7 +5,7 @@ use crate::helpers::button::ButtonReleased;
 use bevy::prelude::*;
 use bevy_pkv::PkvStore;
 use bevy_simple_text_input::{TextInput, TextInputPlugin, TextInputSettings, TextInputValue};
-use bevy_tweening::{lens::TransformScaleLens, Animator, Tween};
+use bevy_tweening::{Animator, Tween, lens::TransformScaleLens};
 use rand::Rng;
 use std::time::Duration;
 

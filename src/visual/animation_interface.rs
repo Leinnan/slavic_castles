@@ -1,5 +1,5 @@
 use bevy::{
-    animation::{animated_field, AnimationEntityMut, AnimationEvaluationError, AnimationTargetId},
+    animation::{AnimationEntityMut, AnimationEvaluationError, AnimationTargetId, animated_field},
     color,
     prelude::*,
 };

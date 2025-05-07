@@ -1,6 +1,6 @@
 use crate::helpers::button::ChangedButtonsFilter;
 use bevy::{prelude::*, ui::Interaction};
-use bevy_tweening::{lens::TransformScaleLens, Animator, Tween};
+use bevy_tweening::{Animator, Tween, lens::TransformScaleLens};
 use std::time::Duration;
 
 pub struct ButtonsPlugin;

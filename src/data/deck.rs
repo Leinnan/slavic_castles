@@ -68,7 +68,7 @@ impl HandCards {
 
         let mut card = &deck[0];
         for attempt in 0..9 {
-            let i: usize = rng.gen::<usize>() % deck.len();
+            let i: usize = rng.r#gen::<usize>() % deck.len();
             card = &deck[i];
             let max_cost_amount = resources.get(card.cost_resource).amount + 2;
             let card_already_in_deck = attempt > 5 || self.iter().any(|c| c.id == card.id);
@@ -85,7 +85,7 @@ impl HandCards {
 
     pub fn rnd(&self) -> usize {
         let mut rng = thread_rng();
-        let i: usize = rng.gen::<usize>() % self.len();
+        let i: usize = rng.r#gen::<usize>() % self.len();
         i
     }
 
@@ -98,7 +98,7 @@ impl HandCards {
 
             let mut card: &Card = &cards[0];
             for attempt in 0..9 {
-                let i: usize = rng.gen::<usize>() % cards.len();
+                let i: usize = rng.r#gen::<usize>() % cards.len();
                 card = &cards[i];
                 let card_already_in_deck = attempt > 5 || deck.iter().any(|c| c.id == card.id);
                 if card.cost_amount <= max_cost_amount && !card_already_in_deck {

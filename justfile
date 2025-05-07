@@ -16,10 +16,9 @@ check:
 # self host web version
 web_host:
 	lwa_simple_server out
-
-# run desktop version with bevy file-watcher feature on
-hot_reload:
-	cargo run --features "bevy/file-watcher"
+	
+gen_cards:
+	cargo run -p utils_svg_cards_gen
 	
 # installs used cli tools
 prepare:

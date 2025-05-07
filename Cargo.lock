@@ -4880,15 +4880,10 @@ dependencies = [
  "bevy_tweening",
  "console_error_panic_hook",
  "game_core",
- "glob",
  "inline_tweak",
  "rand",
- "rayon",
- "resvg",
  "serde",
  "serde_json",
- "tiny-skia",
- "usvg",
  "web-sys",
  "webbrowser",
 ]
@@ -5498,6 +5493,21 @@ name = "utf8_iter"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6c140620e7ffbb22c2dee59cafe6084a59b5ffc27a8859a5f0d494b5d52b6be"
+
+[[package]]
+name = "utils_svg_cards_gen"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "game_core",
+ "glob",
+ "rayon",
+ "resvg",
+ "serde",
+ "serde_json",
+ "tiny-skia",
+ "usvg",
+]
 
 [[package]]
 name = "uuid"

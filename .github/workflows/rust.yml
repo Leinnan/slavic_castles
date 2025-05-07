@@ -46,6 +46,8 @@ jobs:
           packages: libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
       - name: Check
         run: just check
+      - name: Generate cards
+        run: just gen_cards
       - name: Web Build
         run: just web_build
       - name: Push

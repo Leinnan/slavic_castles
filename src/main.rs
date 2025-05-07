@@ -1,4 +1,4 @@
-use bevy::ecs::error::{warn, GLOBAL_ERROR_HANDLER};
+use bevy::ecs::error::{GLOBAL_ERROR_HANDLER, warn};
 use bevy::prelude::*;
 use bevy_common_assets::json::JsonAssetPlugin;
 // use bevy_ecss::prelude::*;

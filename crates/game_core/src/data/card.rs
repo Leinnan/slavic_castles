@@ -125,45 +125,28 @@ impl fmt::Display for CardEffect {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut result: String = match self.effect_type {
             EffectType::ProductionChange(resource, amount) => {
-                let sign = if amount > 0 { "Increase" } else { "Decrease" };
-                let target = if self.affects_user { "" } else { " enemy" };
+                let sign = if amount > 0 { "+" } else { "-" };
+                let target = if self.affects_user { "" } else { "Enemy " };
 
                 return write!(
                     f,
-                    "{}{} prod of {} by {}",
-                    sign,
+                    "{}{} {}{} per turn",
                     target,
                     &resource,
+                    sign,
                     amount.abs()
                 );
             }
             EffectType::Damage(amount, ignore_wall) => {
-                let ignore_wall = if ignore_wall { "(ignores shield)" } else { "" };
-                let target = if self.affects_user {
-                    "Takes"
-                } else {
-                    "Deliver"
-                };
+                let ignore_wall = if ignore_wall { " (ignores shield)" } else { "" };
+                let target = if self.affects_user { "Takes" } else { "" };
                 return write!(f, "{} {} damage{}", target, amount, ignore_wall);
             }
             EffectType::ResourceChange(resource, amount) => {
-                let sign = if amount > 0 { "Gives" } else { "Takes" };
-                let target_suffix = if self.affects_user {
-                    ""
-                } else if amount > 0 {
-                    " to enemy"
-                } else {
-                    " from enemy"
-                };
+                let sign = if amount > 0 { "+" } else { "-" };
+                let target = if self.affects_user { "" } else { "Enemy " };
 
-                return write!(
-                    f,
-                    "{} {} of {}{}",
-                    sign,
-                    amount.abs(),
-                    &resource,
-                    target_suffix
-                );
+                return write!(f, "{}{} {}{}", target, &resource, sign, amount.abs());
             }
             EffectType::TowerGrowth(growth) => {
                 let sign = if growth > 0 { "+" } else { "-" };

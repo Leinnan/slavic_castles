@@ -9,8 +9,8 @@ use crate::states::consts::*;
 use bevy::prelude::*;
 use bevy::ui::widget::NodeImageMode;
 use bevy_pkv::PkvStore;
-use bevy_tweening::{lens::TransformScaleLens, Animator, Delay, Tween};
-use rand::{thread_rng, Rng};
+use bevy_tweening::{Animator, Delay, Tween, lens::TransformScaleLens};
+use rand::{Rng, thread_rng};
 
 pub struct MenuPlugin;
 
@@ -43,7 +43,7 @@ fn check_for_profile(
         ..Default::default()
     });
     let mut rng = thread_rng();
-    let avatar_id: i32 = 1 + (rng.gen::<i32>().abs() % (AVATARS_AMOUNT - 1));
+    let avatar_id: i32 = 1 + (rng.r#gen::<i32>().abs() % (AVATARS_AMOUNT - 1));
     commands.insert_resource(OpponentInformation(PlayerInformation {
         name: name_asset.1.get_random(),
         deck: deck_asset.1.clone(),

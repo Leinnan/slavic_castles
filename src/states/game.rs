@@ -13,7 +13,7 @@ use bevy::time::Stopwatch;
 use game_core::data::card::Card;
 use game_core::data::player::PlayerHealth;
 use game_core::data::supply::PlayerSupply;
-use rand::{thread_rng, Rng};
+use rand::{Rng, thread_rng};
 use serde::{Deserialize, Serialize};
 
 #[derive(
@@ -53,7 +53,7 @@ pub struct NamesAsset(pub Vec<String>);
 impl NamesAsset {
     pub fn get_random(&self) -> String {
         let mut rng = thread_rng();
-        let i: usize = rng.gen::<usize>() % self.0.len();
+        let i: usize = rng.r#gen::<usize>() % self.0.len();
         self.0[i].clone()
     }
 }
