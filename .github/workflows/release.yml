@@ -98,16 +98,14 @@ jobs:
 
           - platform: windows
             targets: x86_64-pc-windows-msvc
-            profile: dist
-            features: desktop
+            profile: release
             binary_ext: .exe
             package_ext: .zip
             runner: windows-latest
 
           - platform: macos
             targets: x86_64-apple-darwin aarch64-apple-darwin
-            profile: dist
-            features: desktop
+            profile: release
             app_suffix: .app/Contents/MacOS
             package_ext: .dmg
             runner: macos-latest
