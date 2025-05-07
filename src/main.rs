@@ -28,7 +28,7 @@ pub fn main() {
         primary_window: Some(Window {
             title: NAME.to_owned(),
             #[cfg(not(debug_assertions))]
-            mode: bevy::window::WindowMode::Fullscreen,
+            mode: bevy::window::WindowMode::BorderlessFullscreen(MonitorSelection::Current),
             #[cfg(debug_assertions)]
             mode: bevy::window::WindowMode::Windowed,
             ..default()
