@@ -143,7 +143,6 @@ impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.enable_state_scoped_entities::<GameState>()
             .enable_state_scoped_entities::<GameTurnSteps>()
-            .add_systems(OnExit(GameState::Game), exit_game_state)
             .add_systems(
                 OnEnter(GameState::Game),
                 (setup_music, init_players, setup_ui).chain(),
@@ -191,10 +190,6 @@ impl Plugin for GamePlugin {
                     .run_if(in_state(GameState::Game)),
             );
     }
-}
-
-fn exit_game_state(s: Option<Res<State<GameTurnSteps>>>) {
-    error!("EXITING GAME STATE: {:#?}", s);
 }
 
 fn end_game(query: Query<&PlayerHealth, With<HumanPlayer>>, mut commands: Commands) -> Result {

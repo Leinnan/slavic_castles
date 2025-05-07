@@ -30,7 +30,6 @@ fn check_for_profile(
     names: Res<Assets<NamesAsset>>,
     mut commands: Commands,
 ) -> Result {
-    error!("CHECK FOR PROFILE");
     let Some(profile) = pkv.get_profile() else {
         next_state.set(GameState::ProfileEdit);
         return Ok(());
@@ -51,7 +50,6 @@ fn check_for_profile(
         avatar_id,
         ..Default::default()
     }));
-    error!("CHECK FOR PROFILE HANDLED");
     Ok(())
 }
 
@@ -69,12 +67,10 @@ fn open_repo(_: Trigger<ButtonReleased>) {
 
 #[cfg(not(target_arch = "wasm32"))]
 fn exit_game(_: Trigger<ButtonReleased>, mut exit: EventWriter<AppExit>) {
-    error!("EXIT GAME PRESSED");
     exit.write(AppExit::Success);
 }
 
 fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
-    error!("SETUP MENU");
     commands
         .spawn(super::root_node())
         .insert(StateScoped(GameState::Menu))
@@ -239,5 +235,4 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                 Name::new("OpenRepoObserver"),
             ));
         });
-    error!("SETUP MENU END");
 }
