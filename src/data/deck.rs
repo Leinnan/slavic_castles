@@ -40,7 +40,7 @@ impl CardInfo<'_> {
 }
 
 impl HandQueryReadItem<'_> {
-    pub fn card_info_array(&self) -> Vec<CardInfo> {
+    pub fn card_info_array(&'_ self) -> Vec<CardInfo<'_>> {
         self.cards
             .iter()
             .enumerate()

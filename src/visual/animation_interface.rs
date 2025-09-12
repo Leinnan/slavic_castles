@@ -46,9 +46,9 @@ impl AnimationInfo {
                 AnimatableCurve::new(
                     animated_field!(Transform::scale),
                     AnimatableKeyframeCurve::new(
-                        [0.0, 0.2, 0.6, 0.8]
+                        [0.0, 0.2, 0.6, 0.7, 0.8]
                             .into_iter()
-                            .zip([Vec3::splat(1.0),Vec3::splat(0.3),Vec3::splat(0.3), Vec3::splat(1.0)]),
+                            .zip([Vec3::splat(1.0),Vec3::splat(0.3),Vec3::splat(0.3),Vec3::splat(1.3),Vec3::splat(1.0)]),
                     )
                         .expect(
                             "should be able to build translation curve because we pass in valid samples",
@@ -100,12 +100,12 @@ pub struct TextColorProperty;
 impl AnimatableProperty for TextColorProperty {
     type Property = Srgba;
 
-    fn evaluator_id(&self) -> EvaluatorId {
-        EvaluatorId::Type(TypeId::of::<Self>())
+    fn evaluator_id(&'_ self) -> EvaluatorId<'_> {
+        EvaluatorId::Type(TypeId::of::<TextColorProperty>())
     }
 
     fn get_mut<'a>(
-        &self,
+        &'_ self,
         entity: &'a mut AnimationEntityMut,
     ) -> Result<&'a mut Self::Property, AnimationEvaluationError> {
         let text_color = entity

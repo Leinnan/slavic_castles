@@ -1,3 +1,5 @@
+_list:
+    just --list
 
 # build web version and put it out directory
 web_build:
@@ -16,10 +18,10 @@ check:
 # self host web version
 web_host:
 	lwa_simple_server out
-	
+
 gen_cards:
 	cargo run -p utils_svg_cards_gen
-	
+
 # installs used cli tools
 prepare:
 	cargo install lwa_simple_server

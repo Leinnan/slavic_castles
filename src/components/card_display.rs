@@ -191,8 +191,8 @@ fn update_card_color(
     for (mut sprite, action, can_throw) in q.iter_mut() {
         sprite.color = match (action, can_throw.is_some()) {
             (ActionToPerform::Use, true) => tailwind::AMBER_300.into(),
-            (ActionToPerform::Discard, _) => Color::linear_rgb(1.0, 0.6, 0.6),
-            (_, false) => Color::WHITE.darker(0.4),
+            (ActionToPerform::Discard, _) => Color::linear_rgba(1.0, 0.6, 0.6, 0.7),
+            (_, false) => Color::WHITE.darker(0.7),
             (_, _) => Color::WHITE,
         };
     }

@@ -195,7 +195,7 @@ impl Plugin for GamePlugin {
 fn end_game(query: Query<&PlayerHealth, With<HumanPlayer>>, mut commands: Commands) -> Result {
     let player = query.single()?;
     let player_won = player.has_max_possible_tower() || player.is_alive();
-    info!("PLAYER WON? {}", player_won);
+    // info!("PLAYER WON? {}", player_won);
     let sound = if player_won {
         "snd/game_won.ogg"
     } else {
@@ -358,7 +358,7 @@ fn esc_to_menu(
     mut query: Query<&mut Node, With<HelpDisplay>>,
 ) {
     if keys.just_released(KeyCode::Escape) {
-        next_state.set(GameState::AssetsLoading);
+        next_state.set(GameState::Menu);
         // keys.reset(KeyCode::Escape);
     } else if keys.just_released(KeyCode::KeyH) {
         for mut style in &mut query {
@@ -376,10 +376,10 @@ fn handle_card_events(
     any_action: Query<&ActionTaken>,
     mut next_state: ResMut<NextState<GameTurnSteps>>,
 ) {
-    let Ok(action_to_do) = any_action.single() else {
+    let Ok(_action_to_do) = any_action.single() else {
         return;
     };
-    info!("{:#?}", action_to_do);
+    // info!("{:#?}", action_to_do);
     next_state.set(GameTurnSteps::PerformAction);
 }
 

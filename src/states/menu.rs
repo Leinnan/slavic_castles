@@ -116,7 +116,7 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                 font_size: 30.0,
                 ..default()
             };
-            let clr = TextColor(Color::linear_rgb(0.7, 0.7, 0.7));
+            let clr = TextColor(Color::linear_rgb(0.65, 0.6, 0.6));
             let mut start_time_ms = 500;
 
             for (text, margin, observer) in [
@@ -180,7 +180,7 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                         },
                         Node {
                             margin,
-                            padding: UiRect::all(Val::Px(15.0)),
+                            padding: UiRect::axes(Val::Px(25.0), Val::Px(20.0)),
                             align_items: AlignItems::Center,
                             justify_content: JustifyContent::Center,
                             ..default()

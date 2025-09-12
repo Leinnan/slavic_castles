@@ -50,6 +50,10 @@ pub struct UiValueAnimator {
     pub negative: AnimationNodeIndex,
 }
 
+#[derive(Reflect, Resource, Deref)]
+#[reflect(Resource)]
+pub struct PlayerUiAnimationInfo(pub AnimationInfo);
+
 #[derive(Component, Default, Reflect, Serialize, Deserialize, Debug)]
 #[require(Text, UiValueAnimator)]
 pub struct PlayerUiValue(pub i32);
@@ -121,11 +125,22 @@ impl Plugin for PlayerUiPlugin {
             Update,
             (update_created_player_ui, update_player_ui).run_if(in_state(GameState::Game)),
         )
+        .register_type::<PlayerUiAnimationInfo>()
+        .add_systems(PostStartup, create_player_anim)
         .add_systems(
             OnEnter(GameState::Game),
             (setup_player_ui).after(game::init_players),
         );
     }
+}
+
+fn create_player_anim(
+    mut animation_graphs: ResMut<Assets<AnimationGraph>>,
+    mut animation_clips: ResMut<Assets<AnimationClip>>,
+    mut commands: Commands,
+) {
+    let anim = AnimationInfo::create(&mut animation_graphs, &mut animation_clips, "UiTarget");
+    commands.insert_resource(PlayerUiAnimationInfo(anim));
 }
 
 #[derive(Component, Reflect, Serialize, Deserialize, Deref, Default, Debug)]
@@ -135,33 +150,21 @@ pub struct PlayerUi(pub PlayerNumber);
 fn update_created_player_ui(
     mut ui_query: Query<TextUiPlayerElements, Added<PlayerTextInterface>>,
     player_query: Players,
-    mut animation_graphs: ResMut<Assets<AnimationGraph>>,
-    mut animation_clips: ResMut<Assets<AnimationClip>>,
+    anim_info: Res<PlayerUiAnimationInfo>,
     mut commands: Commands,
 ) {
     for mut el in ui_query.iter_mut() {
         if let Some(player) = player_query.get_player(el.target.0) {
-            let AnimationInfo {
-                target_name: animation_target_name,
-                target_id: animation_target_id,
-                graph: animation_graph,
-                pos_node_index,
-                neg_node_index,
-            } = AnimationInfo::create(
-                &mut animation_graphs,
-                &mut animation_clips,
-                format!("Ui{:?}", el.element),
-            );
             el.update(&player);
-            el.anim_config.positive = pos_node_index;
-            el.anim_config.negative = neg_node_index;
+            el.anim_config.positive = anim_info.pos_node_index;
+            el.anim_config.negative = anim_info.neg_node_index;
             commands.entity(el.entity).insert((
-                AnimationGraphHandle(animation_graph),
+                AnimationGraphHandle(anim_info.graph.clone()),
                 AnimationTarget {
-                    id: animation_target_id,
+                    id: anim_info.target_id,
                     player: el.entity,
                 },
-                animation_target_name,
+                anim_info.target_name.clone(),
             ));
         }
     }
@@ -220,11 +223,20 @@ fn setup_player_ui(mut commands: Commands, asset_server: Res<AssetServer>, playe
     ] {
         let player_info = player_query.get_player(player).expect("ERROR");
         let avatar_path = player_info.details.avatar_path();
+        let order = if player == PlayerNumber::First {
+            FlexDirection::Row
+        } else {
+            FlexDirection::RowReverse
+        };
         commands
             .spawn((style.clone(), GameObject))
             .insert(Name::new(format!("Ui{:?}", player)))
             .with_children(|p| {
-                p.spawn((
+                p.spawn(Node {
+                    flex_direction: order,
+                    ..default()
+                })
+                .with_child((
                     ImageNode {
                         image: asset_server.load(avatar_path),
                         ..default()
@@ -236,33 +248,24 @@ fn setup_player_ui(mut commands: Commands, asset_server: Res<AssetServer>, playe
                         ..default()
                     },
                 ))
-                .with_children(|p| {
-                    p.spawn((
-                        ImageNode {
-                            image: asset_server.load("img/player_frame_name.png"),
-                            flip_x: right_align,
-                            ..default()
-                        },
-                        Node {
-                            padding: UiRect::all(Val::Px(8.0)),
-                            position_type: PositionType::Absolute,
-                            bottom: Val::Px(0.0),
-                            ..default()
-                        },
-                    ))
-                    .with_children(|name| {
-                        name.spawn((
-                            Text::new(player_info.details.name.clone()),
-                            header_style.clone(),
-                            TextLayout::new_with_justify(if right_align {
-                                JustifyText::Right
-                            } else {
-                                JustifyText::Left
-                            }),
-                        ))
-                        .insert(PlayerUi(player));
-                    });
-                });
+                .with_child((
+                    ImageNode {
+                        image: asset_server.load("img/player_frame_name.png"),
+                        flip_x: right_align,
+                        ..default()
+                    },
+                    Node {
+                        padding: UiRect::axes(Val::Px(12.0), Val::Px(0.0)),
+                        height: Val::Px(64.0),
+                        align_items: AlignItems::Center,
+                        ..default()
+                    },
+                    children![(
+                        Text::new(player_info.details.name.clone()),
+                        header_style.clone(),
+                        PlayerUi(player)
+                    )],
+                ));
                 p.spawn((
                     ImageNode::new(asset_server.load("img/player_frame_resources.png")),
                     Node {
@@ -303,9 +306,9 @@ fn setup_player_ui(mut commands: Commands, asset_server: Res<AssetServer>, playe
                             margin: UiRect::bottom(Val::Px(5.0)),
                             ..default()
                         },
+                        children![ImageNode::new(asset_server.load("img/resource_frame.png"))],
                     ))
                     .with_children(|p| {
-                        p.spawn(ImageNode::new(asset_server.load("img/resource_frame.png")));
                         p.spawn(Node {
                             position_type: PositionType::Absolute,
                             top: Val::Px(0.0),

@@ -128,6 +128,15 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
             ));
             // .insert(Class::new("menu_background"));
 
+            let init_scale = Vec3::splat(0.01);
+            let tween_scale = Tween::new(
+                EaseFunction::QuadraticInOut,
+                Duration::from_millis(500),
+                TransformScaleLens {
+                    start: init_scale,
+                    end: Vec3::ONE,
+                },
+            );
             parent
                 .spawn((
                     ImageNode {
@@ -141,9 +150,11 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                         color: Color::srgb_u8(110, 116, 77),
                         ..default()
                     },
+                    Animator::new(tween_scale),
                     Node {
-                        padding: UiRect::all(Val::Px(20.0)),
+                        padding: UiRect::axes(Val::Px(30.0), Val::Px(40.0)),
                         flex_direction: FlexDirection::Column,
+                        align_items: AlignItems::Center,
                         row_gap: Val::Px(10.0),
                         ..default()
                     },
@@ -151,19 +162,16 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                     // Class::new("popup_window"),
                 ))
                 .with_children(|parent| {
-                    parent
-                        .spawn(Node::default())
-                        .with_child(Text::new("Edit profile"));
-
-                    let init_scale = Vec3::splat(0.01);
-                    let tween_scale = Tween::new(
-                        EaseFunction::QuadraticInOut,
-                        Duration::from_millis(500),
-                        TransformScaleLens {
-                            start: init_scale,
-                            end: Vec3::ONE,
+                    parent.spawn(Node::default()).with_child((
+                        Text::new("Edit profile"),
+                        TextFont {
+                            font: asset_server.load(consts::LABEL_FONT),
+                            font_size: 45.0,
+                            ..default()
                         },
-                    );
+                        TextColor(Color::linear_rgb(0.8, 0.7, 0.7)),
+                    ));
+
                     parent.spawn((
                         BorderColor(Srgba::hex("fcfd9e").unwrap().into()),
                         BackgroundColor(Srgba::hex("2c422e").unwrap().into()),
@@ -198,7 +206,6 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                         .spawn((
                             ImageNode::new(asset_server.load(avatar_path)),
                             Name::new("avatar"),
-                            Animator::new(tween_scale),
                             AvatarDisplay { id: avatar_id },
                             Node {
                                 width: Val::Px(100.0),
