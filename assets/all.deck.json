@@ -1,0 +1,612 @@
+[
+    {
+        "name": "Poor soldier",
+        "id": 1,
+        "cost_amount": 3,
+        "cost_resource": "Soldiers",
+        "effects": [
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        3,
+                        false
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Wood cut",
+        "id": 2,
+        "cost_amount": 4,
+        "cost_resource": "Tools",
+        "effects": [
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        1,
+                        false
+                    ]
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "WallsGrowth": 3
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "TowerGrowth": 1
+                }
+            }
+        ]
+    },
+    {
+        "name": "Soldier",
+        "id": 3,
+        "cost_amount": 3,
+        "cost_resource": "Soldiers",
+        "effects": [
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        5,
+                        false
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Garrison",
+        "id": 4,
+        "cost_amount": 7,
+        "cost_resource": "Soldiers",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "ProductionChange": [
+                        "Soldiers",
+                        2
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Woodshed",
+        "id": 5,
+        "cost_amount": 10,
+        "cost_resource": "Tools",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "WallsGrowth": 3
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "ProductionChange": [
+                        "Tools",
+                        2
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Woodshed",
+        "id": 6,
+        "cost_amount": 15,
+        "cost_resource": "Tools",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "TowerGrowth": 3
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "ProductionChange": [
+                        "Tools",
+                        2
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Pure rage",
+        "id": 7,
+        "cost_amount": 12,
+        "cost_resource": "Soldiers",
+        "effects": [
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        10,
+                        false
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Omen",
+        "id": 8,
+        "cost_amount": 8,
+        "cost_resource": "Magic",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "TowerGrowth": 4
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "ProductionChange": [
+                        "Magic",
+                        1
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Spell",
+        "id": 9,
+        "cost_amount": 1,
+        "cost_resource": "Magic",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "WallsGrowth": 1
+                }
+            }
+        ]
+    },
+    {
+        "name": "Spell",
+        "id": 10,
+        "cost_amount": 3,
+        "cost_resource": "Magic",
+        "effects": [
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        2,
+                        true
+                    ]
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "WallsGrowth": 2
+                }
+            }
+        ]
+    },
+    {
+        "name": "Good Omen",
+        "id": 11,
+        "cost_amount": 6,
+        "cost_resource": "Magic",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "TowerGrowth": 2
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "WallsGrowth": 3
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "ProductionChange": [
+                        "Magic",
+                        1
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Sacrifice",
+        "id": 12,
+        "cost_amount": 9,
+        "cost_resource": "Magic",
+        "effects": [
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        5,
+                        true
+                    ]
+                }
+            },
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "ProductionChange": [
+                        "Magic",
+                        -1
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Thief",
+        "id": 13,
+        "cost_amount": 0,
+        "cost_resource": "Tools",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "ResourceChange": [
+                        "Tools",
+                        -5
+                    ]
+                }
+            },
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "ResourceChange": [
+                        "Tools",
+                        -5
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Sacrifice",
+        "id": 14,
+        "cost_amount": 2,
+        "cost_resource": "Tools",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "ResourceChange": [
+                        "Magic",
+                        -5
+                    ]
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "WallsGrowth": 5
+                }
+            }
+        ]
+    },
+    {
+        "name": "Renovation",
+        "id": 15,
+        "cost_amount": 2,
+        "cost_resource": "Tools",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "ProductionChange": [
+                        "Tools",
+                        1
+                    ]
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "WallsGrowth": 4
+                }
+            }
+        ]
+    },
+    {
+        "name": "Renovation",
+        "id": 15,
+        "cost_amount": 2,
+        "cost_resource": "Tools",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "WallsGrowth": 3
+                }
+            }
+        ]
+    },
+    {
+        "name": "Duty",
+        "id": 16,
+        "cost_amount": 3,
+        "cost_resource": "Tools",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "WallsGrowth": 4
+                }
+            }
+        ]
+    },
+    {
+        "name": "Shrine",
+        "id": 17,
+        "cost_amount": 3,
+        "cost_resource": "Magic",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "ProductionChange": [
+                        "Magic",
+                        1
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Ceremony",
+        "id": 18,
+        "cost_amount": 5,
+        "cost_resource": "Magic",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "ProductionChange": [
+                        "Magic",
+                        1
+                    ]
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "TowerGrowth": 3
+                }
+            },
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "TowerGrowth": 1
+                }
+            }
+        ]
+    },
+    {
+        "name": "Small Ceremony",
+        "id": 19,
+        "cost_amount": 5,
+        "cost_resource": "Magic",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "TowerGrowth": 3
+                }
+            }
+        ]
+    },
+    {
+        "name": "Small Curse",
+        "id": 20,
+        "cost_amount": 2,
+        "cost_resource": "Magic",
+        "effects": [
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        2,
+                        false
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Ceremony",
+        "id": 21,
+        "cost_amount": 3,
+        "cost_resource": "Magic",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "TowerGrowth": 5
+                }
+            }
+        ]
+    },
+    {
+        "name": "Poisoned spring",
+        "id": 22,
+        "cost_amount": 0,
+        "cost_resource": "Soldiers",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "ResourceChange": [
+                        "Soldiers",
+                        -6
+                    ]
+                }
+            },
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "ResourceChange": [
+                        "Soldiers",
+                        -6
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Volunteer",
+        "id": 23,
+        "cost_amount": 3,
+        "cost_resource": "Soldiers",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "ProductionChange": [
+                        "Soldiers",
+                        1
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Berserker",
+        "id": 24,
+        "cost_amount": 1,
+        "cost_resource": "Soldiers",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "ResourceChange": [
+                        "Magic",
+                        -3
+                    ]
+                }
+            },
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        4,
+                        false
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Berserker",
+        "id": 25,
+        "cost_amount": 3,
+        "cost_resource": "Soldiers",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "Damage": [
+                        3,
+                        false
+                    ]
+                }
+            },
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        6,
+                        false
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Stupid soldier",
+        "id": 25,
+        "cost_amount": 4,
+        "cost_resource": "Soldiers",
+        "effects": [
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "Damage": [
+                        1,
+                        false
+                    ]
+                }
+            },
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        3,
+                        true
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Raid",
+        "id": 25,
+        "cost_amount": 4,
+        "cost_resource": "Soldiers",
+        "effects": [
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        5,
+                        false
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "name": "Sabotage action",
+        "id": 26,
+        "cost_amount": 5,
+        "cost_resource": "Soldiers",
+        "effects": [
+            {
+                "affects_user": false,
+                "effect_type": {
+                    "Damage": [
+                        4,
+                        false
+                    ]
+                }
+            },
+            {
+                "affects_user": true,
+                "effect_type": {
+                    "WallsGrowth": 3
+                }
+            }
+        ]
+    }
+]
