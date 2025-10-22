@@ -39,7 +39,7 @@ impl CardInfo<'_> {
     }
 }
 
-impl HandQueryReadItem<'_> {
+impl HandQueryReadItem<'_, '_> {
     pub fn card_info_array(&'_ self) -> Vec<CardInfo<'_>> {
         self.cards
             .iter()

@@ -1,6 +1,7 @@
 use bevy::app::{App, Plugin};
+use bevy::input::common_conditions::input_just_released;
 use bevy::prelude::*;
-use bevy_inspector_egui::bevy_egui::{EguiContext, EguiPlugin, egui};
+use bevy_inspector_egui::bevy_egui::{EguiContext, EguiPlugin, PrimaryEguiContext, egui};
 use bevy_inspector_egui::{
     DefaultInspectorConfigPlugin, bevy_inspector::hierarchy::SelectedEntities,
 };
@@ -36,11 +37,20 @@ impl fmt::Display for PanelDisplay {
     }
 }
 
-#[derive(Resource)]
+#[derive(Resource, Copy, Clone)]
 pub struct Inspector {
     pub left_panel: PanelDisplay,
     pub right_panel: PanelDisplay,
     pub active: bool,
+}
+
+impl Inspector {
+    pub fn is_active(r: Res<Self>) -> bool {
+        r.active
+    }
+    pub fn toggle_active(mut r: ResMut<Self>) {
+        r.active = !r.active;
+    }
 }
 
 impl Default for Inspector {
@@ -57,12 +67,18 @@ pub struct DebugPlugin;
 
 impl Plugin for DebugPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(EguiPlugin {
-            enable_multipass_for_primary_context: false,
-        });
-        app.add_systems(Startup, configure_egui);
+        app.init_resource::<Inspector>();
+        app.add_plugins(EguiPlugin::default());
         app.add_systems(
-            bevy_inspector_egui::bevy_egui::EguiContextPass,
+            Update,
+            configure_egui.run_if(any_match_filter::<Added<EguiContext>>),
+        );
+        app.add_systems(
+            Update,
+            Inspector::toggle_active.run_if(input_just_released(KeyCode::F1)),
+        );
+        app.add_systems(
+            bevy_inspector_egui::bevy_egui::EguiPrimaryContextPass,
             inspector_ui, //.run_if(not(in_state(crate::states::MainState::Editor))),
         )
         // .add_systems(
@@ -116,32 +132,27 @@ impl Plugin for DebugPlugin {
 //     ));
 // }
 
-fn inspector_ui(
-    world: &mut World,
-    mut selected_entities: Local<SelectedEntities>,
-    mut inspector_data: Local<Inspector>,
-) {
-    use bevy::window::PrimaryWindow;
-    if world
-        .get_resource::<ButtonInput<KeyCode>>()
-        .unwrap()
-        .just_released(KeyCode::F1)
-    {
-        inspector_data.active = !inspector_data.active;
-    }
+fn inspector_ui(world: &mut World, mut selected_entities: Local<SelectedEntities>) {
+    let mut inspector_data: Inspector = *world.resource::<Inspector>();
+    let mut update_inspector = false;
     let Ok(egui_context) = world
-        .query_filtered::<&mut EguiContext, With<PrimaryWindow>>()
+        .query_filtered::<&mut EguiContext, With<PrimaryEguiContext>>()
         .single(world)
     else {
         return;
     };
     let mut egui_context = egui_context.clone();
+    let frame =
+        egui::Frame::canvas(&egui_context.get_mut().style()).inner_margin(egui::Margin::same(5));
     egui::SidePanel::left("left")
+        .frame(frame)
         .default_width(250.0)
         .show_animated(egui_context.get_mut(), inspector_data.active, |ui| {
             ui.horizontal(|ui| {
                 for value in PanelDisplay::VALUES {
-                    ui.selectable_value(&mut inspector_data.left_panel, value, value.to_string());
+                    update_inspector |= ui
+                        .selectable_value(&mut inspector_data.left_panel, value, value.to_string())
+                        .changed();
                 }
             });
             ui.separator();
@@ -181,11 +192,14 @@ fn inspector_ui(
         });
 
     egui::SidePanel::right("right")
+        .frame(frame)
         .default_width(250.0)
         .show_animated(egui_context.get_mut(), inspector_data.active, |ui| {
             ui.horizontal(|ui| {
                 for value in PanelDisplay::VALUES {
-                    ui.selectable_value(&mut inspector_data.right_panel, value, value.to_string());
+                    update_inspector |= ui
+                        .selectable_value(&mut inspector_data.right_panel, value, value.to_string())
+                        .changed();
                 }
             });
             ui.separator();
@@ -220,13 +234,19 @@ fn inspector_ui(
                 ui.allocate_space(ui.available_size());
             });
         });
+    if update_inspector {
+        world.insert_resource(inspector_data);
+    }
 }
 
-fn configure_egui(mut contexts: bevy_inspector_egui::bevy_egui::EguiContexts) {
+fn configure_egui(mut contexts: Query<&mut EguiContext>) {
+    if contexts.is_empty() {
+        return;
+    }
+    let mut fonts = egui::FontDefinitions::default();
     #[cfg(any(windows, target_os = "macos"))]
     {
         if let Some((regular, semibold)) = get_fonts() {
-            let mut fonts = egui::FontDefinitions::default();
             fonts.font_data.insert(
                 "regular".to_owned(),
                 egui::FontData::from_owned(regular).into(),
@@ -254,16 +274,16 @@ fn configure_egui(mut contexts: bevy_inspector_egui::bevy_egui::EguiContexts) {
                 .entry(egui::FontFamily::Monospace)
                 .or_default()
                 .push("regular".to_owned());
-
-            // Tell egui to use these fonts:
-            contexts.ctx_mut().set_fonts(fonts);
         }
     }
-    contexts.ctx_mut().style_mut(|style| {
-        for font_id in style.text_styles.values_mut() {
-            font_id.size *= 1.2;
-        }
-    });
+    for mut context in contexts.iter_mut() {
+        context.get_mut().set_fonts(fonts.clone());
+        context.get_mut().all_styles_mut(|style| {
+            for font_id in style.text_styles.values_mut() {
+                font_id.size *= 1.2;
+            }
+        });
+    }
 }
 
 #[cfg(target_os = "macos")]

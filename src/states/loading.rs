@@ -69,6 +69,8 @@ pub struct BaseAssets {
     pub deck: Handle<DeckAsset>,
     #[asset(path = "enemy.names.json")]
     pub names: Handle<NamesAsset>,
+    #[asset(path = "first_anim.anim.json")]
+    pub ui_anim: Handle<AnimationGraph>,
 }
 
 pub struct LoadingPlugin;
@@ -100,7 +102,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                 ..default()
             },
             BackgroundColor(Srgba::hex("#2c422e").unwrap().into()),
-            StateScoped(GameState::AssetsLoading),
+            DespawnOnExit(GameState::AssetsLoading),
         ))
         .with_children(|parent| {
             let header_style = TextFont {

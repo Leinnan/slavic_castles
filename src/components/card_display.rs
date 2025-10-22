@@ -60,7 +60,7 @@ impl CardPlaces<'_, '_> {
 }
 
 #[derive(Component, Reflect, Default, Clone, Copy)]
-#[require(Pickable, ActionToPerform, StateScoped::<GameTurnSteps>(GameTurnSteps::ActionSelection))]
+#[require(Pickable, ActionToPerform, DespawnOnExit::<GameTurnSteps>(GameTurnSteps::ActionSelection))]
 pub struct DraggableCard;
 
 #[derive(Component, Reflect, Default, Clone, Copy)]
@@ -125,8 +125,8 @@ impl Plugin for CardPlugin {
     }
 }
 
-fn drag(trigger: Trigger<Pointer<Drag>>, mut drag: Query<&mut Transform, With<DraggableCard>>) {
-    let Ok(mut transform) = drag.get_mut(trigger.target()) else {
+fn drag(trigger: On<Pointer<Drag>>, mut drag: Query<&mut Transform, With<DraggableCard>>) {
+    let Ok(mut transform) = drag.get_mut(trigger.entity) else {
         return;
     };
     let drag = trigger.event();
@@ -199,11 +199,11 @@ fn update_card_color(
 }
 
 fn on_drag_over_card(
-    trigger: Trigger<Pointer<DragEnter>>,
+    trigger: On<Pointer<DragEnter>>,
     q: Query<&CardDropZone>,
     mut qq: Query<(&mut ActionToPerform, Option<&CanThrowCard>)>,
 ) -> Result {
-    let zone_type = q.get(trigger.target())?;
+    let zone_type = q.get(trigger.entity)?;
     info!("{zone_type:?}");
     let (mut action, usable) = qq.get_mut(trigger.dragged)?;
     let new_action = match zone_type {
@@ -216,11 +216,11 @@ fn on_drag_over_card(
 }
 
 fn on_drag_leave_card(
-    trigger: Trigger<Pointer<DragLeave>>,
+    trigger: On<Pointer<DragLeave>>,
     q: Query<&CardDropZone>,
     mut qq: Query<&mut ActionToPerform, With<DraggableCard>>,
 ) -> Result {
-    let zone_type = q.get(trigger.target())?;
+    let zone_type = q.get(trigger.entity)?;
     info!("Leave {zone_type:?}");
     if let Ok(mut action) = qq.get_mut(trigger.dragged) {
         let _ = action.set_if_neq(ActionToPerform::Nothing);
@@ -267,14 +267,15 @@ fn add_cards(
 }
 
 fn start_drag(
-    trigger: Trigger<Pointer<DragStart>>,
+    trigger: On<Pointer<DragStart>>,
     mut commands: Commands,
-    mut help_query: Query<&mut Node, With<HelpDisplay>>,
+    mut help_query: Query<&mut AnimationPlayer, With<HelpDisplay>>,
 ) -> Result {
-    for mut s in help_query.iter_mut() {
-        s.display = Display::None;
+    for mut player in help_query.iter_mut() {
+        player.stop_all();
+        player.play(AnimationNodeIndex::new(4));
     }
-    let mut e = commands.get_entity(trigger.target())?;
+    let mut e = commands.get_entity(trigger.entity)?;
     e.insert(ActionToPerform::Nothing)
         .try_remove::<CardSlot>()
         .insert(Pickable {
@@ -330,16 +331,16 @@ fn update_card_places(
 }
 
 fn end_drag(
-    trigger: Trigger<Pointer<DragEnd>>,
+    trigger: On<Pointer<DragEnd>>,
     cards_q: Query<(&CardDisplay, &ActionToPerform)>,
     mut commands: Commands,
     q: Query<Entity, With<CurrentActorToken>>,
     places: CardPlaces,
 ) -> Result {
-    let Ok((card_display, action)) = cards_q.get(trigger.target()) else {
+    let Ok((card_display, action)) = cards_q.get(trigger.entity) else {
         return Ok(());
     };
-    let mut ent = commands.get_entity(trigger.target())?;
+    let mut ent = commands.get_entity(trigger.entity)?;
     ent.insert(Pickable {
         is_hoverable: true,
         should_block_lower: true,

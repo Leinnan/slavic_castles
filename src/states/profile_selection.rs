@@ -1,11 +1,13 @@
 use super::consts;
 use super::game_states::GameState;
-use crate::data::profile::{Profile, ProfileProvider};
-use crate::helpers::button::ButtonReleased;
+use crate::{
+    base_systems::buttons::UiTransformScaleLens,
+    data::profile::{Profile, ProfileProvider},
+};
 use bevy::prelude::*;
 use bevy_pkv::PkvStore;
 use bevy_simple_text_input::{TextInput, TextInputPlugin, TextInputSettings, TextInputValue};
-use bevy_tweening::{Animator, Tween, lens::TransformScaleLens};
+use bevy_tweening::{Tween, TweenAnim};
 use rand::Rng;
 use std::time::Duration;
 
@@ -45,14 +47,14 @@ fn avatar_update(
 }
 
 fn button_system(
-    trigger: Trigger<ButtonReleased>,
+    trigger: On<Pointer<Release>>,
     interaction_query: Query<&ProfileEditButton>,
     mut next_state: ResMut<NextState<GameState>>,
     changed_value: Query<&TextInputValue>,
     mut avatar_query: Query<&mut AvatarDisplay>,
     mut pkv: ResMut<PkvStore>,
 ) {
-    let Ok(button_type) = interaction_query.get(trigger.target()) else {
+    let Ok(button_type) = interaction_query.get(trigger.entity) else {
         return;
     };
 
@@ -111,10 +113,10 @@ fn get_user_name(pkv: &PkvStore) -> String {
 fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<PkvStore>) {
     commands
         .spawn(Observer::new(button_system))
-        .insert(StateScoped(GameState::ProfileEdit));
+        .insert(DespawnOnExit(GameState::ProfileEdit));
     commands
         .spawn(super::root_node())
-        .insert(StateScoped(GameState::ProfileEdit))
+        .insert(DespawnOnExit(GameState::ProfileEdit))
         .with_children(|parent| {
             parent.spawn((
                 ImageNode::new(asset_server.load("img/start_screen_bg.png")),
@@ -128,13 +130,13 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
             ));
             // .insert(Class::new("menu_background"));
 
-            let init_scale = Vec3::splat(0.01);
+            let init_scale = Vec2::splat(0.01);
             let tween_scale = Tween::new(
                 EaseFunction::QuadraticInOut,
                 Duration::from_millis(500),
-                TransformScaleLens {
+                UiTransformScaleLens {
                     start: init_scale,
-                    end: Vec3::ONE,
+                    end: Vec2::ONE,
                 },
             );
             parent
@@ -150,7 +152,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                         color: Color::srgb_u8(110, 116, 77),
                         ..default()
                     },
-                    Animator::new(tween_scale),
+                    TweenAnim::new(tween_scale),
                     Node {
                         padding: UiRect::axes(Val::Px(30.0), Val::Px(40.0)),
                         flex_direction: FlexDirection::Column,
@@ -173,7 +175,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                     ));
 
                     parent.spawn((
-                        BorderColor(Srgba::hex("fcfd9e").unwrap().into()),
+                        BorderColor::all(Srgba::hex("fcfd9e").unwrap()),
                         BackgroundColor(Srgba::hex("2c422e").unwrap().into()),
                         Node {
                             width: Val::Px(200.0),
@@ -235,7 +237,7 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                                     .spawn((
                                         Button,
                                         BackgroundColor(Srgba::hex("7A444A").unwrap().into()),
-                                        Transform::from_scale(init_scale),
+                                        UiTransform::from_scale(init_scale),
                                         Node {
                                             align_items: AlignItems::Center,
                                             justify_content: JustifyContent::Center,
@@ -246,12 +248,12 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                                             right,
                                             ..default()
                                         },
-                                        Animator::new(Tween::new(
+                                        TweenAnim::new(Tween::new(
                                             EaseFunction::QuadraticInOut,
                                             Duration::from_millis(500),
-                                            TransformScaleLens {
+                                            UiTransformScaleLens {
                                                 start: init_scale,
-                                                end: Vec3::ONE,
+                                                end: Vec2::ONE,
                                             },
                                         )),
                                         // Class::new(format!("avatar common {}", class)),
@@ -287,16 +289,16 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, pkv: Res<Pkv
                                 padding: UiRect::all(Val::Px(15.0)),
                                 ..default()
                             },
-                            Transform::from_scale(init_scale),
+                            UiTransform::from_scale(init_scale),
                             // Class::new("menu common"),
                             Name::new(format!("button:{}", text)),
                             label,
-                            Animator::new(Tween::new(
+                            TweenAnim::new(Tween::new(
                                 EaseFunction::QuadraticInOut,
                                 Duration::from_millis(500),
-                                TransformScaleLens {
+                                UiTransformScaleLens {
                                     start: init_scale,
-                                    end: Vec3::ONE,
+                                    end: Vec2::ONE,
                                 },
                             )),
                         ))

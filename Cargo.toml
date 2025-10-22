@@ -20,32 +20,42 @@ opt-level = 1
 [profile.dev.package."*"]
 opt-level = 2
 
+[features]
+default = ["debug_desktop"]
+debug_desktop = [
+    "bevy/file_watcher",
+    "bevy/track_location",
+]
+
 [workspace.dependencies]
-bevy = {version = "0.16"}
+bevy = {version = "0.17"}
 serde = { version =  "1", features = ["derive"] }
 serde_json = "1"
 
 [dependencies]
+bevy_anim_assets = {path = "crates/bevy_anim_assets"}
 game_core = {path = "crates/game_core", features = ["bevy"]}
 console_error_panic_hook = "0.1"
-bevy = {workspace = true, default-features = true, features = ["configurable_error_handler"]}
+bevy = {workspace = true, default-features = true}
 serde = {workspace = true}
 serde_json = {workspace = true}
 inline_tweak = "1"
-bevy_tweening = "0.13"
-bevy_pkv = "0.13"
+bevy_tweening = "0.14"
+bevy_pkv = { version = "0.14", default-features = false, features = [
+    "bevy",
+    "sled",
+] }
 rand = "0.8"
-bevy_asset_loader = "0.23.0-rc.3"
+bevy_asset_loader = "0.24.0-rc.1"
 webbrowser = "1"
-bevy_common_assets = { version = "0.13", features = ["json"] }
-bevy_simple_text_input = "0.11"
+bevy_common_assets = { version = "0.14", features = ["json"] }
+bevy_simple_text_input = "0.12"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-bevy-inspector-egui = "0.31"
+bevy-inspector-egui = "0.34"
 #iyes_perf_ui = "0.2"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]
 version = "0.3"
 default-features = false
 features = ["Window"]
-

@@ -2,9 +2,9 @@ use crate::states::{
     consts,
     game::{self, GameObject, PlayerNumber, PlayerQueryItem, Players, PlayersUpdated},
     game_states::GameState,
+    loading::BaseAssets,
 };
-use crate::visual::animation_interface::AnimationInfo;
-use bevy::animation::AnimationTarget;
+use bevy::animation::{AnimationTarget, AnimationTargetId};
 use bevy::{color, ecs::query::QueryData, prelude::*, reflect::Reflect};
 use game_core::data::resource::ResourceType;
 use serde::{Deserialize, Serialize};
@@ -17,6 +17,13 @@ pub enum PlayerTextInterface {
     Health,
     #[default]
     Shield,
+}
+
+#[derive(Component, Default, Reflect, Serialize, Deserialize, Debug, Copy, Clone)]
+pub enum PlayerUiContainer {
+    #[default]
+    Resource,
+    Health,
 }
 
 trait PlayerInterfaceHelper {
@@ -33,7 +40,9 @@ impl PlayerInterfaceHelper for Res<'_, AssetServer> {
         element: PlayerTextInterface,
         player: PlayerNumber,
     ) -> (PlayerTextInterface, PlayerUi, TextFont, TextColor) {
-        let text_font = TextFont::from_font(self.load(consts::REGULAR_FONT)).with_font_size(20.0);
+        let text_font = TextFont::default()
+            .with_font(self.load(consts::REGULAR_FONT))
+            .with_font_size(20.0);
 
         (
             element,
@@ -44,18 +53,12 @@ impl PlayerInterfaceHelper for Res<'_, AssetServer> {
     }
 }
 
-#[derive(Component, Default, Reflect, Serialize, Deserialize, Debug)]
-pub struct UiValueAnimator {
-    pub positive: AnimationNodeIndex,
-    pub negative: AnimationNodeIndex,
-}
-
-#[derive(Reflect, Resource, Deref)]
-#[reflect(Resource)]
-pub struct PlayerUiAnimationInfo(pub AnimationInfo);
+// #[derive(Reflect, Resource, Deref)]
+// #[reflect(Resource)]
+// pub struct PlayerUiAnimationInfo(pub AnimationInfo);
 
 #[derive(Component, Default, Reflect, Serialize, Deserialize, Debug)]
-#[require(Text, UiValueAnimator)]
+#[require(Text)]
 pub struct PlayerUiValue(pub i32);
 
 #[derive(Hash, Ord, PartialOrd, PartialEq, Eq, Default, Debug)]
@@ -89,11 +92,10 @@ pub struct TextUiPlayerElements {
     element: &'static PlayerTextInterface,
     value: &'static mut PlayerUiValue,
     text: &'static mut Text,
-    anim_config: &'static mut UiValueAnimator,
     anim: &'static mut AnimationPlayer,
 }
 
-impl TextUiPlayerElementsItem<'_> {
+impl TextUiPlayerElementsItem<'_, '_> {
     pub fn update(&mut self, data: &PlayerQueryItem) -> UpdateResult {
         let new_value = match &self.element {
             PlayerTextInterface::ResourceAmount(res_type) => data.supply.get(*res_type).amount,
@@ -125,8 +127,8 @@ impl Plugin for PlayerUiPlugin {
             Update,
             (update_created_player_ui, update_player_ui).run_if(in_state(GameState::Game)),
         )
-        .register_type::<PlayerUiAnimationInfo>()
-        .add_systems(PostStartup, create_player_anim)
+        // .register_type::<PlayerUiAnimationInfo>()
+        // .add_systems(PostStartup, create_player_anim)
         .add_systems(
             OnEnter(GameState::Game),
             (setup_player_ui).after(game::init_players),
@@ -134,14 +136,14 @@ impl Plugin for PlayerUiPlugin {
     }
 }
 
-fn create_player_anim(
-    mut animation_graphs: ResMut<Assets<AnimationGraph>>,
-    mut animation_clips: ResMut<Assets<AnimationClip>>,
-    mut commands: Commands,
-) {
-    let anim = AnimationInfo::create(&mut animation_graphs, &mut animation_clips, "UiTarget");
-    commands.insert_resource(PlayerUiAnimationInfo(anim));
-}
+// fn create_player_anim(
+//     mut animation_graphs: ResMut<Assets<AnimationGraph>>,
+//     mut animation_clips: ResMut<Assets<AnimationClip>>,
+//     mut commands: Commands,
+// ) {
+//     let anim = AnimationInfo::create(&mut animation_graphs, &mut animation_clips, "UiTarget");
+//     commands.insert_resource(PlayerUiAnimationInfo(anim));
+// }
 
 #[derive(Component, Reflect, Serialize, Deserialize, Deref, Default, Debug)]
 #[require(AnimationPlayer)]
@@ -150,21 +152,20 @@ pub struct PlayerUi(pub PlayerNumber);
 fn update_created_player_ui(
     mut ui_query: Query<TextUiPlayerElements, Added<PlayerTextInterface>>,
     player_query: Players,
-    anim_info: Res<PlayerUiAnimationInfo>,
+    base_assets: Res<BaseAssets>,
     mut commands: Commands,
 ) {
+    let target_name = Name::new("UiTarget");
     for mut el in ui_query.iter_mut() {
         if let Some(player) = player_query.get_player(el.target.0) {
             el.update(&player);
-            el.anim_config.positive = anim_info.pos_node_index;
-            el.anim_config.negative = anim_info.neg_node_index;
             commands.entity(el.entity).insert((
-                AnimationGraphHandle(anim_info.graph.clone()),
+                AnimationGraphHandle(base_assets.ui_anim.clone()),
                 AnimationTarget {
-                    id: anim_info.target_id,
+                    id: AnimationTargetId::from_name(&target_name),
                     player: el.entity,
                 },
-                anim_info.target_name.clone(),
+                target_name.clone(),
             ));
         }
     }
@@ -179,10 +180,10 @@ pub fn update_player_ui(mut ui_query: Query<TextUiPlayerElements>, player_query:
             match el.update(&player) {
                 UpdateResult::NoChange => {}
                 UpdateResult::BiggerValue => {
-                    el.anim.start(el.anim_config.positive);
+                    el.anim.start(AnimationNodeIndex::new(1));
                 }
                 UpdateResult::SmallerValue => {
-                    el.anim.start(el.anim_config.negative);
+                    el.anim.start(AnimationNodeIndex::new(2));
                 }
             }
         }
@@ -190,8 +191,9 @@ pub fn update_player_ui(mut ui_query: Query<TextUiPlayerElements>, player_query:
 }
 
 fn setup_player_ui(mut commands: Commands, asset_server: Res<AssetServer>, player_query: Players) {
-    let header_style =
-        TextFont::from_font(asset_server.load(consts::LABEL_FONT)).with_font_size(30.0);
+    let header_style = TextFont::default()
+        .with_font(asset_server.load(consts::LABEL_FONT))
+        .with_font_size(30.0);
 
     for (player, style, right_align) in [
         (
@@ -229,8 +231,11 @@ fn setup_player_ui(mut commands: Commands, asset_server: Res<AssetServer>, playe
             FlexDirection::RowReverse
         };
         commands
-            .spawn((style.clone(), GameObject))
-            .insert(Name::new(format!("Ui{:?}", player)))
+            .spawn((
+                style.clone(),
+                GameObject,
+                Name::new(format!("Ui{:?}", player)),
+            ))
             .with_children(|p| {
                 p.spawn(Node {
                     flex_direction: order,

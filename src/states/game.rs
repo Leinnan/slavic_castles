@@ -5,11 +5,14 @@ use crate::components::ObserverExtension;
 use crate::data::deck::{DeckAsset, HandCards};
 use crate::data::profile::Profile;
 use crate::helpers::AudioSpawnCommandExt;
+use crate::states::loading::BaseAssets;
 use crate::visual::BackgroundSprite;
+use bevy::animation::{AnimationTarget, AnimationTargetId};
 use bevy::ecs::query::{QueryData, QueryFilter};
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use bevy::time::Stopwatch;
+use bevy_anim_assets::AnimationBaseEvent;
 use game_core::data::card::Card;
 use game_core::data::player::PlayerHealth;
 use game_core::data::supply::PlayerSupply;
@@ -44,7 +47,7 @@ pub struct SelectedCard {
 }
 
 #[derive(Component, Debug, Default, Copy, Clone, Reflect)]
-#[require(StateScoped::<GameState>(GameState::Game))]
+#[require(DespawnOnExit::<GameState>(GameState::Game))]
 pub struct GameObject;
 
 #[derive(serde::Deserialize, bevy::asset::Asset, Deref, DerefMut, Reflect)]
@@ -120,7 +123,7 @@ pub struct PlayerQuery {
 pub struct Players<'w, 's>(Query<'w, 's, PlayerQuery>);
 
 impl Players<'_, '_> {
-    pub fn get_player(&self, nr: PlayerNumber) -> Option<PlayerQueryItem<'_>> {
+    pub fn get_player(&self, nr: PlayerNumber) -> Option<PlayerQueryItem<'_, '_>> {
         self.iter().find(move |e| e.nr.eq(&nr))
     }
 }
@@ -134,61 +137,58 @@ pub struct PlayersUpdatedFilter {
 pub struct PlayersUpdated<'w, 's>(Query<'w, 's, PlayerQuery, PlayersUpdatedFilter>);
 
 impl PlayersUpdated<'_, '_> {
-    pub fn get_player(&self, nr: PlayerNumber) -> Option<PlayerQueryItem<'_>> {
+    pub fn get_player(&self, nr: PlayerNumber) -> Option<PlayerQueryItem<'_, '_>> {
         self.iter().find(move |e| e.nr.eq(&nr))
     }
 }
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app.enable_state_scoped_entities::<GameState>()
-            .enable_state_scoped_entities::<GameTurnSteps>()
-            .add_systems(
-                OnEnter(GameState::Game),
-                (setup_music, init_players, setup_ui).chain(),
+        app.add_systems(
+            OnEnter(GameState::Game),
+            (setup_music, init_players, setup_ui).chain(),
+        )
+        .add_systems(
+            Update,
+            perform_action.run_if(in_state(GameTurnSteps::PerformAction)),
+        )
+        .add_systems(
+            OnEnter(GameTurnSteps::ActionSelection),
+            switch_player.run_if(not(game_ended_condition)),
+        )
+        .add_systems(
+            OnEnter(GameTurnSteps::SearchForAgents),
+            (end_game).run_if(game_ended_condition),
+        )
+        .add_systems(
+            Update,
+            (handle_card_events, ai_select_card).run_if(in_state(GameTurnSteps::ActionSelection)),
+        )
+        .add_systems(
+            Update,
+            (
+                // update_ui,
+                // update_deck_visibility,
+                card_sounds,
             )
-            .add_systems(
-                Update,
-                perform_action.run_if(in_state(GameTurnSteps::PerformAction)),
-            )
-            .add_systems(
-                OnEnter(GameTurnSteps::ActionSelection),
-                switch_player.run_if(not(game_ended_condition)),
-            )
-            .add_systems(
-                OnEnter(GameTurnSteps::SearchForAgents),
-                (end_game).run_if(game_ended_condition),
-            )
-            .add_systems(
-                Update,
-                (handle_card_events, ai_select_card)
-                    .run_if(in_state(GameTurnSteps::ActionSelection)),
-            )
-            .add_systems(
-                Update,
-                (
-                    // update_ui,
-                    // update_deck_visibility,
-                    card_sounds,
-                )
-                    .run_if(in_state(GameState::Game)),
-            )
-            .add_systems(Update, update_timers.run_if(in_state(GameState::Game)))
-            .init_resource::<SelectedCard>()
-            .init_resource::<TimeSinceTurnStarted>()
-            .register_type::<GameObject>()
-            .register_type::<HandCards>()
-            .register_type::<ExitGameTimer>()
-            .register_type::<OpponentInformation>()
-            .register_type::<PlayerInformation>()
-            .register_type::<PlayerDetailsInfo>()
-            .register_type::<TimeSinceTurnStarted>()
-            .add_systems(
-                Update,
-                esc_to_menu
-                    .run_if(not(game_ended_condition))
-                    .run_if(in_state(GameState::Game)),
-            );
+                .run_if(in_state(GameState::Game)),
+        )
+        .add_systems(Update, update_timers.run_if(in_state(GameState::Game)))
+        .init_resource::<SelectedCard>()
+        .init_resource::<TimeSinceTurnStarted>()
+        .register_type::<GameObject>()
+        .register_type::<HandCards>()
+        .register_type::<ExitGameTimer>()
+        .register_type::<OpponentInformation>()
+        .register_type::<PlayerInformation>()
+        .register_type::<PlayerDetailsInfo>()
+        .register_type::<TimeSinceTurnStarted>()
+        .add_systems(
+            Update,
+            esc_to_menu
+                .run_if(not(game_ended_condition))
+                .run_if(in_state(GameState::Game)),
+        );
     }
 }
 
@@ -218,7 +218,7 @@ fn update_timers(
     timer.0.tick(time.delta());
     for mut t in exit_game_timer.iter_mut() {
         t.0.tick(time.delta());
-        if t.0.finished() {
+        if t.0.is_finished() {
             info!("Timer finished, going back to menu");
             next_state.set(GameState::Menu);
             t.0.reset();
@@ -312,9 +312,10 @@ fn card_sounds(mut commands: Commands, q: Query<&ActionTaken, Added<ActionTaken>
     }
 }
 
-fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let header_style =
-        TextFont::from_font(asset_server.load(consts::LABEL_FONT)).with_font_size(45.0);
+fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>, base_assets: Res<BaseAssets>) {
+    let header_style = TextFont::default()
+        .with_font(asset_server.load(consts::LABEL_FONT))
+        .with_font_size(45.0);
     commands.spawn((
         Transform::from_xyz(0.0, 0.0, -1.0),
         Sprite::from_image(asset_server.load("img/ingame_bg.png")),
@@ -323,50 +324,76 @@ fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
         GameObject,
         Name::new("BG"),
     ));
-
-    commands
+    let target_name = Name::new("Help display");
+    let mut animation_player = AnimationPlayer::default();
+    _ = animation_player.play(AnimationNodeIndex::new(3));
+    let id = commands
         .spawn((
             Node {
-                margin: UiRect::new(Val::Auto, Val::Auto, Val::Px(30.0), Val::Auto),
+                margin: UiRect::new(Val::Auto, Val::Auto, Val::Px(0.0), Val::Auto),
                 padding: UiRect::all(Val::Px(15.0)),
+                top: Val::Px(-400.0),
                 position_type: PositionType::Absolute,
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Center,
                 ..default()
             },
+            target_name.clone(),
+            animation_player,
+            AnimationGraphHandle(base_assets.ui_anim.clone()),
             BackgroundColor(Srgba::hex("2c422e").unwrap().into()),
             HelpDisplay,
+            ZIndex(4),
             Pickable::default(),
         ))
-        .observe_in_child(|out: Trigger<Pointer<Click>>, mut node: Query<&mut Node>| {
-            let mut n = node.get_mut(out.target()).unwrap();
+        .observe(
+            |out: On<Pointer<Click>>, mut node: Query<&mut AnimationPlayer>| {
+                let Ok(mut player) = node.get_mut(out.event_target()) else {
+                    warn!("Failed to get AnimationPlayer");
+                    return;
+                };
+                player.stop_all();
+                player.play(AnimationNodeIndex::new(4));
+            },
+        )
+        .observe_in_child(|out: On<AnimationBaseEvent>, mut node: Query<&mut Node>| {
+            let mut n = node.get_mut(out.trigger().animation_player).unwrap();
             n.display = Display::None;
         })
         .with_children(|p| {
             p.spawn((Text::new("Help"), header_style.clone()));
             p.spawn((
-                TextFont::from_font(asset_server.load(consts::REGULAR_FONT)).with_font_size(25.0),
+                TextFont::default()
+                    .with_font(asset_server.load(consts::REGULAR_FONT))
+                    .with_font_size(25.0),
                 TextColor(Srgba::hex("fcfd9e").unwrap().into()),
                 Text::new(consts::HELP_TEXT),
             ));
-        });
+        })
+        .id();
+    commands.entity(id).insert(AnimationTarget {
+        id: AnimationTargetId::from_name(&target_name),
+        player: id,
+    });
 }
 
 fn esc_to_menu(
     keys: Res<ButtonInput<KeyCode>>,
     mut next_state: ResMut<NextState<GameState>>,
-    mut query: Query<&mut Node, With<HelpDisplay>>,
+    mut query: Query<(&mut AnimationPlayer, &mut Node), With<HelpDisplay>>,
 ) {
     if keys.just_released(KeyCode::Escape) {
         next_state.set(GameState::Menu);
         // keys.reset(KeyCode::Escape);
     } else if keys.just_released(KeyCode::KeyH) {
-        for mut style in &mut query {
-            style.display = if style.display == Display::Flex {
-                Display::None
+        for (mut player, mut node) in &mut query {
+            player.stop_all();
+            if node.display == Display::None {
+                player.play(AnimationNodeIndex::new(3));
+                node.display = Display::Flex;
             } else {
-                Display::Flex
-            };
+                player.play(AnimationNodeIndex::new(4));
+            }
         }
         // keys.reset(KeyCode::KeyH);
     }

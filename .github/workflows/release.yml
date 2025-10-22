@@ -140,7 +140,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           lfs: ${{ env.git_lfs }}
-      
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -170,13 +170,13 @@ jobs:
         run: |
           cp wasm/index.html .
           cargo binstall --no-confirm trunk wasm-bindgen-cli wasm-opt
-          trunk build --locked --release --dist '${{ env.app }}'
+          trunk build --locked --no-default-features --release --dist '${{ env.app }}'
 
       - name: Build binaries (non-Web)
         if: ${{ matrix.platform != 'web' }}
         run: |
           for target in ${{ matrix.targets }}; do
-            cargo build --locked --profile='${{ matrix.profile }}' --target="${target}" --no-default-features --features='${{ matrix.features }}'
+            cargo build --locked --no-default-features --profile='${{ matrix.profile }}' --target="${target}" --no-default-features --features='${{ matrix.features }}'
             mv target/"${target}"/'${{ matrix.profile }}/${{ env.cargo_build_binary_name }}${{ matrix.binary_ext }}' tmp/binary/"${target}"'${{ matrix.binary_ext }}'
           done
 

@@ -4,12 +4,12 @@ use super::game::{OpponentInformation, PlayerInformation};
 use super::{game::NamesAsset, game_states::GameState};
 use crate::data::deck::DeckAsset;
 use crate::data::profile::ProfileProvider;
-use crate::helpers::button::ButtonReleased;
 use crate::states::consts::*;
 use bevy::prelude::*;
 use bevy::ui::widget::NodeImageMode;
 use bevy_pkv::PkvStore;
-use bevy_tweening::{Animator, Delay, Tween, lens::TransformScaleLens};
+use bevy_tweening::TweenAnim;
+use bevy_tweening::{Delay, Tween, lens::TransformScaleLens};
 use rand::{Rng, thread_rng};
 
 pub struct MenuPlugin;
@@ -53,27 +53,27 @@ fn check_for_profile(
     Ok(())
 }
 
-fn start_game(_: Trigger<ButtonReleased>, mut next_state: ResMut<NextState<GameState>>) {
+fn start_game(_: On<Pointer<Release>>, mut next_state: ResMut<NextState<GameState>>) {
     next_state.set(GameState::Game);
 }
 
-fn edit_profile_game(_: Trigger<ButtonReleased>, mut next_state: ResMut<NextState<GameState>>) {
+fn edit_profile_game(_: On<Pointer<Release>>, mut next_state: ResMut<NextState<GameState>>) {
     next_state.set(GameState::ProfileEdit);
 }
 
-fn open_repo(_: Trigger<ButtonReleased>) {
+fn open_repo(_: On<Pointer<Release>>) {
     webbrowser::open(env!("CARGO_PKG_HOMEPAGE")).unwrap_or_default();
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn exit_game(_: Trigger<ButtonReleased>, mut exit: EventWriter<AppExit>) {
+fn exit_game(_: On<Pointer<Release>>, mut exit: MessageWriter<AppExit>) {
     exit.write(AppExit::Success);
 }
 
 fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn(super::root_node())
-        .insert(StateScoped(GameState::Menu))
+        .insert(DespawnOnExit(GameState::Menu))
         .insert(Name::new("menu-root"))
         // .insert(StyleSheet::new(asset_server.load("css/base.css")))
         .with_children(|parent| {
@@ -100,7 +100,7 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
                     },
                     ..default()
                 },
-                Animator::new(Tween::new(
+                TweenAnim::new(Tween::new(
                     EaseFunction::BounceOut,
                     Duration::from_millis(900),
                     TransformScaleLens {
@@ -158,9 +158,9 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
 
                 let animator = if start_time_ms > 0 {
                     let delay = Delay::new(Duration::from_millis(start_time_ms));
-                    Animator::new(delay.then(tween_scale))
+                    TweenAnim::new(delay.then(tween_scale))
                 } else {
-                    Animator::new(tween_scale)
+                    TweenAnim::new(tween_scale)
                 };
 
                 start_time_ms += 200;
@@ -208,7 +208,7 @@ fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             }
             let id = parent
                 .spawn((
-                    TextLayout::new_with_justify(JustifyText::Right),
+                    TextLayout::new_with_justify(Justify::Right),
                     Text(format!("v.{}\n{}", VERSION, GIT_HASH)),
                     TextColor(Color::WHITE),
                     TextFont {

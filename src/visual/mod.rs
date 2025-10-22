@@ -1,8 +1,6 @@
 use bevy::math::Vec2;
 use bevy::prelude::*;
 
-pub mod animation_interface;
-
 #[derive(Component, Debug, Default, Copy, Clone, Reflect)]
 pub struct BackgroundSprite;
 

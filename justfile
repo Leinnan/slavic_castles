@@ -3,7 +3,7 @@ _list:
 
 # build web version and put it out directory
 web_build:
-	cargo build --target wasm32-unknown-unknown --release
+	cargo build --target wasm32-unknown-unknown --release --no-default-features
 	wasm-bindgen --out-dir ./out/ --target web ./target/wasm32-unknown-unknown/release/slavic_castles.wasm
 	cp -u wasm/* out/
 	cp -R -u assets out/
